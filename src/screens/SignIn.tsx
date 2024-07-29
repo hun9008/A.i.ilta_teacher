@@ -3,12 +3,17 @@ import { SafeAreaView, StyleSheet, Text, View, Button, TextInput } from 'react-n
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'SignIn'> & { setIsSignedIn: (value: boolean) => void };
 
-const SignIn: React.FC<Props> = ({ navigation }) => {
+const SignIn: React.FC<Props> = ({ navigation, setIsSignedIn }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    const handleSignIn = () => {
+        // login request
+        setIsSignedIn(true);
+        navigation.replace('MainPage');
+    }
 
     return (
         <SafeAreaView>
@@ -26,7 +31,7 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
                 onChangeText={setPassword}
             />
 
-            <Button title="로그인 하기" onPress={() => navigation.replace('MainPage')} />
+            <Button title="로그인 하기" onPress={handleSignIn} />
             <Button title="비밀번호 찾기" />
         </View>
         </SafeAreaView>
