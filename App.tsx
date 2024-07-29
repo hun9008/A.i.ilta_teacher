@@ -28,9 +28,11 @@ const App = () => {
           <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
         )}
         <Stack.Screen name="SignIn">
-          {(props) => <SignIn {...props} setIsSignedIn={setIsSignedIn} />}
+          {(props) => <SignIn {...props} setIsSignedIn={setIsSignedIn} isSignedIn={isSignedIn} />}
         </Stack.Screen>
-        <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: true }} />
+        <Stack.Screen name="SignUp">
+          {(props) => <SignUp {...props} setIsSignedIn={setIsSignedIn} isSignedIn={isSignedIn} />}
+        </Stack.Screen>
         {isSignedIn && (
           <Stack.Screen name="MainPage" component={MainPage} options={{ headerShown: true }} />
         )}

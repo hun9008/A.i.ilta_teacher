@@ -1,11 +1,11 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, Text, View, Button, TextInput, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'SignIn'> & { setIsSignedIn: (value: boolean) => void };
+type Props = NativeStackScreenProps<RootStackParamList, 'SignIn'> & { setIsSignedIn: (value: boolean) => void , isSignedIn: boolean};
 
-const SignIn: React.FC<Props> = ({ navigation, setIsSignedIn }) => {
+const SignIn: React.FC<Props> = ({ navigation, setIsSignedIn, isSignedIn }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -23,15 +23,20 @@ const SignIn: React.FC<Props> = ({ navigation, setIsSignedIn }) => {
     
             if (response.ok) {
             setIsSignedIn(true);
-            navigation.replace('MainPage');
             } else {
             Alert.alert('Error', result.message || '로그인 실패');
             }
         } catch (error) {
             Alert.alert('Error', '네트워크 오류');
         }*/
-        setIsSignedIn(true); navigation.replace('MainPage'); //백엔드 연결되면 지워야함
+        setIsSignedIn(true); //백엔드 연결되면 지워야함
     }
+
+    useEffect(() => {
+        if (isSignedIn) {
+          navigation.replace('MainPage');
+        }
+      }, [isSignedIn, navigation]);
 
     return (
         <SafeAreaView>

@@ -1,11 +1,12 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { SafeAreaView, StyleSheet, Text, View, Button, TextInput, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'SignUp'> & { setIsSignedIn: React.Dispatch<React.SetStateAction<boolean>>, isSignedIn: boolean };
+type SignUpProps = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
 
-const SignUp: React.FC<Props> = ({ navigation }) => {
+const SignUp: React.FC<Props> = ({ navigation, setIsSignedIn, isSignedIn }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -28,15 +29,21 @@ const SignUp: React.FC<Props> = ({ navigation }) => {
           const result = await response.json();
     
           if (response.ok) {
-            navigation.replace('MainPage');
+            setIsSignedIn(true);
           } else {
             Alert.alert('Error', result.message || '회원가입 실패');
           }
         } catch (error) {
           Alert.alert('Error', '네트워크 오류');
         }*/
-        navigation.replace('MainPage'); //백엔드 연결되면 지워야함
+          setIsSignedIn(true); //백엔드 연결되면 지워야함
     };
+
+    useEffect(() => {
+        if (isSignedIn) {
+          navigation.replace('MainPage');
+        }
+      }, [isSignedIn, navigation]);
 
     return (
         <SafeAreaView>
