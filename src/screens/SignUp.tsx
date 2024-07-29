@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { SafeAreaView, StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View, Button, TextInput, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 
@@ -11,6 +11,32 @@ const SignUp: React.FC<Props> = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [passwordCheck, setPasswordCheck] = useState('');
 
+    const handleSignUp = async () => {
+        /*if (password !== passwordCheck) {
+          Alert.alert('Error', '비밀번호가 일치하지 않습니다');
+          return;
+        }
+    
+        try {
+          const response = await fetch('https://example.com/api/signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, email, password }),
+          });
+          const result = await response.json();
+    
+          if (response.ok) {
+            navigation.replace('MainPage');
+          } else {
+            Alert.alert('Error', result.message || '회원가입 실패');
+          }
+        } catch (error) {
+          Alert.alert('Error', '네트워크 오류');
+        }*/
+        navigation.replace('MainPage'); //백엔드 연결되면 지워야함
+    };
 
     return (
         <SafeAreaView>
@@ -40,7 +66,7 @@ const SignUp: React.FC<Props> = ({ navigation }) => {
                 onChangeText={setPasswordCheck}
             />
 
-            <Button title="회원 가입하기" onPress={() => navigation.replace('MainPage')} />
+            <Button title="회원 가입하기" onPress={handleSignUp} />
             <Button title="이미 계정이 있어요" onPress={() => navigation.navigate('SignIn')} />
         </View>
         </SafeAreaView>
