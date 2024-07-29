@@ -4,7 +4,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SignUp'> & { setIsSignedIn: React.Dispatch<React.SetStateAction<boolean>>, isSignedIn: boolean };
-type SignUpProps = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
 
 const SignUp: React.FC<Props> = ({ navigation, setIsSignedIn, isSignedIn }) => {
     const [name, setName] = useState('');
@@ -17,7 +16,7 @@ const SignUp: React.FC<Props> = ({ navigation, setIsSignedIn, isSignedIn }) => {
           Alert.alert('Error', '비밀번호가 일치하지 않습니다');
           return;
         }
-    
+
         try {
           const response = await fetch('https://example.com/api/signup', {
             method: 'POST',
@@ -36,7 +35,7 @@ const SignUp: React.FC<Props> = ({ navigation, setIsSignedIn, isSignedIn }) => {
         } catch (error) {
           Alert.alert('Error', '네트워크 오류');
         }*/
-          setIsSignedIn(true); //백엔드 연결되면 지워야함
+        setIsSignedIn(true); //백엔드 연결되면 지워야함
     };
 
     useEffect(() => {
