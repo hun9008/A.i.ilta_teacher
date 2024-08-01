@@ -24,7 +24,7 @@ const SplashPage: React.FC<Props> = ({ navigation, isSignedIn, isFirstLaunch}) =
   return (
     <View>
       <Image
-        source={require('../../images/jerry.png')}
+        source={require('../../assets/images/jerry.png')}
       />
       <Text>mAI tutor</Text>
       <Text>나만의 튜터</Text>
