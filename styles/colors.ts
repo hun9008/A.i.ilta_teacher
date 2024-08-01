@@ -17,6 +17,7 @@ const colors = {
     secondary700: '#68AE72',
     secondary800: '#428C53',
     secondary900: '#27743F',
+    black: '#000000'
   };
   
   export default colors;
