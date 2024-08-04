@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Video Streaming with OCR</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        video {
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        #ocr-result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+        }
+        #error-message {
+            color: red;
+            margin-top: 20px;
+            max-width: 600px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            video, #ocr-result, #error-message {
+                width: 90%;
+            }
+            .button {
+                width: 30%;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Video Streaming with OCR</h1>
+    <video id="localVideo" autoplay playsinline></video>
+    <div class="button-container">
+        <button id="startButton" class="button">Run</button>
+        <button id="stopButton" class="button">Stop</button>
+        <button id="resetButton" class="button">Reset</button>
+    </div>
+    <div id="ocr-result">
+        <h2>OCR Result:</h2>
+        <p id="ocr-text"></p>
+    </div>
+    <div id="error-message"></div>
+    <script src="script.js"></script>
+</body>
+</html>
