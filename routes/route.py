@@ -3,24 +3,12 @@ from pydantic import BaseModel, EmailStr
 
 # database에서 table 가져오기 
 from config.database import users_collection
-#from models import User, UserInDB
-# 모델이 있는지 확인하고 임포트
-try:
-    from models import User, UserInDB
-except ImportError:
-    # 모델이 없는 경우 대체 모델 정의
-    class User(BaseModel):
-        email: EmailStr
-        password: str
-
-    class UserInDB(User):
-        hashed_password: str
-        
+from models.user import User, UserInDB, LoginRequest
 from utils import get_password_hash, verify_password
 
 route = APIRouter()
 
-@route.post("/Register", response_model=User) #프론트에서 post 요청을 보내는 주소(원래 주소 + reg)
+@route.post("/Register") #프론트에서 post 요청을 보내는 주소(원래 주소 + reg)
 async def register(user: User): #-> dict: # return을 dict로 하겠다고 명시(dict가 아니면 error) 
     user_in_db = await users_collection.find_one({"email": user.email})
     # DB에 user가 있는데 register 시도하는 경우 
@@ -32,13 +20,13 @@ async def register(user: User): #-> dict: # return을 dict로 하겠다고 명�
     return user
 
 @route.post("/Login")
-async def login(email: EmailStr, password: str):
+async def login(login: LoginRequest):
     # table(user들의 모음)에서 이메일이 input으로 들어온 이메일인걸 찾기 
-    user_in_db = await users_collection.find_one({"email": email})
+    user_in_db = await users_collection.find_one({"email": login.email})
     # user DB 안에 정보가 없는데 Login 시도하는 경우
     if not user_in_db:
         raise HTTPException(status_code=400, detail="Invalid email or password")
-    if not verify_password(password, user_in_db["hashed_password"]):
+    if not verify_password(login.password, user_in_db["hashed_password"]):
         raise HTTPException(status_code=400, detail="Invalid email or password")
     
     return {"message" : "Login successful"}
