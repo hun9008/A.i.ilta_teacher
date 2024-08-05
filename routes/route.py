@@ -1,12 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPSException, status
-from pydantic import EmailStr
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, EmailStr
 
 # database에서 table 가져오기 
 from config.database import users_collection
-from models import User, UserInDB
+#from models import User, UserInDB
+# 모델이 있는지 확인하고 임포트
+try:
+    from models import User, UserInDB
+except ImportError:
+    # 모델이 없는 경우 대체 모델 정의
+    class User(BaseModel):
+        email: EmailStr
+        password: str
+
+    class UserInDB(User):
+        hashed_password: str
+        
 from utils import get_password_hash, verify_password
 
-router = APIRouter()
+route = APIRouter()
 
 @route.post("/Register", response_model=User) #프론트에서 post 요청을 보내는 주소(원래 주소 + reg)
 async def register(user: User): #-> dict: # return을 dict로 하겠다고 명시(dict가 아니면 error) 

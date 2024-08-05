@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from routes.route import router
+from routes.route import route
 
 
 app = FastAPI()
 
-app.include_router(router)
+app.include_router(route)
 
 # middleware
