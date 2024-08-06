@@ -1,90 +1,42 @@
 import React, {useEffect, useState, useRef} from 'react';
 import {View, Text, Button, Alert, StyleSheet, Platform} from 'react-native';
-import {Camera, useCameraDevices} from 'react-native-vision-camera';
+import { RNCamera } from 'react-native-camera';
 import {PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 
 const CameraUse: React.FC = () => {
-  const [hasCameraPermission, setHasCameraPermission] = useState(false);
-  const camera = useRef<Camera>(null);
-  const devices = useCameraDevices();
-  const device = devices.back;
+  const [hasPermission, setHasPermission] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
-    checkCameraPermission();
+    (async () => {
+      const status = await requestCameraPermission();
+      setHasPermission(status === RESULTS.GRANTED);
+    })();
   }, []);
 
-  const checkCameraPermission = async () => {
-    const result = await request(
-      Platform.OS === 'android'
-        ? PERMISSIONS.ANDROID.CAMERA
-        : PERMISSIONS.IOS.CAMERA,
-    );
-
-    if (result === RESULTS.GRANTED) {
-      setHasCameraPermission(true);
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'ios') {
+      return await request(PERMISSIONS.IOS.CAMERA);
     } else {
-      Alert.alert('권한 필요', '카메라를 사용하려면 권한이 필요합니다.', [
-        {text: '확인'},
-      ]);
+      return await request(PERMISSIONS.ANDROID.CAMERA);
     }
   };
 
-  const takePicture = async () => {
-    if (camera.current) {
-      try {
-        const photo = await camera.current.takePhoto({
-          flash: 'off',
-          qualityPrioritization: 'balanced',
-        });
-        console.log(photo.uri);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
-
-  if (!device) return <Text> 카메라를 키고 있습니다.</Text>;
-
-  if (!hasCameraPermission) {
-    return (
-      <View style={styles.container}>
-        <Text>카메라 권한이 필요합니다.</Text>
-        <Button title="권한 요청" onPress={checkCameraPermission} />
-      </View>
-    );
+  if (hasPermission === null) {
+    return <View><Text>카메라 권한을 요청 중입니다...</Text></View>;
+  }
+  if (hasPermission === false) {
+    return <View><Text>카메라 접근 권한이 없습니다. 설정에서 권한을 허용해주세요.</Text></View>;
   }
 
   return (
-    <View style={styles.container}>
-      <Camera
-        ref={camera}
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive={true}
-        photo={true}
+    <View style={{ flex: 1 }}>
+      <RNCamera
+        style={{ flex: 1 }}
+        type={RNCamera.Constants.Type.back}
+        captureAudio={false}
       />
-      <View style={styles.captureContainer}>
-        <Button title="사진 찍기" onPress={takePicture} />
-      </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  captureContainer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-});
 
 export default CameraUse;

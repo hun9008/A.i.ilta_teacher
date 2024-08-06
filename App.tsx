@@ -7,6 +7,8 @@ import SignIn from './src/screens/SignIn.tsx';
 import SignUp from './src/screens/SignUp.tsx';
 import MainPage from './src/screens/MainPage.tsx';
 import SplashPage from './src/screens/SplashPage.tsx';
+import CameraUse from './src/screens/CameraUse.tsx';
+
 
 //타입스크립트에선 각 stack파라미터의 형식 지정해줘야함. 그래서 각 페이지별로 undefined 선언
 export type RootStackParamList = {
@@ -15,6 +17,7 @@ export type RootStackParamList = {
   SignIn: undefined;
   SignUp: undefined;
   MainPage: undefined;
+  CameraUse: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -32,7 +35,9 @@ const App = () => {
           {(props) => <SplashPage {...props} isSignedIn={isSignedIn} isFirstLaunch={isFirstLaunch} />}
         </Stack.Screen>
         {isFirstLaunch && (
-          <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
+          <Stack.Screen name="Onboarding" 
+          component={Onboarding}
+          options={{ headerShown: false }} />
         )}
         <Stack.Screen name="SignIn">
           {(props) => <SignIn {...props} setIsSignedIn={setIsSignedIn} isSignedIn={isSignedIn} />}
@@ -43,6 +48,7 @@ const App = () => {
         {isSignedIn && (
           <Stack.Screen name="MainPage" component={MainPage} options={{ headerShown: true }} />
         )}
+        <Stack.Screen name="CameraUse" component={CameraUse} options={{ headerShown: true }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

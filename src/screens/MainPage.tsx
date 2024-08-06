@@ -1,12 +1,17 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../App';
 
-const MainPage: React.FC = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'MainPage'>
+
+const MainPage: React.FC<Props> = ({navigation}) => {
   return (
     <SafeAreaView>
       <View>
         <Text>메인페이지요</Text>
-      </View>
+        <Button title="카메라" onPress={() => navigation.replace('CameraUse')} />
+        </View>
     </SafeAreaView>
   );
 };

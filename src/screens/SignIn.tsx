@@ -62,6 +62,7 @@ const SignIn: React.FC<Props> = ({navigation, setIsSignedIn, isSignedIn}) => {
 
         <Button title="로그인 하기" onPress={handleSignIn} />
         <Button title="비밀번호 찾기" />
+        <Button title="개발용 통과버튼" onPress={() => setIsSignedIn(true)}/>
       </View>
     </SafeAreaView>
   );
