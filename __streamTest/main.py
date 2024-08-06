@@ -7,6 +7,8 @@ import base64
 import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+import requests
 
 app = FastAPI()
 
@@ -34,29 +36,17 @@ async def websocket_endpoint(websocket: WebSocket):
         connections.remove(websocket)
 
 async def handle_video_frame(frame_data, websocket):
-    frame = decode_frame(frame_data)
-    text = perform_ocr(frame)
-    print("Detected Text:", text)
-    response = {'type': 'ocr-result', 'text': text}
+    output = perform_ocr(frame_data)
+    response = {'type': 'ocr-result', 'text': output}
     await websocket.send_json(response)
 
-def decode_frame(frame_data):
-    try:
-        img_data = base64.b64decode(frame_data)
-        np_arr = np.frombuffer(img_data, dtype=np.uint8)
-        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        if frame is None:
-            raise ValueError("Decoded frame is None")
-        return frame
-    except Exception as e:
-        print(f"Error decoding frame: {e}")
-        return None
+def perform_ocr(frame_data):
 
-def perform_ocr(frame):
-    if frame is None:
-        return ""
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    text = pytesseract.image_to_string(gray)
-    if not text.strip():
-        return ""
-    return text
+    url = "http://llm.hunian.site"
+    payload = {'image_base64': frame_data}
+    response = requests.post(url, data=payload)
+
+    return response.text
+
+if __name__ == "__main__":
+    uvicorn.run(app)

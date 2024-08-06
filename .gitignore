@@ -1,1 +1,4 @@
 .env
+mobile
+llm_server/llm
+__pycache__
