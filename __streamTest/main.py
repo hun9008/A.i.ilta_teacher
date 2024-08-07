@@ -6,6 +6,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import requests
+import asyncio
 
 app = FastAPI()
 
@@ -18,12 +19,25 @@ app.add_middleware(
 )
 
 connections = []
+performing_ocr = False
 
 def decode_image(base64_str):
-    img_data = base64.b64decode(base64_str)
-    np_arr = np.frombuffer(img_data, np.uint8)
-    image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-    return image
+    try:
+        img_data = base64.b64decode(base64_str)
+        np_arr = np.frombuffer(img_data, np.uint8)
+        
+        if np_arr.size == 0:
+            raise ValueError("Decoded buffer is empty")
+        
+        image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        
+        if image is None:
+            raise ValueError("Image decoding failed")
+        
+        return image
+    except Exception as e:
+        print(f"Error decoding image: {e}")
+        return None
 
 def detect_hand(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -49,8 +63,10 @@ def detect_hand(frame):
     # 가장 큰 윤곽선을 선택
     if len(contours) > 0:
         max_contour = max(contours, key=cv2.contourArea)
-        if cv2.contourArea(max_contour) > 1000:  # 최소 면적 조건
+        if cv2.contourArea(max_contour) > 10:  # 최소 면적 조건
+            # print("Hand detected")
             return True
+    # print("No hand detected")
     return False
 
 @app.websocket("/ws")
@@ -67,19 +83,30 @@ async def websocket_endpoint(websocket: WebSocket):
         connections.remove(websocket)
 
 async def handle_video_frame(frame_data, websocket):
+    global performing_ocr
+    if performing_ocr:
+        response = {'type': 'ocr-result', 'text': 'OCR in progress, please wait'}
+        await websocket.send_json(response)
+        return
+    
     frame = decode_image(frame_data)
-    if detect_hand(frame):
-        output = perform_ocr(frame_data)
+    if frame is not None and detect_hand(frame):
+        performing_ocr = True
+        output = await perform_ocr(frame_data)
+        performing_ocr = False
         response = {'type': 'ocr-result', 'text': output}
         await websocket.send_json(response)
     else:
-        response = {'type': 'ocr-result', 'text': 'No hand detected'}
+        response = {'type': 'ocr-result', 'text': 'No hand detected or failed to decode image'}
         await websocket.send_json(response)
 
-def perform_ocr(frame_data):
-    url = "http://llm.hunian.site"
+async def perform_ocr(frame_data):
+    print("Performing OCR")
+    url = "http://llm.hunian.site/api/solution"
     payload = {'image_base64': frame_data}
-    response = requests.post(url, data=payload)
+    print(payload)
+    headers = {'Content-Type': 'application/json'}  # JSON 형식임을 명시
+    response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)  # JSON 형식으로 전송
     return response.text
 
 if __name__ == "__main__":

@@ -4,9 +4,9 @@ const errorMessageElement = document.getElementById('error-message');
 const startButton = document.getElementById('startButton');
 const stopButton = document.getElementById('stopButton');
 const resetButton = document.getElementById('resetButton');
+const sendButton = document.getElementById('sendButton');
 let localStream;
 let ws;
-let intervalId;
 
 startButton.addEventListener('click', () => {
     init();
@@ -20,12 +20,20 @@ resetButton.addEventListener('click', () => {
     resetStreaming();
 });
 
+sendButton.addEventListener('click', () => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        captureFrame();
+    } else {
+        errorMessageElement.textContent = 'WebSocket connection is not open.';
+    }
+});
+
 async function init() {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true });
         localVideo.srcObject = localStream;
 
-        ws = new WebSocket('ws://stream.hunian.site/ws');
+        ws = new WebSocket('ws://localhost:8000/ws');
         ws.onopen = () => {
             console.log('WebSocket connection opened');
             errorMessageElement.textContent = '';
@@ -43,12 +51,6 @@ async function init() {
         ws.onclose = () => {
             console.log('WebSocket connection closed');
         };
-
-        intervalId = setInterval(() => {
-            if (ws.readyState === WebSocket.OPEN) {
-                captureFrame();
-            }
-        }, 1000 / 30); 
     } catch (error) {
         console.error('Error accessing media devices:', error);
         errorMessageElement.textContent = 'Error accessing media devices. Check console for details.';
@@ -56,9 +58,6 @@ async function init() {
 }
 
 function stopStreaming() {
-    if (intervalId) {
-        clearInterval(intervalId);
-    }
     if (ws) {
         ws.close();
     }
