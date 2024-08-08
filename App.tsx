@@ -28,8 +28,8 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator 
-      //initialRouteName={isFirstLaunch ? 'Onboarding' : isSignedIn ? 'MainPage' : 'SignIn'}
-      initialRouteName='SplashPage'
+      initialRouteName={isFirstLaunch ? 'Onboarding' : isSignedIn ? 'MainPage' : 'SignIn'}
+      //initialRouteName='SplashPage'
       >
         <Stack.Screen name="SplashPage">
           {(props) => <SplashPage {...props} isSignedIn={isSignedIn} isFirstLaunch={isFirstLaunch} />}
