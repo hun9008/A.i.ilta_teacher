@@ -41,3 +41,22 @@ pip install -r requirements.txt
 pip freeze > requirements.txt
 ```
 (주의 : 가상환경이 아닌 로컬환경에서 requirements 업데이트하면 이상한게 덮어 쓰일 수 있으니, 가상환경에서 작업하길 권장)
+
+## Deploy
+
+```
+// 가상머신 접속
+
+cd workspace/back/A.i.ilta_teacher/
+
+git pull origin back
+
+// 실행중인 백 도커 확인
+sudo docker ps 
+
+sudo docker build -t server:버전 .
+
+sudo docker stop containerID
+
+sudo docker run -d -p 8000:8000 server:버전
+```
