@@ -3,7 +3,7 @@ import QRCode from 'qrcode.react';
 
 function QrPage(){
   const navigate = useNavigate();
-  const cameraAppUrl = "http://127.0.0.1:5173/camera";
+  const cameraAppUrl = "https://front-web--iridescent-bombolone-b67e0e.netlify.app/";
 
   return (
     <>
