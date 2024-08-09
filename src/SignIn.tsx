@@ -50,6 +50,11 @@ function SignIn() {
       <div style={{ marginTop: '20px' }}>
         <button onClick={() => navigate('/SignUp')}>회원가입하기</button>
       </div>
+      <div style={{ marginTop: '20px' }}>
+        <button onClick={() => navigate('/QrPage')}>
+          QR 페이지로 바로가기
+        </button>
+      </div>
     </div>
   );
 }
