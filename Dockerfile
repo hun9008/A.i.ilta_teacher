@@ -7,6 +7,8 @@ COPY . /app/
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install motor
+RUN apt-get update -y
+RUN apt-get install -y libgl1-mesa-glx
 
 EXPOSE 8000
 
