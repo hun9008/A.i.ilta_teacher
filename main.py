@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# include router
+# include router.
 app.include_router(login_route)
 app.include_router(sock_route)
 
