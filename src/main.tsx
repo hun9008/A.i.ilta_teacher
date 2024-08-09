@@ -1,17 +1,19 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import QrPage from './QrPage.tsx'
+import SignIn from './SignIn.tsx';
+import QrPage from './QrPage.tsx';
 import CameraPage from './camera.tsx';
-import './index.css'
+import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Router>
       <Routes>
-        <Route path="/" element={<QrPage />} />
+        <Route path="/" element={<SignIn />} />
+        <Route path="/QrPage" element={<QrPage />} />
         <Route path="/camera" element={<CameraPage />} />
       </Routes>
     </Router>
-  </StrictMode>,
-)
+  </StrictMode>
+);
