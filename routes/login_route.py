@@ -10,11 +10,11 @@ route = APIRouter()
 
 @route.post("/Register") 
 async def register(user: User):
-    user_in_db = await users_collection.find_one({"email": user.email})
+    user_in_db = await users_collection.find_one({"email": user.u_email})
     # DB에 user가 있는데 register 시도하는 경우 
     if user_in_db:
         raise HTTPException(status_code=400, detail="Email already registered")
-    hashed_password = get_password_hash(user.password)
+    hashed_password = get_password_hash(user.u_pwd)
     user_in_db = UserInDB(**user.dict(), hashed_password=hashed_password)
     await users_collection.insert_one(user_in_db.dict())
     return user
@@ -22,11 +22,19 @@ async def register(user: User):
 @route.post("/Login")
 async def login(login: LoginRequest):
     # table(user들의 모음)에서 이메일이 input으로 들어온 이메일인걸 찾기 
-    user_in_db = await users_collection.find_one({"email": login.email})
+    user_in_db = await users_collection.find_one({"u_email": login.email})
     # user DB 안에 정보가 없는데 Login 시도하는 경우
     if not user_in_db:
-        raise HTTPException(status_code=400, detail="Invalid email or password")
+        raise HTTPException(status_code=400, detail="Invalid email")
     if not verify_password(login.password, user_in_db["hashed_password"]):
-        raise HTTPException(status_code=400, detail="Invalid email or password")
+        raise HTTPException(status_code=400, detail="Invalid password")
     
     return {"message" : "Login successful"}
+
+@route.get("/user_all")
+async def get_all_users():
+    users = []
+    async for user in users_collection.find():
+        user['_id'] = str(user['_id'])
+        users.append(user)
+    return users
