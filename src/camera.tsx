@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import LaptopImage from './assets/Laptop.jpg';
 
 function CameraPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -6,18 +7,19 @@ function CameraPage() {
   useEffect(() => {
     const constraints = {
       video: {
-        facingMode: 'environment'
-      }
+        facingMode: 'environment',
+      },
     };
 
-    navigator.mediaDevices.getUserMedia(constraints)
+    navigator.mediaDevices
+      .getUserMedia(constraints)
       .then((stream) => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
       })
       .catch((err) => {
-        console.error("Error accessing camera: ", err);
+        console.error('Error accessing camera: ', err);
       });
 
     return () => {
@@ -31,14 +33,24 @@ function CameraPage() {
   }, []);
 
   return (
-    <div>
-      <h1>Camera Web App</h1>
-      <video
-        ref={videoRef}
-        autoPlay
-      ></video>
+    <div
+      style={{
+        display: 'flex',
+      }}
+    >
+      <div style={{ marginRight: '100px' }}>
+        <img src={LaptopImage} style={{ width: '300px', height: '300px' }} />
+      </div>
+
+      <div>
+        <video
+          ref={videoRef}
+          autoPlay
+          style={{ width: '300px', height: '300px' }}
+        ></video>
+      </div>
     </div>
   );
-};
+}
 
 export default CameraPage;
