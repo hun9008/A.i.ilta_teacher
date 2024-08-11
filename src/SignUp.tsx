@@ -9,7 +9,8 @@ function SignUp() {
 
   const handleSignUp = async () => {
     try {
-      const response = await fetch('http://52.141.30.206:8000/Register', {
+      const baseUrl = import.meta.env.VITE_BASE_URL;
+      const response = await fetch(`${baseUrl}/Register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

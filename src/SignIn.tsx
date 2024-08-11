@@ -9,7 +9,8 @@ function SignIn() {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://52.141.30.206:8000/Login', {
+      const baseUrl = import.meta.env.VITE_BASE_URL;
+      const response = await fetch(`${baseUrl}/Login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -20,6 +21,9 @@ function SignIn() {
       if (!response.ok) {
         throw new Error('로그인에 실패했습니다.');
       }
+
+      localStorage.setItem('email', email)
+
       navigate('/QrPage');
     } catch (error: any) {
       console.error('로그인 에러:', error);
