@@ -7,6 +7,7 @@ import QrPage from './QrPage.tsx';
 import CameraPage from './camera.tsx';
 import StudyGoals from './StudyGoals';
 import TextToSpeech from './TextToSpeech';
+import MainPage from './MainPage';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/camera" element={<CameraPage />} />
         <Route path="/StudyGoals" element={<StudyGoals />} />
         <Route path="/TextToSpeech" element={<TextToSpeech />} />
+        <Route path="/MainPage" element={<MainPage />} />
       </Routes>
     </Router>
   </StrictMode>

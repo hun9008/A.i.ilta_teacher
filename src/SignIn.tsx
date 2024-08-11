@@ -22,7 +22,7 @@ function SignIn() {
         throw new Error('로그인에 실패했습니다.');
       }
 
-      localStorage.setItem('email', email)
+      localStorage.setItem('email', email);
 
       navigate('/QrPage');
     } catch (error: any) {
@@ -57,6 +57,11 @@ function SignIn() {
       <div style={{ marginTop: '20px' }}>
         <button onClick={() => navigate('/QrPage')}>
           QR 페이지로 바로가기
+        </button>
+      </div>
+      <div style={{ marginTop: '20px' }}>
+        <button onClick={() => navigate('/MainPage')}>
+          MainPage로 바로가기
         </button>
       </div>
     </div>
