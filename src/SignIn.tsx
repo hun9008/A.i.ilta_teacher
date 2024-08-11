@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from './assets/logo.svg';
+import './Signin.css';
 
 function SignIn() {
   const [email, setEmail] = useState<string>('');
@@ -32,37 +34,37 @@ function SignIn() {
   };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>로그인 하기</h1>
-      <div>
-        <input
-          type="email"
-          placeholder="이메일 입력"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-      <div>
-        <input
-          type="password"
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-      <button onClick={handleLogin}>로그인</button>
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={() => navigate('/SignUp')}>회원가입하기</button>
-      </div>
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={() => navigate('/QrPage')}>
-          QR 페이지로 바로가기
-        </button>
-      </div>
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={() => navigate('/MainPage')}>
-          MainPage로 바로가기
-        </button>
+    <div className="signin-container">
+      <div className="form-box">
+        <div className="logo-container">
+          <img src={logo} className="logo" alt="m.AI tutor logo" />
+          <h2 className='jua-regular'>마이튜터</h2>
+        </div>
+        <h2 className="signin-title">로그인 하기</h2>
+        <div className="input-container">
+          <input
+            className="input-field"
+            type="email"
+            placeholder="이메일 입력"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            className="input-field"
+            type="password"
+            placeholder="비밀번호"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <div className="button-container">
+          <button className="login-button" onClick={handleLogin}>로그인</button>
+          <button className="login-button signup-button" onClick={() => navigate('/SignUp')}>회원가입하기</button>
+        </div>
+        <div className="extra-options">
+          <button className="secondary-button" onClick={() => navigate('/QrPage')}>QR 페이지로 바로가기</button>
+          <button className="secondary-button" onClick={() => navigate('/MainPage')}>MainPage로 바로가기</button>
+        </div>
       </div>
     </div>
   );

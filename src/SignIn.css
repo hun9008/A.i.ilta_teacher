@@ -1,0 +1,116 @@
+.signin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+  padding: 20px;
+  background-color: #f0f4f8;
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(-20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.form-box {
+    background-color: #ffffff;
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    animation: fadeInBox 2s ease-in-out;
+    max-width: 400px;
+}
+@keyframes fadeInBox {
+    0%, 50% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: end;
+}
+
+.logo {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 10px;
+  animation: bounce 2s infinite;
+  transition: filter 0.4s ease;
+}
+
+.logo:hover {
+    filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+  60% { transform: translateY(-2px); }
+}
+
+.signin-title {
+  font-size: 2rem;
+  color: #6161ff;
+  margin-bottom: 20px;
+}
+
+.input-field {
+  max-width: 300px;
+  padding: 10px;
+  border: 2px solid #6161ff;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #ffffff;
+  transition: box-shadow 0.3s ease;
+  margin: 10px;
+  width: 100%;
+}
+
+.input-field:focus {
+  box-shadow: 0 0 10px #a361ff80;
+  outline: none;
+}
+
+.login-button {
+  background-color: #6161ff;
+  color: #ffffff;
+  width: 100%;
+  max-width: 300px;
+  padding: 10px;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #4444e2;
+}
+
+.extra-options {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.secondary-button {
+  background-color: #4aadff;
+  color: #ffffff;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.secondary-button:hover {
+  background-color: #328fdb;
+}
