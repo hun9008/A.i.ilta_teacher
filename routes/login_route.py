@@ -8,7 +8,7 @@ from utils.login_utils import get_password_hash, verify_password
 
 route = APIRouter()
 
-@route.post("/Register") 
+@route.post("/register") 
 async def register(user: User):
     user_in_db = await users_collection.find_one({"email": user.u_email})
     # DB에 user가 있는데 register 시도하는 경우 
@@ -19,7 +19,7 @@ async def register(user: User):
     await users_collection.insert_one(user_in_db.dict())
     return user
 
-@route.post("/Login")
+@route.post("/login")
 async def login(login: LoginRequest):
     # table(user들의 모음)에서 이메일이 input으로 들어온 이메일인걸 찾기 
     user_in_db = await users_collection.find_one({"u_email": login.email})
@@ -38,3 +38,14 @@ async def get_all_users():
         user['_id'] = str(user['_id'])
         users.append(user)
     return users
+
+@route.delete("/user_delete")
+async def delete_user(email: EmailStr):
+    # 이메일로 user 찾기
+    user_in_db = await users_collection.find_one({"email": email})
+    if not user_in_db:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # user 삭제
+    await users_collection.delete_one({"email":email})
+    return {"message": "User deleted successfully"}
