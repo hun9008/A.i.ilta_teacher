@@ -42,7 +42,7 @@ function QrPage(){
     <>
       <div style={{ textAlign: 'center', marginTop: '50px' }}>
         <h1>Scan this QR Code</h1>
-        <QRCode value={qrUrl} size={256} />
+        {qrUrl && <QRCode value={qrUrl} size={256} />}
         <button onClick={()=>{navigate('/camera');}}>Camera</button>
         
       </div>
