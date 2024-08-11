@@ -41,9 +41,8 @@ function CameraPage() {
       }}
     >
       <div style={{ display: 'flex', marginBottom: '20px' }}>
-        <div style={{ marginRight: '100px' }}>
-          <img src={LaptopImage} style={{ width: '300px', height: '300px' }} />
-        </div>
+        <img src={LaptopImage} style={{ width: '100px', height: '100px' }} />
+
 
         <div>
           <video

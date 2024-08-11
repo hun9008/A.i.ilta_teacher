@@ -14,6 +14,27 @@ function QrPage(){
       const qrCodeUrl = `${hostUrl}/camera?email=${encodeURIComponent(email)}`;
       setQrUrl(qrCodeUrl);
     }
+
+    try {
+      const ws = import.meta.env.VITE_SOCKET_URL;
+
+      ws.onopen = () => {
+        console.log('WebSocket connection opened');
+      };
+      ws.onmessage = (event: MessageEvent) => {
+        const message = JSON.parse(event.data);
+        console.log('Message from server: ', message);
+      };
+      ws.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+      ws.onerror = (error: Event) => {
+        console.error('WebSocket error: ', error);
+      };
+    } catch (error) {
+      console.error('Error accessing media devices:', error);
+    }
+
   },[]);
 
 
