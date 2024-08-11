@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function StudyGoals() {
+  const navigate = useNavigate();
+
   const [goals, setGoals] = useState({
     goal1: false,
     goal2: false,
@@ -145,7 +148,10 @@ function StudyGoals() {
       </div>
 
       <div style={{ marginTop: '20px' }}>
-        <button disabled={!goals.goal1 || !goals.goal2 || !goals.goal3}>
+        <button
+          disabled={!goals.goal1 || !goals.goal2 || !goals.goal3}
+          onClick={() => navigate('/TextToSpeech')}
+        >
           다음
         </button>
       </div>
