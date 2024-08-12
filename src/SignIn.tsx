@@ -5,24 +5,22 @@ import './SignIn.css';
 function SignIn() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [isSignUp, setIsSignUp] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const baseUrl = import.meta.env.VITE_BASE_URL;
 
   const handleLogin = async () => {
     try {
-      const baseUrl = import.meta.env.VITE_BASE_URL;
       const response = await fetch(`${baseUrl}/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-
       if (!response.ok) {
         throw new Error('로그인에 실패했습니다.');
       }
-
       localStorage.setItem('email', email);
 
       navigate('/QrPage');
@@ -32,44 +30,30 @@ function SignIn() {
     }
   };
 
+  const handleSignUp = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ u_email, u_pwd, u_name }),
+      });
+
+      const result = await response.json();
+      console.log('Response:', result);
+
+      if (!response.ok) {
+        throw new Error('회원가입에 실패했습니다.');
+      }
+
+      setIsSignUp(false);
+    } catch (error: any) {
+      console.error('회원가입 에러:', error);
+      alert(error.message || '회원가입 중 문제가 발생했습니다.');
+    }
+  };
+
   return (
     <div>
-      {/*
-      <div className="sign-in">
-        <div className="form-box-wrapper">
-          <div className="logo-container">
-            <img src={logo} className="logo" alt="m.AI tutor logo" />
-            <h2 className='jua-regular'>마이튜터</h2>
-          </div>
-          <h2 className="signin-title">로그인 하기</h2>
-          <div className="input-container">
-            <input
-              className="input-field"
-              type="email"
-              placeholder="이메일 입력"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              className="input-field"
-              type="password"
-              placeholder="비밀번호"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="button-container">
-            <button className="login-button" onClick={handleLogin}>로그인</button>
-            <button className="login-button signup-button" onClick={() => navigate('/SignUp')}>회원가입하기</button>
-          </div>
-          <div className="extra-options">
-            <button className="secondary-button" onClick={() => navigate('/QrPage')}>QR 페이지로 바로가기</button>
-            <button className="secondary-button" onClick={() => navigate('/MainPage')}>MainPage로 바로가기</button>
-          </div>
-        </div>
-      </div>
-      */}
-
       <div className="sign-in">
         <div className="form-box-wrapper">
           <div className="form-box">
@@ -83,56 +67,135 @@ function SignIn() {
             </div>
 
             <div className="signin-container">
-              <h1 className="text-title">로그인</h1>
-              <div className="input-container">
-                <label className="input-label" htmlFor="email">
-                  이메일
-                </label>
-                <div className="input">
-                  <div className="email-image" />
-                  <input
-                    className="textinput"
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="이메일을 입력하세요"
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="input-container">
-                <label className="input-label" htmlFor="password">
-                  비밀번호
-                </label>
-                <div className="input">
-                  <div className="password-image" />
-                  <input
-                    className="textinput"
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="비밀번호를 입력하세요"
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="forgot-password">
-                <a href="#" className="forgot-password-link">
-                  비밀번호를 잊으셨나요?
-                </a>
-              </div>
-              <button className="signin-button" onClick={handleLogin}>
-                로그인 하기
-              </button>
-              <button
-                className="signup-button"
-                onClick={() => navigate('/SignUp')}
-              >
-                회원가입 하기
-              </button>
+              {isSignUp ? (
+                <>
+                  <button
+                    className="back-button"
+                    onClick={() => setIsSignUp(false)}
+                  >
+                    ←
+                  </button>
+                  <h1 className="text-title">회원가입</h1>
+                  <div className="input-container">
+                    <label className="input-label" htmlFor="name">
+                      이름
+                    </label>
+                    <div className="input">
+                      <div className="name-image" />
+                      <input
+                        className="textinput"
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="이름을 입력하세요"
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="input-container">
+                    <label className="input-label" htmlFor="email">
+                      이메일
+                    </label>
+                    <div className="input">
+                      <div className="email-image" />
+                      <input
+                        className="textinput"
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="이메일을 입력하세요"
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="input-container">
+                    <label className="input-label" htmlFor="password">
+                      비밀번호
+                    </label>
+                    <div className="input">
+                      <div className="password-image" />
+                      <input
+                        className="textinput"
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="비밀번호를 입력하세요"
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <button className="signin-button" onClick={handleSignUp}>
+                    회원가입 하기
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-title">로그인</h1>
+                  <div className="input-container">
+                    <label className="input-label" htmlFor="email">
+                      이메일
+                    </label>
+                    <div className="input">
+                      <div className="email-image" />
+                      <input
+                        className="textinput"
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="이메일을 입력하세요"
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="input-container">
+                    <label className="input-label" htmlFor="password">
+                      비밀번호
+                    </label>
+                    <div className="input">
+                      <div className="password-image" />
+                      <input
+                        className="textinput"
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="비밀번호를 입력하세요"
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="forgot-password">
+                    <a href="#" className="forgot-password-link">
+                      비밀번호를 잊으셨나요?
+                    </a>
+                  </div>
+                  <button className="signin-button" onClick={handleLogin}>
+                    로그인 하기
+                  </button>
+                  <button
+                    className="signup-button"
+                    onClick={() => setIsSignUp(true)}
+                  >
+                    회원가입 하기
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
+      </div>
+      <div style={{ transform: 'translateY(-40px)' }}>
+        <button
+          className="secondary-button"
+          onClick={() => navigate('/QrPage')}
+        >
+          QR 페이지로 바로가기
+        </button>
+        <button
+          className="secondary-button"
+          onClick={() => navigate('/MainPage')}
+        >
+          MainPage로 바로가기
+        </button>
       </div>
     </div>
   );
