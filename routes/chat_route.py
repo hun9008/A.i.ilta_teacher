@@ -29,7 +29,8 @@ async def process_message(chat: ChatRequest):
             
     elif user_status == "solve":
         # 푼 문제를 저장하고 종료
-        response = {"content": "Your solution has been saved."}
+        #response = {"content": "Your solution has been saved."}
+        response = "Your solution has been saved."
         ## DB에 저장 ; user schema의 end_state를 저장
     # solution을 순차적으로 제공 (OpenAI API 호출)
     elif user_status == "wrong":
@@ -39,10 +40,12 @@ async def process_message(chat: ChatRequest):
 
     elif user_status == "doing":
         # doing 상태에서는 할게 없음
-        response = {"content": "The user is continuing their work."}
+        #response = {"content": "The user is continuing their work."}
+        response = "The user is continuing their work."
         
     else:
-        response = {"content": "Invalid state."}
+        #response = {"content": "Invalid state."}
+        response = "Invalid state."
 
     return response
 
