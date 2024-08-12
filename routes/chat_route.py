@@ -4,6 +4,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse # API response를 JSON 형식으로 반환
 from openai import OpenAI
 from dotenv import load_dotenv
+from models.chat import ChatRequest
 
 route = APIRouter()
 
@@ -15,8 +16,8 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @route.post("/chat")
 # 메시지 처리 로직
-async def process_message(request: Request):
-    message = await request.json()
+async def process_message(chat: ChatRequest):
+    message = await chat.json()
     
     user_status = message.get("status")
     user_text = message.get("text") # user가 물어보는 내용
