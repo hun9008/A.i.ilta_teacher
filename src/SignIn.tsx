@@ -160,6 +160,7 @@ function SignIn() {
                         name="password"
                         placeholder="비밀번호를 입력하세요"
                         onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                       />
                     </div>
                   </div>
