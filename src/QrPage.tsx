@@ -11,7 +11,7 @@ function QrPage(){
     const email = localStorage.getItem('email');
     if(email) {
       const hostUrl = import.meta.env.VITE_HOST_URL;
-      const qrCodeUrl = `${hostUrl}/camera?email=${encodeURIComponent(email)}`;
+      const qrCodeUrl = `${hostUrl}/cameraMobile?email=${encodeURIComponent(email)}`;
       setQrUrl(qrCodeUrl);
     }
 

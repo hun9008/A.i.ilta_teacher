@@ -8,6 +8,7 @@ import CameraPage from './camera.tsx';
 import StudyGoals from './StudyGoals';
 import TextToSpeech from './TextToSpeech';
 import MainPage from './MainPage';
+import CameraMobilePage from './cameraMobile.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/StudyGoals" element={<StudyGoals />} />
         <Route path="/TextToSpeech" element={<TextToSpeech />} />
         <Route path="/MainPage" element={<MainPage />} />
+        <Route path="/cameraMobile" element={<CameraMobilePage />} />
       </Routes>
     </Router>
   </StrictMode>
