@@ -2,9 +2,9 @@ from pydantic import BaseModel
 
 class User(BaseModel):
     _id: str
-    u_email: str
-    u_pwd: str
-    u_name: str
+    email: str
+    pwd: str
+    name: str
 
 class UserInDB(User):
     hashed_password: str

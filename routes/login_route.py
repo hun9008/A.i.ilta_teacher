@@ -10,11 +10,11 @@ route = APIRouter()
 
 @route.post("/register") 
 async def register(user: User):
-    user_in_db = await users_collection.find_one({"email": user.u_email})
+    user_in_db = await users_collection.find_one({"email": user.email})
     # DB에 user가 있는데 register 시도하는 경우 
     if user_in_db:
         raise HTTPException(status_code=400, detail="Email already registered")
-    hashed_password = get_password_hash(user.u_pwd)
+    hashed_password = get_password_hash(user.pwd)
     user_in_db = UserInDB(**user.dict(), hashed_password=hashed_password)
     await users_collection.insert_one(user_in_db.dict())
     return user
