@@ -10,7 +10,7 @@ function SignUp() {
   const handleSignUp = async () => {
     try {
       const baseUrl = import.meta.env.VITE_BASE_URL;
-      const response = await fetch(`${baseUrl}/Register`, {
+      const response = await fetch(`${baseUrl}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

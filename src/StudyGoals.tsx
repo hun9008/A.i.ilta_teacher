@@ -152,8 +152,9 @@ function StudyGoals() {
           disabled={!goals.goal1 || !goals.goal2 || !goals.goal3}
           onClick={() => navigate('/TextToSpeech')}
         >
-          다음
+          TTS
         </button>
+        <button onClick={() => navigate('/StudyMain')}>공부 시작하기</button>
       </div>
     </div>
   );
