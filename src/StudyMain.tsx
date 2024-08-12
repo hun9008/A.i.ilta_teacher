@@ -14,6 +14,73 @@ function StudyMain() {
   const [previousAnswer, setPreviousAnswer] = useState<string | null>(null);
   const [isChatVisible, setIsChatVisible] = useState(false);
 
+  // const [timer1, setTimer1] = useState(0);
+  // const [timer2, setTimer2] = useState(0);
+  const [timer1, setTimer1] = useState(90);
+  const [timer2, setTimer2] = useState(45);
+  const [isRunning1, setIsRunning1] = useState(false);
+  const [isRunning2, setIsRunning2] = useState(false);
+
+  // useEffect(() => {
+  //   const fetchTimerValues = async () => {
+  //     const baseUrl = import.meta.env.VITE_BASE_URL;
+
+  //     try {
+  //       const response = await fetch(`${baseUrl}/get-timers`, {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
+
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         setTimer1(data.timer1);
+  //         setTimer2(data.timer2);
+  //       } else {
+  //         console.error(`Failed to fetch timer values: ${response.statusText}`);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching timer values:', error);
+  //     }
+  //   };
+
+  //   fetchTimerValues();
+  // }, []);
+
+  // 첫 번째 타이머 제어
+  useEffect(() => {
+    let intervalId;
+    if (isRunning1) {
+      intervalId = setInterval(() => {
+        setTimer1((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+      }, 60000); // 분 단위로 감소
+    }
+    return () => clearInterval(intervalId);
+  }, [isRunning1]);
+
+  // 두 번째 타이머 제어
+  useEffect(() => {
+    let intervalId;
+    if (isRunning2) {
+      intervalId = setInterval(() => {
+        setTimer2((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+      }, 60000); // 분 단위로 감소
+    }
+    return () => clearInterval(intervalId);
+  }, [isRunning2]);
+
+  // 시간:분 포맷 함수
+  const formatTime = (totalMinutes) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    const formattedHours = hours >= 0 ? `${hours}:` : '';
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+    return `${formattedHours}${formattedMinutes}`;
+  };
+
   // 메시지를 가져오는 함수
   useEffect(() => {
     if (isChatVisible) {
@@ -147,7 +214,50 @@ function StudyMain() {
           onClick={toggleChatVisibility}
         />
       </div>
-
+      <div style={{ display: 'flex', marginBottom: '10px' }}>
+        <div style={{ marginRight: '20px' }}>
+          <h3>
+            {' '}
+            오늘 공부 목표 시간
+            <h4>{formatTime(timer1)}</h4>
+          </h3>
+          <button
+            onClick={() => setIsRunning1(!isRunning1)}
+            style={{
+              marginRight: '10px',
+              padding: '5px 10px',
+              borderRadius: '5px',
+              backgroundColor: isRunning1 ? '#dc3545' : '#28a745',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {isRunning1 ? 'Stop' : 'Start'}
+          </button>
+        </div>
+        <div>
+          <h3>
+            {' '}
+            공부 중 쉬는 시간
+            <h4>{formatTime(timer2)}</h4>
+          </h3>{' '}
+          <button
+            onClick={() => setIsRunning2(!isRunning2)}
+            style={{
+              marginRight: '10px',
+              padding: '5px 10px',
+              borderRadius: '5px',
+              backgroundColor: isRunning2 ? '#dc3545' : '#28a745',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {isRunning2 ? 'Stop' : 'Start'}
+          </button>
+        </div>
+      </div>
       {isChatVisible && (
         <div
           style={{
