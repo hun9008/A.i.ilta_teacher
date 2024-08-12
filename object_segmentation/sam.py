@@ -8,7 +8,7 @@ sam = sam_model_registry["vit_h"](checkpoint="models/sam_vit_h_4b8939.pth")
 
 mask_generator = SamAutomaticMaskGenerator(sam)
 
-image_path = "src/scenes/prob_3.jpeg"
+image_path = "src/scenes/prob_6.png"
 image = cv2.imread(image_path)
 
 if image is None:
@@ -38,8 +38,8 @@ def post_process_mask(mask):
 for i, mask in enumerate(tqdm(masks, desc="Processing Masks")):
     x, y, w, h = mask["bbox"]
     
-    if w * h < (image_width * image_height) // 256:
-        continue
+    # if w * h < (image_width * image_height) // 256:
+    #     continue
 
     processed_mask = post_process_mask(mask["segmentation"])
 
