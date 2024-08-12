@@ -14,7 +14,7 @@ async def register(user: User):
     # DB에 user가 있는데 register 시도하는 경우 
     if user_in_db:
         raise HTTPException(status_code=400, detail="Email already registered")
-    hashed_password = get_password_hash(user.pwd)
+    hashed_password = get_password_hash(user.password)
     user_in_db = UserInDB(**user.dict(), hashed_password=hashed_password)
     await users_collection.insert_one(user_in_db.dict())
     return user
