@@ -17,10 +17,9 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 @route.post("/chat")
 # 메시지 처리 로직
 async def process_message(chat: ChatRequest):
-    message = await chat.json()
     
-    user_status = message.get("status")
-    user_text = message.get("text") # user가 물어보는 내용
+    user_status = chat.status
+    user_text = chat.text # user가 물어보는 내용
     
     # 개념을 순차적으로 질문하는 로직 (OpenAI API 호출)
     if user_status == "solve_delay":
