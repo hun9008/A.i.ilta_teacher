@@ -83,7 +83,11 @@ function CameraMobilePage() {
   };
 
   const captureFrame = async () => {
+    console.log('captureFrame function called'); // 함수 호출 확인 로그
+
     if (videoRef.current && ws && ws.readyState === WebSocket.OPEN) {
+      console.log('WebSocket is open and videoRef is valid'); // 상태 확인 로그
+
       const canvas = document.createElement('canvas');
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
@@ -111,6 +115,7 @@ function CameraMobilePage() {
         ws.send(JSON.stringify(message));
       }
     } else {
+      console.log('WebSocket is not open or videoRef is null'); // 상태 확인 로그
       setErrorMessage('WebSocket connection is not open.');
     }
   };
@@ -132,10 +137,10 @@ function CameraMobilePage() {
             Run
           </button>
           <button id="stopButton" className="button" onClick={stopStreaming}>
-            Stop
+            Stopping
           </button>
           <button id="resetButton" className="button" onClick={resetStreaming}>
-            Reset
+            Reset1111
           </button>
           <button id="sendButton" className="button" onClick={captureFrame}>
             Send
