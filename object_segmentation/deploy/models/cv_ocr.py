@@ -42,8 +42,11 @@ def imtrim(page):
     # bottom_trim = 50  
     # page = page[top_trim:-bottom_trim, :]
     
-
-    h, w = page.shape
+    if len(page.shape) == 2:
+        h, w = page.shape
+    else:
+        h, w, _ = page.shape
+    
     print(f"Image size after trimming: {h}x{w}")
 
     half_width = w // 2  
@@ -61,7 +64,7 @@ def imtrim(page):
 
     return right, left
 
-def contour(page_rl, output_dir, type):
+def contour(page_rl, output_dir, type, origin):
     global problem_idx
 
     if page_rl is None:
@@ -85,22 +88,47 @@ def contour(page_rl, output_dir, type):
 
     cv2.imwrite(f"{output_dir}/_{type}_contoured_image.png", contoured_image)
 
+    problem_locations = []
+
     cnt = 0
     print("contours len, type: ", len(contours), " ",type)
     for i, c in enumerate(contours):
         x, y, w, h = cv2.boundingRect(c)
         if w > 100 and h > 50:  
-            img_trim = page_rl[y:y+h, x:x+w]
-            cv2.imwrite(f"{output_dir}/problem_{i+1+problem_idx}.png", img_trim)
-            cnt += 1
+            problem_locations.append((x, y, w, h))
+    
+    print("problem_locations: ", len(problem_locations))
+    padding = 10
+    scale_factor = 2  # 해상도 확대 비율
+    for i in range(len(problem_locations)):
+        x, y, w, h = problem_locations[i]
+        img_trim = origin[y:y+h, x:x+w]
+
+        # 이미지 해상도 확대
+        img_resized = cv2.resize(img_trim, (w * scale_factor, h * scale_factor), interpolation=cv2.INTER_CUBIC)
+        
+        img_padded = cv2.copyMakeBorder(
+            img_resized, 
+            top=padding * scale_factor, bottom=padding * scale_factor, 
+            left=padding * scale_factor, right=padding * scale_factor, 
+            borderType=cv2.BORDER_CONSTANT, 
+            value=[255, 255, 255]  # 흰색 패딩
+        )
+        
+        # Bilateral Filter 적용
+        anti_aliased_image = cv2.bilateralFilter(img_padded, d=15, sigmaColor=100, sigmaSpace=100)
+        
+        cv2.imwrite(f"{output_dir}/problem_{i+1+problem_idx}.png", anti_aliased_image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        cnt += 1
     
     problem_idx += cnt
 
 def problem_crop(image):
-    
-    image = preprocess_image(image)
 
-    right, left = imtrim(image)
+    durty_image = preprocess_image(image)
+
+    right, left = imtrim(durty_image)
+    origin_right, origin_left = imtrim(image)
     print("all shape:", image.shape)
     print("right shape: ", right.shape)
     print("left shape: ", left.shape)
@@ -112,8 +140,8 @@ def problem_crop(image):
     output_dir = './temp'
     os.makedirs(output_dir, exist_ok=True)
 
-    contour(right, output_dir, 'right')
-    contour(left, output_dir, 'left')
+    contour(right, output_dir, 'right', origin_right)
+    contour(left, output_dir, 'left', origin_left)
 
 def ocr(image_path):
 

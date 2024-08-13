@@ -13,6 +13,7 @@ from botocore.exceptions import NoCredentialsError
 import requests
 from openai import OpenAI
 import asyncio
+import anthropic
 
 router = APIRouter()
 
@@ -57,16 +58,53 @@ async def fetch_solution_or_concept(client, image_url, prompt_type):
     response = await loop.run_in_executor(
         None,
         lambda: client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o-2024-08-06",
             messages=message,
             max_tokens=1000
         )
     )
     return response.choices[0].message.content
 
+async def fetch_solution_or_concept_claude(client, encoded_img, prompt_type):
+
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/png",
+                    "data": encoded_img
+                }
+            },
+            {
+                "type": "text",
+                "text": prompt_type
+            }
+        ]
+    }]
+
+    loop = asyncio.get_event_loop()
+    response = await loop.run_in_executor(
+        None,
+        lambda: client.messages.create(
+        model="claude-3-5-sonnet-20240620",
+        max_tokens=1000,
+        temperature=0,
+        system="너는 ocr 기계야.",
+        messages=messages
+        )
+    )
+
+    print(response.content[0].text)
+
+    return response.content[0].text
+
 @router.post("/problems_ocr")
 async def problems_ocr(input: OCRInput):
     start = time.time()
+    encoded_imgs = []
     image = decode_image(input.image)
     problem_crop(image)
     
@@ -78,8 +116,13 @@ async def problems_ocr(input: OCRInput):
         file_path = os.path.join(image_path, filename)
         image_url = upload_to_s3(file_path, 'flyai', filename)
         image_urls.append(image_url)
+
+    for filename in os.listdir(image_path):
+        encoded_imgs.append(base64.b64encode(open(os.path.join(image_path, filename), "rb").read()).decode())
     
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+    claude_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     
     solution_tasks = [
         fetch_solution_or_concept(client, image_url, "이미지를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ..., answer: 로 알려줘.")
@@ -90,9 +133,16 @@ async def problems_ocr(input: OCRInput):
         fetch_solution_or_concept(client, image_url, "이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼.")
         for image_url in image_urls
     ]
+
+    ocr_tasks = [
+        # fetch_solution_or_concept(client, image_url, "이 이미지에서 문제를 추출해 알려줘. (부등호에 주의해줘.)")
+        fetch_solution_or_concept_claude(claude_client, encoded_img, "이 이미지에서 문제를 추출해 알려줘. (부등호 구분에 주의) 그리고 OCR 결과로 나온 텍스트만 알려줘")
+        for encoded_img in encoded_imgs
+    ]
     
     solutions = await asyncio.gather(*solution_tasks)
     concepts = await asyncio.gather(*concept_tasks)
+    ocrs = await asyncio.gather(*ocr_tasks)
 
     # temp directory cleanup
     for filename in os.listdir(image_path):
@@ -101,6 +151,7 @@ async def problems_ocr(input: OCRInput):
     output_json = {
         "concepts": concepts,
         "solutions": solutions,
+        "ocrs": ocrs,
     }
 
     return JSONResponse(content=output_json)
