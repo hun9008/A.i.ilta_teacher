@@ -125,16 +125,15 @@
 // export default CameraMobilePage;
 
 import { useEffect, useState, useRef } from 'react';
-import LaptopImage from './assets/Laptop.jpg';
 import { useNavigate } from 'react-router-dom';
 
-function CameraPage() {
+function CameraMobilePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
   const localStreamRef = useRef<MediaStream | null>(null);
-  const captureIntervalRef = useRef<number | null>(null);
+  const streamIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     const constraints = {
@@ -174,8 +173,11 @@ function CameraPage() {
     socket.onopen = () => {
       console.log('WebSocket connection opened');
       setErrorMessage('');
-      setWs(socket);
-      startCapturingFrames(u_id); // WebSocket이 open된 이후에만 캡처를 시작하고 u_id를 전달
+
+      // WebSocket 연결이 열리면 1초에 한 번씩 프레임을 전송
+      streamIntervalRef.current = window.setInterval(() => {
+        captureFrame(u_id); // u_id를 captureFrame 함수로 전달
+      }, 1000); // 1초마다 프레임 전송
     };
 
     socket.onerror = (error) => {
@@ -185,29 +187,23 @@ function CameraPage() {
 
     socket.onclose = () => {
       console.log('WebSocket connection closed');
-      stopCapturingFrames();
+      if (streamIntervalRef.current) {
+        clearInterval(streamIntervalRef.current);
+        streamIntervalRef.current = null;
+      }
     };
-  };
 
-  const startCapturingFrames = (u_id: string) => {
-    if (captureIntervalRef.current) return;
-
-    captureIntervalRef.current = window.setInterval(() => {
-      captureFrame(u_id);
-    }, 1000);
-  };
-
-  const stopCapturingFrames = () => {
-    if (captureIntervalRef.current) {
-      clearInterval(captureIntervalRef.current);
-      captureIntervalRef.current = null;
-    }
+    setWs(socket);
   };
 
   const stopStreaming = () => {
     if (ws) {
       ws.close();
       setWs(null);
+    }
+    if (streamIntervalRef.current) {
+      clearInterval(streamIntervalRef.current);
+      streamIntervalRef.current = null;
     }
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => track.stop());
@@ -234,6 +230,7 @@ function CameraPage() {
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
         const frame = canvas.toDataURL('image/jpeg').split(',')[1];
 
+        // 프레임 데이터 전송 시 서버가 기대하는 필드 추가
         ws.send(
           JSON.stringify({
             type: 'rtc',
@@ -242,8 +239,6 @@ function CameraPage() {
             u_id: u_id, // localStorage에서 가져온 u_id 사용
           })
         );
-
-        console.log('Frame sent:', { u_id, frame });
       }
     } else {
       setErrorMessage('WebSocket connection is not open.');
@@ -253,8 +248,6 @@ function CameraPage() {
   return (
     <div>
       <div>
-        <img src={LaptopImage} style={{ width: '100px', height: '100px' }} />
-
         <video
           ref={videoRef}
           autoPlay
@@ -280,4 +273,4 @@ function CameraPage() {
   );
 }
 
-export default CameraPage;
+export default CameraMobilePage;

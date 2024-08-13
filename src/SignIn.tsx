@@ -57,7 +57,7 @@ function SignIn() {
 
   const handleFindPassword = async () => {
     try {
-      const response = await fetch('http://20.196.65.131:8000/user_all', {
+      const response = await fetch(`${baseUrl}/user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name }),
