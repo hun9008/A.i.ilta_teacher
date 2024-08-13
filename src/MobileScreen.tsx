@@ -13,11 +13,14 @@ const VideoDisplay: React.FC = () => {
       };
 
       socket.onmessage = (message) => {
+        console.log('Message received:', message); // 추가 로그
         const data = JSON.parse(message.data);
         if (data.type === 'rtc-frame' && data.payload) {
           // 서버에서 받은 이미지 데이터를 화면에 표시
           const imgData = `data:image/jpeg;base64,${data.payload}`;
           setImageSrc(imgData);
+        } else {
+          console.log('Received message but not rtc-frame:', data); // 추가 로그
         }
       };
 

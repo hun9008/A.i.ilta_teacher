@@ -106,6 +106,8 @@ function CameraMobilePage() {
           device: 'mobile', // 장치 유형, 예: 'mobile'
           u_id: u_id, // 사용자 ID
         };
+
+        console.log('Sending message:', message); // 추가 로그
         ws.send(JSON.stringify(message));
       }
     } else {
