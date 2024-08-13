@@ -124,27 +124,15 @@
 
 // export default CameraMobilePage;
 
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 
 function CameraMobilePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [isStreaming, setIsStreaming] = useState<boolean>(false);
-  const navigate = useNavigate();
+  const streamIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
-    initCamera();
-    initWebSocket();
-
-    return () => {
-      stopStreaming();
-    };
-  }, []);
-
-  const initCamera = () => {
     const constraints = {
       video: { facingMode: 'environment' },
     };
@@ -154,110 +142,85 @@ function CameraMobilePage() {
       .then((stream) => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          localStreamRef.current = stream;
+
+          wsRef.current = new WebSocket(import.meta.env.VITE_SOCKET_URL);
+
+          wsRef.current.onopen = () => {
+            console.log('WebSocket connection opened');
+          };
+
+          wsRef.current.onmessage = (event) => {
+            console.log('Message from server:', event.data);
+          };
+
+          wsRef.current.onerror = (error) => {
+            console.error('WebSocket error:', error);
+          };
+
+          wsRef.current.onclose = () => {
+            console.log('WebSocket connection closed');
+          };
+
+          // 일정 주기로 비디오 프레임을 WebSocket을 통해 전송
+          streamIntervalRef.current = window.setInterval(() => {
+            sendFrame();
+          }, 100); // 100ms마다 프레임 전송
         }
       })
-      .catch((err) => {
-        console.error('Error accessing camera:', err);
-        setErrorMessage('Error accessing camera. Check console for details.');
-      });
-  };
+      .catch((error) => console.error('Error accessing camera:', error));
 
-  const initWebSocket = () => {
-    const ws = new WebSocket(import.meta.env.VITE_SOCKET_URL);
-    ws.onopen = () => {
-      console.log('WebSocket connection opened');
-      setIsStreaming(true);
-      startCapturing();
+    return () => {
+      stopStreaming();
     };
+  }, []);
 
-    ws.onmessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'ocr-result') {
-        console.log('OCR Result:', data.text);
-      }
-    };
+  const sendFrame = () => {
+    if (!videoRef.current || !canvasRef.current || !wsRef.current) return;
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      setErrorMessage('WebSocket error occurred. Check console for details.');
-      setIsStreaming(false);
-    };
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
 
-    ws.onclose = () => {
-      console.log('WebSocket connection closed');
-      setIsStreaming(false);
-    };
-
-    wsRef.current = ws;
+    if (context && videoRef.current) {
+      context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      const frameData = canvas.toDataURL('image/jpeg'); // 프레임을 base64 인코딩
+      wsRef.current.send(
+        JSON.stringify({ type: 'video-frame', payload: frameData })
+      );
+    }
   };
 
   const stopStreaming = () => {
-    setIsStreaming(false);
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
     }
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => track.stop());
-      localStreamRef.current = null;
+    if (streamIntervalRef.current) {
+      clearInterval(streamIntervalRef.current);
+      streamIntervalRef.current = null;
     }
-    if (videoRef.current) {
+    if (videoRef.current && videoRef.current.srcObject) {
+      (videoRef.current.srcObject as MediaStream)
+        .getTracks()
+        .forEach((track) => track.stop());
       videoRef.current.srcObject = null;
-    }
-    setErrorMessage('');
-  };
-
-  const captureFrame = () => {
-    if (
-      videoRef.current &&
-      wsRef.current &&
-      wsRef.current.readyState === WebSocket.OPEN
-    ) {
-      const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        const frame = canvas.toDataURL('image/jpeg').split(',')[1];
-        wsRef.current.send(
-          JSON.stringify({ type: 'video-frame', payload: frame })
-        );
-      }
-    } else {
-      setErrorMessage('WebSocket connection is not open.');
-    }
-  };
-
-  const startCapturing = () => {
-    if (isStreaming) {
-      captureFrame();
-      setTimeout(startCapturing, 1000); // 1초마다 프레임 캡처
     }
   };
 
   return (
     <div>
-      <div>
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          style={{ width: '300px', height: '300px' }}
-        ></video>
-
-        <div className="button-container">
-          <button onClick={initWebSocket} disabled={isStreaming}>
-            Start Streaming
-          </button>
-          <button onClick={stopStreaming} disabled={!isStreaming}>
-            Stop Streaming
-          </button>
-        </div>
-        {errorMessage && <div>{errorMessage}</div>}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        style={{ display: 'none' }}
+      ></video>
+      <canvas ref={canvasRef} style={{ width: '300px', height: '300px' }} />
+      <div className="button-container">
+        <button onClick={() => console.log('Streaming started')}>
+          Start Streaming
+        </button>
+        <button onClick={stopStreaming}>Stop Streaming</button>
       </div>
-      <button onClick={() => navigate('/StudyGoals')}>Go to Study Goals</button>
     </div>
   );
 }
