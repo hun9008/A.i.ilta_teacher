@@ -13,7 +13,7 @@ import ErrorBoundary from './ErrorBoundary';
 import SettingPage from './SettingPage.tsx';
 
 import './css/index.css';
-import './css/output.css';
+import './css/tailwind.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
