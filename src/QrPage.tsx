@@ -39,19 +39,20 @@ function QrPage() {
   }, []);
 
   return (
-    <>
-      <div style={{ textAlign: 'center', marginTop: '50px' }}>
-        <h1>Scan this QR Code</h1>
-        {qrUrl && <QRCode value={qrUrl} size={256} />}
-        <button
-          onClick={() => {
-            navigate('/camera');
-          }}
-        >
-          Camera
-        </button>
-      </div>
-    </>
+    <div className="flex flex-col items-center justify-center bg-gray-50">
+      <h1 className="text-xl font-bold mb-6 mt-6 text-center">스마트폰 카메라로<br />아래 QRcode를 스캔하세요</h1>
+      {qrUrl && <QRCode value={qrUrl} size={200} className="mb-10 p-4 bg-white rounded-xl animate-border-glow" />}
+      {/*
+      <button
+        onClick={() => {
+          navigate('/camera');
+        }}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+      >
+        Camera
+      </button>*/
+      }
+    </div>
   );
 }
 

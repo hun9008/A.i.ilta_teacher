@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronRight, Check } from 'lucide-react';
+import QrPage from './QrPage';
 
 interface Step {
   id: string;
@@ -47,7 +48,7 @@ function SettingPage() {
   const renderStepContent = (step: Step) => {
     switch (step.id) {
       case 'qr':
-        return <p>QR코드가 떠야함</p>;
+        return <QrPage />;
       case 'mobcam':
         return <p>모바일 카메라 잘 뜨는지 확인 후 자바라 잘 설치하시오, 빛의 양을 조절하시오 등등</p>;
       case 'webcam':

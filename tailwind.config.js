@@ -6,6 +6,16 @@ export default {
   ],
   theme: {
     extend: {
+      keyframes: {
+        'border-glow': {
+          '0%, 100%': { boxShadow: '0 0 10px rgba(134, 104, 255, 0)' },
+          '50%': { boxShadow: '0 0 20px rgba(170, 154, 255, 0.9)' },
+        },
+      },
+      animation: {
+        'border-glow': 'border-glow 2s infinite',
+      },
+
       colors: {
         grey: {
           100: 'var(--grey-100)',

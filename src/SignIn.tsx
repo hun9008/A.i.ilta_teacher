@@ -24,7 +24,7 @@ function SignIn() {
       }
       localStorage.setItem('email', email);
 
-      navigate('/qrpage');
+      navigate('/setting');
     } catch (error: any) {
       console.error('로그인 에러:', error);
       alert(error.message || '로그인 중 문제가 발생했습니다.');
