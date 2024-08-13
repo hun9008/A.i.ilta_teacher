@@ -45,12 +45,11 @@ def upload_to_s3(file_name, bucket, object_name=None):
         print("AWS 자격 증명을 찾을 수 없습니다.")
         return None
 
-async def fetch_solution_or_concept(client, image_url, prompt_type):
+async def fetch_solution_or_concept(client, prompt_type):
     message = [{
         "role": "user", 
         "content": [
             {"type": "text", "text": prompt_type},
-            {"type": "image_url", "image_url": {"url": image_url, "detail": "high"}}
         ]
     }]
     
@@ -58,14 +57,14 @@ async def fetch_solution_or_concept(client, image_url, prompt_type):
     response = await loop.run_in_executor(
         None,
         lambda: client.chat.completions.create(
-            model="gpt-4o-2024-08-06",
+            model="gpt-4-turbo",
             messages=message,
-            max_tokens=1000
+            max_tokens=2000
         )
     )
     return response.choices[0].message.content
 
-async def fetch_solution_or_concept_claude(client, encoded_img, prompt_type):
+async def fetch_ocr_claude(client, encoded_img, prompt_type):
 
     messages=[{
         "role": "user",
@@ -101,7 +100,7 @@ async def fetch_solution_or_concept_claude(client, encoded_img, prompt_type):
 
     return response.content[0].text
 
-@router.post("/problems_ocr")
+@router.post("/problems_solver")
 async def problems_ocr(input: OCRInput):
     start = time.time()
     encoded_imgs = []
@@ -109,13 +108,13 @@ async def problems_ocr(input: OCRInput):
     problem_crop(image)
     
     image_path = './temp'
-    file_name = str(int(time.time())) + ".jpg"
-    image_urls = []
+    # file_name = str(int(time.time())) + ".jpg"
+    # image_urls = []
 
-    for filename in os.listdir(image_path):
-        file_path = os.path.join(image_path, filename)
-        image_url = upload_to_s3(file_path, 'flyai', filename)
-        image_urls.append(image_url)
+    # for filename in os.listdir(image_path):
+    #     file_path = os.path.join(image_path, filename)
+    #     image_url = upload_to_s3(file_path, 'flyai', filename)
+    #     image_urls.append(image_url)
 
     for filename in os.listdir(image_path):
         encoded_imgs.append(base64.b64encode(open(os.path.join(image_path, filename), "rb").read()).decode())
@@ -124,25 +123,37 @@ async def problems_ocr(input: OCRInput):
 
     claude_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     
-    solution_tasks = [
-        fetch_solution_or_concept(client, image_url, "이미지를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ..., answer: 로 알려줘.")
-        for image_url in image_urls
-    ]
+    # solution_tasks = [
+    #     fetch_solution_or_concept(client, image_url, "이미지를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ..., answer: 로 알려줘.")
+    #     for image_url in image_urls
+    # ]
     
-    concept_tasks = [
-        fetch_solution_or_concept(client, image_url, "이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼.")
-        for image_url in image_urls
-    ]
+    # concept_tasks = [
+    #     fetch_solution_or_concept(client, image_url, "이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼.")
+    #     for image_url in image_urls
+    # ]
 
     ocr_tasks = [
         # fetch_solution_or_concept(client, image_url, "이 이미지에서 문제를 추출해 알려줘. (부등호에 주의해줘.)")
-        fetch_solution_or_concept_claude(claude_client, encoded_img, "이 이미지에서 문제를 추출해 알려줘. (부등호 구분에 주의) 그리고 OCR 결과로 나온 텍스트만 알려줘")
+        fetch_ocr_claude(claude_client, encoded_img, "이 이미지에서 문제를 추출해 알려줘. (부등호 구분에 주의) 그리고 OCR 결과로 나온 텍스트만 알려줘")
         for encoded_img in encoded_imgs
     ]
     
-    solutions = await asyncio.gather(*solution_tasks)
-    concepts = await asyncio.gather(*concept_tasks)
+    # solutions = await asyncio.gather(*solution_tasks)
+    # concepts = await asyncio.gather(*concept_tasks)
     ocrs = await asyncio.gather(*ocr_tasks)
+
+    concept_tasks = [
+        fetch_solution_or_concept(client, f"이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
+        for ocr in ocrs
+    ]
+    solution_tasks = [
+        fetch_solution_or_concept(client, f"이미지를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ..., answer: 로 알려줘. {ocr}")
+        for ocr in ocrs
+    ]
+
+    concepts = await asyncio.gather(*concept_tasks)
+    solutions = await asyncio.gather(*solution_tasks)
 
     # temp directory cleanup
     for filename in os.listdir(image_path):
