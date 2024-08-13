@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './SignIn.css';
+import './css/SignIn.css';
 
 function SignIn() {
   const [email, setEmail] = useState<string>('');
@@ -24,7 +24,7 @@ function SignIn() {
       }
       localStorage.setItem('email', email);
 
-      navigate('/QrPage');
+      navigate('/qrpage');
     } catch (error: any) {
       console.error('로그인 에러:', error);
       alert(error.message || '로그인 중 문제가 발생했습니다.');
@@ -264,16 +264,19 @@ function SignIn() {
       <div style={{ transform: 'translateY(-40px)' }}>
         <button
           className="secondary-button"
-          onClick={() => navigate('/QrPage')}
+          onClick={() => navigate('/qrpage')}
         >
           QR 페이지로 바로가기
         </button>
         <button
           className="secondary-button"
-          onClick={() => navigate('/MainPage')}
+          onClick={() => navigate('/main')}
         >
           MainPage로 바로가기
         </button>
+        <button
+          onClick={() => navigate('/setting')}
+        >Setting페이지</button>
       </div>
     </div>
   );

@@ -50,7 +50,7 @@ function StudyMain() {
 
   // 첫 번째 타이머 제어
   useEffect(() => {
-    let intervalId;
+    let intervalId: number;
     if (isRunning1) {
       intervalId = setInterval(() => {
         setTimer1((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
@@ -61,7 +61,7 @@ function StudyMain() {
 
   // 두 번째 타이머 제어
   useEffect(() => {
-    let intervalId;
+    let intervalId: number;
     if (isRunning2) {
       intervalId = setInterval(() => {
         setTimer2((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
@@ -71,7 +71,7 @@ function StudyMain() {
   }, [isRunning2]);
 
   // 시간:분 포맷 함수
-  const formatTime = (totalMinutes) => {
+  const formatTime = (totalMinutes: number) => {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 

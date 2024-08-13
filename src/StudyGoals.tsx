@@ -150,7 +150,7 @@ function StudyGoals() {
       <div style={{ marginTop: '20px' }}>
         <button
           disabled={!goals.goal1 || !goals.goal2 || !goals.goal3}
-          onClick={() => navigate('/TextToSpeech')}
+          onClick={() => navigate('/tts')}
         >
           TTS
         </button>

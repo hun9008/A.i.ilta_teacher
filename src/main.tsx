@@ -10,6 +10,7 @@ import MainPage from './MainPage';
 import CameraMobilePage from './cameraMobile.tsx';
 import StudyMain from './StudyMain';
 import ErrorBoundary from './ErrorBoundary';
+import SettingPage from './SettingPage.tsx';
 
 import './css/index.css';
 import './css/output.css';
@@ -19,13 +20,14 @@ createRoot(document.getElementById('root')!).render(
     <Router>
       <Routes>
         <Route path="/" element={<SignIn />} />
-        <Route path="/SignIn" element={<SignIn />} />
-        <Route path="/QrPage" element={<QrPage />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/qrpage" element={<QrPage />} />
         <Route path="/camera" element={<CameraPage />} />
-        <Route path="/StudyGoals" element={<StudyGoals />} />
-        <Route path="/TextToSpeech" element={<TextToSpeech />} />
-        <Route path="/MainPage" element={<MainPage />} />
-        <Route path="/cameraMobile" element={<CameraMobilePage />} />
+        <Route path="/studygoals" element={<StudyGoals />} />
+        <Route path="/tts" element={<TextToSpeech />} />
+        <Route path="/main" element={<MainPage />} />
+        <Route path="/camera-mobile" element={<CameraMobilePage />} />
+        <Route path="/setting" element={<SettingPage />} />
         <Route
           path="/StudyMain"
           element={

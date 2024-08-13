@@ -102,8 +102,8 @@ function MainPage() {
           <h3 style={{ marginBottom: '10px' }}>푼 문제 수</h3>
           <p>{solvedProblems}</p>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <button onClick={() => navigate('/QrPage')}>학습하기</button>
-            <button onClick={() => navigate('/WrongNote')}>오답노트</button>
+            <button onClick={() => navigate('/qrpage')}>학습하기</button>
+            <button onClick={() => navigate('/wrongnote')}>오답노트</button>
           </div>
         </div>
       </div>

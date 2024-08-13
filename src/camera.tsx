@@ -158,7 +158,7 @@ function CameraPage() {
         </div> */}
         <div>{errorMessage}</div>
       </div>
-      <button onClick={() => navigate('/StudyGoals')}>학습하기</button>
+      <button onClick={() => navigate('/studygoals')}>학습하기</button>
     </div>
   );
 }

@@ -117,7 +117,7 @@ function CameraMobilePage() {
           {errorMessage}
         </div>
       </div>
-      <button onClick={() => navigate('/StudyGoals')}>학습하기</button>
+      <button onClick={() => navigate('/studygoals')}>학습하기</button>
     </div>
   );
 }
