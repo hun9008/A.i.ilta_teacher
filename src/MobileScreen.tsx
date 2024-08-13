@@ -1,40 +1,57 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const VideoDisplay: React.FC = () => {
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const websocketRef = useRef<WebSocket | null>(null);
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const [imageSrc, setImageSrc] = useState<string>('');
 
   useEffect(() => {
-    const ws = new WebSocket(import.meta.env.VITE_SOCKET_URL); // 서버 주소로 수정
+    const initWebSocket = () => {
+      const socket = new WebSocket(import.meta.env.VITE_SOCKET_URL);
 
-    ws.onopen = () => {
-      console.log('WebSocket connection established');
-      websocketRef.current = ws;
+      socket.onopen = () => {
+        console.log('WebSocket connection opened on PC');
+      };
+
+      socket.onmessage = (message) => {
+        const data = JSON.parse(message.data);
+        if (data.type === 'rtc-frame' && data.payload) {
+          // 서버에서 받은 이미지 데이터를 화면에 표시
+          const imgData = `data:image/jpeg;base64,${data.payload}`;
+          setImageSrc(imgData);
+        }
+      };
+
+      socket.onerror = (error) => {
+        console.error('WebSocket error on PC:', error);
+      };
+
+      socket.onclose = () => {
+        console.log('WebSocket connection closed on PC');
+      };
+
+      setWs(socket);
     };
 
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.type === 'rtc-frame') {
-        setImageSrc(message.payload);
-      }
-    };
-
-    ws.onclose = () => {
-      console.log('WebSocket connection closed');
-      websocketRef.current = null;
-    };
+    initWebSocket();
 
     return () => {
-      if (websocketRef.current) {
-        websocketRef.current.close();
+      if (ws) {
+        ws.close();
       }
     };
   }, []);
 
   return (
     <div>
-      {imageSrc && (
-        <img src={imageSrc} alt="Video Frame" style={{ width: '100%' }} />
+      <h1>PC Dashboard</h1>
+      {imageSrc ? (
+        <img
+          src={imageSrc}
+          alt="Captured from mobile"
+          style={{ width: '500px', height: 'auto' }}
+        />
+      ) : (
+        <p>No image received from mobile yet.</p>
       )}
     </div>
   );
