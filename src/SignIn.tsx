@@ -22,7 +22,9 @@ function SignIn() {
       if (!response.ok) {
         throw new Error('로그인에 실패했습니다.');
       }
+      const data = await response.json();
       localStorage.setItem('email', email);
+      localStorage.setItem('u_id', data.u_id);
 
       navigate('/setting');
     } catch (error: any) {
@@ -268,15 +270,10 @@ function SignIn() {
         >
           QR 페이지로 바로가기
         </button>
-        <button
-          className="secondary-button"
-          onClick={() => navigate('/main')}
-        >
+        <button className="secondary-button" onClick={() => navigate('/main')}>
           MainPage로 바로가기
         </button>
-        <button
-          onClick={() => navigate('/setting')}
-        >Setting페이지</button>
+        <button onClick={() => navigate('/setting')}>Setting페이지</button>
       </div>
     </div>
   );

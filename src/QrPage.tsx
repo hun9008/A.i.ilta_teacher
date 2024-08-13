@@ -60,6 +60,13 @@ function QrPage() {
       >
         MobileCamera
       </button>
+      <button
+        onClick={() => {
+          navigate('/camera');
+        }}
+      >
+        LaptopCamera
+      </button>
     </div>
   );
 }
