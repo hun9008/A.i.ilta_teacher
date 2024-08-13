@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 function StudyGoals() {
   const navigate = useNavigate();
-
+  const baseUrl = import.meta.env.VITE_BASE_URL;
   const [goals, setGoals] = useState({
     goal1: false,
     goal2: false,
@@ -29,6 +29,41 @@ function StudyGoals() {
       ...prevTime,
       [name]: validatedValue.toString().padStart(2, '0'),
     }));
+  };
+
+  const convertToMinutes = (hours: string, minutes: string) => {
+    const hoursInMinutes = parseInt(hours || '0', 10) * 60;
+    const totalMinutes = hoursInMinutes + parseInt(minutes || '0', 10);
+    return totalMinutes;
+  };
+
+  const sendTimeToServer = async () => {
+    const studyTime = convertToMinutes(time.goal2Hours, time.goal2Minutes);
+    const breakTime = convertToMinutes(time.goal3Hours, time.goal3Minutes);
+
+    const payload = {
+      study_time: studyTime,
+      break_time: breakTime,
+    };
+
+    try {
+      const response = await fetch(`${baseUrl}/study/settime`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send data to server');
+      }
+
+      const data = await response.json();
+      console.log('Server response:', data);
+    } catch (error) {
+      console.error('Error sending time to server:', error);
+    }
   };
 
   const handleSelectionComplete = (goalName: 'goal2' | 'goal3') => {
@@ -154,7 +189,14 @@ function StudyGoals() {
         >
           TTS
         </button>
-        <button onClick={() => navigate('/StudyMain')}>공부 시작하기</button>
+        <button
+          onClick={async () => {
+            await sendTimeToServer();
+            navigate('/StudyMain');
+          }}
+        >
+          공부 시작하기
+        </button>
       </div>
     </div>
   );
