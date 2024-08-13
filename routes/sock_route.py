@@ -2,7 +2,8 @@ import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import requests
 import asyncio
-from utils.sock_utils import decode_image, detect_hand
+#from utils.sock_utils import decode_image, detect_hand 
+from utils.problem import concepts, solutions, ocrs
 
 route = APIRouter()
 
@@ -16,44 +17,43 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            
-            # decoding(JSON format to Python object)
             message = json.loads(data)
-            
-            # 비디오 프레임일 경우 
-            if message['type'] == 'video-frame':
-                # 현재의 payload를 handle_video_frame()에 넣어서 처리
-                await handle_video_frame(message['payload'], websocket)
+
+            if 'image_url' in message:
+                await handle_image_url(message, websocket)
                 
     except WebSocketDisconnect:
         connections.remove(websocket)
-
-async def handle_video_frame(frame_data, websocket): 
+        
+# (프론트에서 버튼이 눌리면) # 모델에 img 전달
+async def handle_image_url(message, websocket):
     global performing_ocr
     if performing_ocr:
         response = {'type': 'ocr-result', 'text': 'OCR in progress, please wait'}
         await websocket.send_json(response)
         return
     
-    frame = decode_image(frame_data)
+    image_url = message['image_url']
     
-    # 손이 detect 되는 경우
-    if frame is not None and detect_hand(frame):
-        performing_ocr = True
-        output = await perform_ocr(frame_data)
-        performing_ocr = False
-        response = {'type': 'ocr-result', 'text': output}
-        await websocket.send_json(response)
-        
-    else:
-        response = {'type': 'ocr-result', 'text': 'No hand detected or failed to decode image'}
-        await websocket.send_json(response)
+    # 이미지 URL로부터 OCR 수행
+    performing_ocr = True
+    ocr_result = await perform_ocr(image_url)
+    performing_ocr = False
+    
+    # concepts, solutions, ocrs 모두 저장
+    concepts.extend(ocr_result.get("concepts", []))
+    solutions.extend(ocr_result.get("solutions", []))
+    ocrs.extend(ocr_result.get("ocrs", []))
+    
+    # 프론트에는 ocr 결과만 전송 
+    response = {'type': 'ocr-result', 'ocrs': ocr_result.get('ocrs')}
+    await websocket.send_json(response)
 
-async def perform_ocr(frame_data):
+async def perform_ocr(image_url):
     print("Performing OCR")
-    url = "http://llm.hunian.site/api/solution"
-    payload = {'image_base64': frame_data}
-    print(payload)
-    headers = {'Content-Type': 'application/json'}  # JSON 형식임을 명시
-    response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)  # JSON 형식으로 전송
-    return response.text
+    url = "http://llm.hunian.site/problem_ocr"
+    payload = {'image_url': image_url}
+    headers = {'Content-Type': 'application/json'}
+    response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)
+    result = response.json()
+    return result
