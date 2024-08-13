@@ -36,7 +36,7 @@ function SignIn() {
       const response = await fetch(`${baseUrl}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
+        body: JSON.stringify({ email, password, name }),
       });
 
       const result = await response.json();

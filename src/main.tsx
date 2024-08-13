@@ -11,7 +11,8 @@ import CameraMobilePage from './cameraMobile.tsx';
 import StudyMain from './StudyMain';
 import ErrorBoundary from './ErrorBoundary';
 
-import './index.css';
+import './css/index.css';
+import './css/output.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
