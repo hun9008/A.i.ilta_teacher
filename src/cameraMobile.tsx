@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import LaptopImage from './assets/Laptop.jpg';
 import { useNavigate } from 'react-router-dom';
 
 function CameraMobilePage() {
@@ -15,7 +16,6 @@ function CameraMobilePage() {
         facingMode: 'environment',
       },
     };
-
     navigator.mediaDevices
       .getUserMedia(constraints)
       .then((stream) => {
@@ -35,19 +35,11 @@ function CameraMobilePage() {
   }, []);
 
   const initWebSocket = () => {
-    const u_id = localStorage.getItem('u_id'); // u_id를 WebSocket 초기화 시에 가져오기
-
-    if (!u_id) {
-      setErrorMessage('User ID not found. Please login first.');
-      return;
-    }
-
     const socket = new WebSocket(import.meta.env.VITE_SOCKET_URL);
 
     socket.onopen = () => {
       console.log('WebSocket connection opened');
       setErrorMessage('');
-      setWs(socket);
     };
 
     socket.onmessage = (message) => {
@@ -67,13 +59,6 @@ function CameraMobilePage() {
     };
 
     setWs(socket);
-
-    // u_id가 설정된 상태에서만 captureFrame 호출
-    const captureInterval = setInterval(() => {
-      captureFrame(u_id);
-    }, 1000);
-
-    return () => clearInterval(captureInterval); // 컴포넌트가 언마운트될 때 인터벌 정리
   };
 
   const stopStreaming = () => {
@@ -97,8 +82,8 @@ function CameraMobilePage() {
     initWebSocket();
   };
 
-  const captureFrame = async (u_id: string) => {
-    if (videoRef.current && ws && ws.readyState === WebSocket.OPEN && u_id) {
+  const captureFrame = async () => {
+    if (videoRef.current && ws && ws.readyState === WebSocket.OPEN) {
       const canvas = document.createElement('canvas');
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
@@ -106,25 +91,33 @@ function CameraMobilePage() {
       if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
         const frame = canvas.toDataURL('image/jpeg').split(',')[1];
-        ws.send(
-          JSON.stringify({
-            type: 'rtc',
-            payload: frame,
-            device: 'phone',
-            u_id: u_id,
-          })
-        );
+
+        // 로컬 스토리지에서 u_id 값 가져오기
+        const u_id = localStorage.getItem('u_id');
+        if (!u_id) {
+          setErrorMessage('u_id is not found in local storage.');
+          return;
+        }
+
+        // WebSocket을 통해 서버에 프레임 데이터를 전송
+        const message = {
+          type: 'rtc', // 'ocr' 또는 다른 타입이 올 수 있음
+          payload: frame, // 이미지 데이터
+          device: 'mobile', // 장치 유형, 예: 'mobile'
+          u_id: u_id, // 사용자 ID
+        };
+        ws.send(JSON.stringify(message));
       }
     } else {
-      setErrorMessage(
-        'WebSocket connection is not open or User ID is missing.'
-      );
+      setErrorMessage('WebSocket connection is not open.');
     }
   };
 
   return (
     <div>
       <div>
+        <img src={LaptopImage} style={{ width: '100px', height: '100px' }} />
+
         <video
           ref={videoRef}
           autoPlay
@@ -142,20 +135,25 @@ function CameraMobilePage() {
           <button id="resetButton" className="button" onClick={resetStreaming}>
             Reset
           </button>
-          {/* Send 버튼은 개별 프레임 전송이 필요할 경우 사용할 수 있음 */}
-          {/* <button id="sendButton" className="button" onClick={() => captureFrame(u_id)}> */}
-          {/*   Send */}
-          {/* </button> */}
+          <button id="sendButton" className="button" onClick={captureFrame}>
+            Send
+          </button>
         </div>
         <div id="ocr-result">
           <h2>OCR Result:</h2>
           <p>{ocrText}</p>
         </div>
-        <div>{errorMessage}</div>
+        <div>
+          <video
+            ref={videoRef}
+            autoPlay
+            style={{ width: '300px', height: '300px' }}
+          ></video>
+          {errorMessage}
+        </div>
       </div>
-      <button onClick={() => navigate('/studygoals')}>학습하기</button>
+      <button onClick={() => navigate('/StudyGoals')}>학습하기</button>
     </div>
   );
 }
-
 export default CameraMobilePage;
