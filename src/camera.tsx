@@ -157,6 +157,7 @@
 
 // export default CameraPage;
 
+/// <reference types="node" />
 import { useEffect, useState, useRef } from 'react';
 import LaptopImage from './assets/Laptop.jpg';
 import { useNavigate } from 'react-router-dom';
