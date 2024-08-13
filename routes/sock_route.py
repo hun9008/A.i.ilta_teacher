@@ -2,7 +2,8 @@ import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import requests
 import asyncio
-from utils.sock_utils import decode_image, detect_hand
+#from utils.sock_utils import decode_image, detect_hand 
+from utils.problem import concepts, solutions, ocrs
 
 route = APIRouter()
 
@@ -16,8 +17,6 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            
-            # decoding(JSON format to Python object)
             message = json.loads(data)
             image = message['payload']
             device = message['device']
@@ -45,19 +44,21 @@ async def handle_ws_ocr(frame_data, websocket):
         await websocket.send_json(response)
         return
     
-    frame = decode_image(frame_data)
+    image_url = message['image_url']
     
-    # 손이 detect 되는 경우
-    if frame is not None and detect_hand(frame):
-        performing_ocr = True
-        output = await perform_ocr(frame_data)
-        performing_ocr = False
-        response = {'type': 'ocr-result', 'text': output}
-        await websocket.send_json(response)
-        
-    else:
-        response = {'type': 'ocr-result', 'text': 'No hand detected or failed to decode image'}
-        await websocket.send_json(response)
+    # 이미지 URL로부터 OCR 수행
+    performing_ocr = True
+    ocr_result = await perform_ocr(image_url)
+    performing_ocr = False
+    
+    # concepts, solutions, ocrs 모두 저장
+    concepts.extend(ocr_result.get("concepts", []))
+    solutions.extend(ocr_result.get("solutions", []))
+    ocrs.extend(ocr_result.get("ocrs", []))
+    
+    # 프론트에는 ocr 결과만 전송 
+    response = {'type': 'ocr-result', 'ocrs': ocr_result.get('ocrs')}
+    await websocket.send_json(response)
 
 async def handle_ws_rtc(frame_data, websocket, u_id):
     print("Handling RTC")
