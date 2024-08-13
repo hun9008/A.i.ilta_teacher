@@ -92,6 +92,10 @@ function CameraMobilePage() {
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
       const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        console.log('Failed to get 2D context'); // 2D 컨텍스트가 유효하지 않은 경우
+        return;
+      }
       if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
         const frame = canvas.toDataURL('image/jpeg').split(',')[1];
@@ -99,6 +103,8 @@ function CameraMobilePage() {
         // 로컬 스토리지에서 u_id 값 가져오기
         const u_id = localStorage.getItem('u_id');
         if (!u_id) {
+          console.log('u_id is not found in local storage.'); // 이 로그가 출력되는지 확인
+
           setErrorMessage('u_id is not found in local storage.');
           return;
         }
