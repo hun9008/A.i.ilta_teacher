@@ -1,63 +1,43 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-function LaptopPage() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
+const VideoDisplay: React.FC = () => {
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const websocketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    // WebSocket 연결 설정
-    wsRef.current = new WebSocket('wss://backend.maitutor.site/ws');
+    const ws = new WebSocket(import.meta.env.VITE_SOCKET_URL); // 서버 주소로 수정
 
-    wsRef.current.onopen = () => {
-      console.log('WebSocket connection opened on laptop');
+    ws.onopen = () => {
+      console.log('WebSocket connection established');
+      websocketRef.current = ws;
     };
 
-    wsRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data.type === 'video-frame') {
-        const img = new Image();
-        img.src = data.payload;
-
-        img.onload = () => {
-          if (canvasRef.current) {
-            const context = canvasRef.current.getContext('2d');
-            if (context) {
-              context.drawImage(
-                img,
-                0,
-                0,
-                canvasRef.current.width,
-                canvasRef.current.height
-              );
-            }
-          }
-        };
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === 'rtc-frame') {
+        setImageSrc(message.payload);
       }
     };
 
-    wsRef.current.onerror = (error) => {
-      console.error('WebSocket error on laptop:', error);
-    };
-
-    wsRef.current.onclose = () => {
-      console.log('WebSocket connection closed on laptop');
+    ws.onclose = () => {
+      console.log('WebSocket connection closed');
+      websocketRef.current = null;
     };
 
     return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
+      if (websocketRef.current) {
+        websocketRef.current.close();
       }
     };
   }, []);
 
   return (
     <div>
-      <h1>Mobile Camera Stream</h1>
-      <canvas ref={canvasRef} style={{ width: '500px', height: '500px' }} />
+      {imageSrc && (
+        <img src={imageSrc} alt="Video Frame" style={{ width: '100%' }} />
+      )}
     </div>
   );
-}
+};
 
-export default LaptopPage;
+export default VideoDisplay;
