@@ -134,7 +134,11 @@ function CameraMobilePage() {
 
   useEffect(() => {
     const constraints = {
-      video: { facingMode: 'environment' },
+      video: {
+        facingMode: 'environment',
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
     };
 
     navigator.mediaDevices
@@ -143,7 +147,8 @@ function CameraMobilePage() {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
 
-          wsRef.current = new WebSocket(import.meta.env.VITE_SOCKET_URL);
+          // WebSocket 연결 설정
+          wsRef.current = new WebSocket('wss://backend.maitutor.site/ws');
 
           wsRef.current.onopen = () => {
             console.log('WebSocket connection opened');
@@ -161,7 +166,7 @@ function CameraMobilePage() {
             console.log('WebSocket connection closed');
           };
 
-          // 일정 주기로 비디오 프레임을 WebSocket을 통해 전송
+          // 일정 간격으로 비디오 프레임을 WebSocket을 통해 전송
           streamIntervalRef.current = window.setInterval(() => {
             sendFrame();
           }, 100); // 100ms마다 프레임 전송

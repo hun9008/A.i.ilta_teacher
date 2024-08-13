@@ -5,7 +5,8 @@ function LaptopPage() {
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    wsRef.current = new WebSocket(import.meta.env.VITE_SOCKET_URL);
+    // WebSocket 연결 설정
+    wsRef.current = new WebSocket('wss://backend.maitutor.site/ws');
 
     wsRef.current.onopen = () => {
       console.log('WebSocket connection opened on laptop');
