@@ -44,5 +44,3 @@ class UserInDB(User):
 class LoginRequest(BaseModel):
     email: str
     password: str
-
-# classes for class User
