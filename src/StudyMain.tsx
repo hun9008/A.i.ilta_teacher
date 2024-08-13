@@ -52,7 +52,7 @@ function StudyMain() {
   useEffect(() => {
     let intervalId: number;
     if (isRunning1) {
-      intervalId = setInterval(() => {
+      intervalId = window.setInterval(() => {
         setTimer1((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
       }, 60000); // 분 단위로 감소
     }
@@ -63,7 +63,7 @@ function StudyMain() {
   useEffect(() => {
     let intervalId: number;
     if (isRunning2) {
-      intervalId = setInterval(() => {
+      intervalId = window.setInterval(() => {
         setTimer2((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
       }, 60000); // 분 단위로 감소
     }

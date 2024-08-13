@@ -52,15 +52,14 @@ function QrPage() {
           className="mb-10 p-4 bg-white rounded-xl animate-border-glow"
         />
       )}
-      {/*
+
       <button
         onClick={() => {
-          navigate('/camera');
+          navigate('/MobileScreen');
         }}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
       >
-        Camera
-      </button>*/}
+        MobileCamera
+      </button>
     </div>
   );
 }
