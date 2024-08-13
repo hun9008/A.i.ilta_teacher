@@ -2,8 +2,33 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional
 from datetime import datetime
 
+class SignUpRequest(BaseModel):
+    name: str
+    nickname: str
+    email: str
+    password: str
+class InitState(BaseModel):
+    start_date: datetime
+    problems: Dict[str, int]
+    study_time: int
+    break_time: int
+class EndState(BaseModel):
+    end_date: datetime
+    focusing_level: float
+    solved_problem: Dict[str, int]
+    r_study_time: int
+    r_break_time: int
+
+class StudySession(BaseModel):
+    s_id: str
+    init_state: InitState
+    end_state: EndState
+
+class UnsolvedProblem(BaseModel):
+    s_id: str
+    category: str
+    level: str
 class User(BaseModel):
-    _id: str
     name: str
     nickname: str
     email: str
@@ -21,22 +46,3 @@ class LoginRequest(BaseModel):
     password: str
 
 # classes for class User
-class StudySession(BaseModel):
-    s_id: str
-    init_state: InitState
-    end_state: EndState
-class InitState(BaseModel):
-    start_date: datetime
-    problems: Dict[str, int]
-    study_time: int
-    break_time: int
-class EndState(BaseModel):
-    end_date: datetime
-    focusing_level: float
-    solved_problem: Dict[str, int]
-    r_study_time: int
-    r_break_time: int
-class UnsolvedProblem(BaseModel):
-    s_id: str
-    category: str
-    level: str

@@ -3,13 +3,13 @@ from pydantic import EmailStr
 
 # database에서 table 가져오기 
 from config.database import users_collection
-from models.user import User, UserInDB, LoginRequest
+from models.user import SignUpRequest, UserInDB, LoginRequest
 from utils.login_utils import get_password_hash, verify_password
 
 route = APIRouter()
 
 @route.post("/register") 
-async def register(user: User):
+async def register(user: SignUpRequest):
     user_in_db = await users_collection.find_one({"email": user.email})
     # DB에 user가 있는데 register 시도하는 경우 
     if user_in_db:
@@ -29,7 +29,7 @@ async def login(login: LoginRequest):
     if not verify_password(login.password, user_in_db["hashed_password"]):
         raise HTTPException(status_code=400, detail="Invalid password")
     
-    return {"message" : "Login successful"}
+    return {"message" : "Login successful", "u_id": str(user_in_db["_id"])}
 
 @route.get("/user_all")
 async def get_all_users():

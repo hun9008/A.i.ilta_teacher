@@ -33,7 +33,7 @@ async function init() {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true });
         localVideo.srcObject = localStream;
 
-        ws = new WebSocket('ws://localhost:8000/ws');
+        ws = new WebSocket('ws://pepper.hunian.site/ws');
         ws.onopen = () => {
             console.log('WebSocket connection opened');
             errorMessageElement.textContent = '';
