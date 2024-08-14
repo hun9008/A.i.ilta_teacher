@@ -267,7 +267,7 @@ function CameraMobilePage() {
       if (event.code !== 1000) {
         // 1000: Normal Closure
         console.log('Attempting to reconnect WebSocket...');
-        setTimeout(initWebSocket, 3000); // 3초 후 재연결 시도
+        setTimeout(initWebSocket, 1000); // 3초 후 재연결 시도
       }
       setWs(null); // WebSocket 객체를 null로 설정
     };
@@ -308,7 +308,7 @@ function CameraMobilePage() {
       }
     };
 
-    intervalRef.current = window.setInterval(sendFrame, 1000);
+    intervalRef.current = window.setInterval(sendFrame, 1000 / 3);
     console.log('send img');
   };
 

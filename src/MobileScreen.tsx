@@ -5,6 +5,7 @@ const VideoDisplay: React.FC = () => {
   const [imageSrc, setImageSrc] = useState<string>('');
 
   const initWebSocket = () => {
+    console.log('Initializing WebSocket...');
     try {
       const socket = new WebSocket(import.meta.env.VITE_SOCKET_URL);
 
@@ -49,14 +50,17 @@ const VideoDisplay: React.FC = () => {
   };
 
   useEffect(() => {
+    // WebSocket 연결을 설정
     initWebSocket();
 
     return () => {
+      // 컴포넌트가 unmount될 때 WebSocket 연결을 닫음
       if (ws && ws.readyState === WebSocket.OPEN) {
+        console.log('Closing WebSocket connection');
         ws.close();
       }
     };
-  }, []);
+  }, []); // 빈 배열을 넣어 이 효과가 컴포넌트 마운트 시 한 번만 실행되도록 함
 
   return (
     <div>
