@@ -35,7 +35,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_json
                 
     except WebSocketDisconnect:
-        connections.remove(websocket)
+        # connections.remove(websocket)
+        connections.pop(connection_key, None)
 
 async def handle_ws_ocr(frame_data, websocket): 
     global performing_ocr
@@ -65,7 +66,7 @@ async def handle_ws_rtc(frame_data, websocket, u_id):
     print("Handling RTC")
     pc_key = f'{u_id}_pc'
 
-    if pc_key not in connections:
+    if pc_key in connections:
         pc_websocket = connections[pc_key]
         response = {'type': 'rtc-frame', 'payload': frame_data}
         await pc_websocket.send_json(response)
