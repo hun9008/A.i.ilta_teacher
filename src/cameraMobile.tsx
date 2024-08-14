@@ -290,7 +290,7 @@ function CameraMobilePage() {
     };
 
     // 1초에 15번 (약 15 FPS) 프레임 전송
-    intervalRef.current = window.setInterval(sendFrame, 1000 / 15);
+    intervalRef.current = window.setInterval(sendFrame, 1000);
   };
 
   const stopStreaming = () => {
