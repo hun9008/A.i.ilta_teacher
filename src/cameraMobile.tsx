@@ -65,8 +65,11 @@ function CameraMobilePage() {
       setErrorMessage('WebSocket error occurred. Check console for details.');
     };
 
-    socket.onclose = () => {
-      console.log('WebSocket connection closed');
+    socket.onclose = (event) => {
+      console.log('WebSocket connection closed:', event.code, event.reason);
+      setErrorMessage(
+        `WebSocket closed: ${event.reason || 'No reason provided'}`
+      );
     };
 
     setWs(socket);
