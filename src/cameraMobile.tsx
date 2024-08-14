@@ -308,7 +308,7 @@ function CameraMobilePage() {
       }
     };
 
-    intervalRef.current = window.setInterval(sendFrame, 1000 / 10000);
+    intervalRef.current = window.setInterval(sendFrame, 1000 / 30);
     console.log('send img');
   };
 

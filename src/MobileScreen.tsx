@@ -193,6 +193,7 @@ function VideoDisplay() {
   const intervalRef = useRef<number | null>(null);
   const [imageSrc, setImageSrc] = useState<string>('');
   const localStreamRef = useRef<MediaStream | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!u_id) {
@@ -225,12 +226,12 @@ function VideoDisplay() {
       const data = JSON.parse(message.data);
 
       // 모바일에서 보낸 이미지를 수신하여 화면에 표시
-      if (data.type === 'rtc-frame' && data.payload) {
-        const imgData = `data:image/jpeg;base64,${data.payload}`;
-        setImageSrc(imgData); // 이미지 상태 업데이트
-      } else {
-        console.log('Received message but not rtc-frame:', data);
-      }
+      // if (data.type === 'rtc-frame' && data.payload) {
+      const imgData = `data:image/jpeg;base64,${data.payload}`;
+      setImageSrc(imgData); // 이미지 상태 업데이트
+      // } else {
+      //   console.log('Received message but not rtc-frame:', data);
+      // }
     };
 
     socket.onerror = (error) => {
@@ -262,7 +263,7 @@ function VideoDisplay() {
       return;
     }
 
-    const sendFrame = () => {
+    const sendFrame = (socket: WebSocket) => {
       console.log('open send frame start');
       // if (videoRef.current && socket.readyState === WebSocket.OPEN) {
       console.log('open canvas');
@@ -289,7 +290,8 @@ function VideoDisplay() {
       // }
     };
 
-    intervalRef.current = window.setInterval(sendFrame, 1000 / 10000); // 초당 1프레임 전송
+    // intervalRef.current = window.setInterval(sendFrame, 1000 / 10000); // 초당 1프레임 전송
+    animationFrameRef.current = requestAnimationFrame(() => sendFrame(socket));
     console.log('send img');
   };
 
