@@ -202,6 +202,7 @@ function CameraMobilePage() {
 
   useEffect(() => {
     if (!u_id) {
+      console.log('no u_id');
       setErrorMessage('u_id is missing from URL.');
       return;
     }
@@ -260,12 +261,14 @@ function CameraMobilePage() {
 
   const startStreaming = () => {
     if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.log('WebSocket connection is not opened');
       setErrorMessage('WebSocket connection is not open.');
       return;
     }
 
     const sendFrame = () => {
       if (videoRef.current && ws && ws.readyState === WebSocket.OPEN) {
+        console.log('open canvas');
         const canvas = document.createElement('canvas');
         canvas.width = videoRef.current.videoWidth;
         canvas.height = videoRef.current.videoHeight;
@@ -291,6 +294,7 @@ function CameraMobilePage() {
 
     // 1초에 15번 (약 15 FPS) 프레임 전송
     intervalRef.current = window.setInterval(sendFrame, 1000);
+    console.log('send img');
   };
 
   const stopStreaming = () => {
