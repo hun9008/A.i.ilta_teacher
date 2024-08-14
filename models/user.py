@@ -7,6 +7,7 @@ class SignUpRequest(BaseModel):
     nickname: str
     email: str
     password: str
+    parent_email: str
 class InitState(BaseModel):
     start_date: datetime
     problems: Dict[str, int]
