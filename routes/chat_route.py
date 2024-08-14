@@ -5,7 +5,8 @@ from fastapi.responses import JSONResponse # API response를 JSON 형식으로 �
 from openai import OpenAI
 from dotenv import load_dotenv
 from models.chat import ChatRequest
-import request #?
+from utils.problem import concepts, solutions, ocrs
+from utils.chat_utils import prompt_delay, prompt_wrong
 
 route = APIRouter()
 
@@ -17,6 +18,10 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # websocket 연결 관리 
 connections = []
+
+# (assume) define user_status
+user_status = "solve_delay"
+user_context = {}  # 사용자의 상태와 관련된 데이터를 저장
 
 @route.websocket("/ws/chat")
 # front에서 status를 open으로 주면 websocket 열어줌
@@ -35,40 +40,68 @@ async def websocket_endpoint(websocket: WebSocket):
             if chat_request.status == "open":
                 connections.append(websocket)
                 await websocket.send_text("WebSocket connection opened.")
-            else:
-                await websocket.send_text("WebSocket connection not opened due to status.")
+                
+            # 메시지 처리
+            response = await process_message(chat_request)
+            
+            # 사용자에게 응답 전송
+            await websocket.send_text(response)
                 
     except WebSocketDisconnect:
         if websocket in connections:
             connections.remove(websocket)
-        await websocket.close()
+        # await websocket.close()
         
 # 메시지 처리 로직
 async def process_message(chat: ChatRequest):
     
-    user_status = chat.status
-    user_text = chat.text # user가 물어보는 내용
+    user_text = chat.text
+    # 사용자의 고유 ID
+    user_id = abc321 #user_id = chat.user_id 
+    # (assume) 지금 어떤 문제 풀고 있는지 알아내기
+    problem_index = 1
+    
+    # 해당 인덱스에 해당하는 문제(ocr 결과), concept, solution 가져오기
+    ocr = ocrs[problem_index]
+    prev_chat = user_context[user_id].get("prev_chat", "")
     
     if user_status == "solve_delay":
-        ## concept = ""
-        prompt = user_text
-        response = await call_openai_api(prompt) # OpenAI API 호출
+        # init: 질문 전송
+        if not user_context[user_id].get("solve_delay"):
+            user_context[user_id] = {"solve_delay": True, "prev_chat": ""}
+            return "어디가 이해가 안돼?"
+        
+        # 사용자의 응답을 받은 경우, OpenAI API로 전송
+        concept = concepts[problem_index]
+        prompt = prompt_delay(ocr, concept, user_text, prev_chat)
+        response = await call_openai_api(prompt)
+        
+        user_context[user_id]["solve_delay"] = False
+        user_context[user_id]["prev_chat"] = prompt+"\n"+response
             
     elif user_status == "solve":
         response = "Your solution has been saved."
-        ## DB에 저장
 
     elif user_status == "wrong":
-        ## solution = ""
-        prompt = user_text
-        response = await call_openai_api(prompt) # OpenAI API 호출
+        # init: 질문 전송
+        if not user_context[user_id].get("wrong"):
+            user_context[user_id] = {"wrong": True, "prev_chat": ""}
+            return "방금 풀이에서 틀린 부분 없는지 체크해볼래?"
+        
+        # 사용자의 응답을 받은 경우, OpenAI API로 전송
+        solution = solutions[problem_index]
+        prompt = prompt_wrong(ocr, solution, user_text, prev_chat)
+        response = await call_openai_api(prompt)
+        
+        user_context[user_id]["wrong"] = False
+        user_context[user_id]["prev_chat"] = prompt+"\n"+response
 
     elif user_status == "doing":
         response = "The user is continuing their work."
         
     else:
         response = "Invalid state."
-
+    
     return response
 
 # OpenAI API 호출 함수
@@ -80,7 +113,7 @@ async def call_openai_api(prompt):
             messages=[
                 {"role": "system", "content": prompt}
             ],
-            max_tokens=300,
+            max_tokens=2000,
         )
         
         # JSON 형식으로 return 
