@@ -191,7 +191,7 @@ function useQuery() {
 
 function CameraMobilePage() {
   const query = useQuery();
-  const u_id = query.get('u_id'); // URL 쿼리 매개변수에서 u_id 가져오기
+  const u_id = query.get('u_id');
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [ocrText, setOcrText] = useState<string>('');
@@ -237,6 +237,9 @@ function CameraMobilePage() {
       console.log('WebSocket connection opened');
       setErrorMessage('');
       setWs(socket); // WebSocket 객체 상태 업데이트
+
+      // WebSocket이 열렸을 때만 스트리밍 시작
+      startStreaming(socket);
     };
 
     socket.onmessage = (message) => {
@@ -259,9 +262,9 @@ function CameraMobilePage() {
     };
   };
 
-  const startStreaming = () => {
+  const startStreaming = (socket: WebSocket) => {
     console.log('open click start');
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.log('WebSocket connection is not opened');
       setErrorMessage('WebSocket connection is not open.');
       return;
@@ -269,7 +272,7 @@ function CameraMobilePage() {
 
     const sendFrame = () => {
       console.log('open send frame start');
-      if (videoRef.current && ws && ws.readyState === WebSocket.OPEN) {
+      if (videoRef.current && socket.readyState === WebSocket.OPEN) {
         console.log('open canvas');
         const canvas = document.createElement('canvas');
         canvas.width = videoRef.current.videoWidth;
@@ -284,17 +287,16 @@ function CameraMobilePage() {
 
         const message = {
           type: 'rtc',
-          payload: frame, // 이미지 데이터
+          payload: frame,
           device: 'mobile',
-          u_id: u_id, // URL에서 가져온 u_id 사용
+          u_id: u_id,
         };
 
-        console.log('Sending message:', message); // 추가 로그
-        ws.send(JSON.stringify(message));
+        console.log('Sending message:', message);
+        socket.send(JSON.stringify(message));
       }
     };
 
-    // 1초에 15번 (약 15 FPS) 프레임 전송
     intervalRef.current = window.setInterval(sendFrame, 1000);
     console.log('send img');
   };
@@ -306,7 +308,7 @@ function CameraMobilePage() {
     }
     if (ws) {
       ws.close();
-      setWs(null); // WebSocket 객체를 null로 설정
+      setWs(null);
     }
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => track.stop());
@@ -337,14 +339,7 @@ function CameraMobilePage() {
         ></video>
 
         <div className="button-container">
-          <button
-            id="startButton"
-            className="button"
-            onClick={() => {
-              initWebSocket();
-              startStreaming();
-            }}
-          >
+          <button id="startButton" className="button" onClick={initWebSocket}>
             Start
           </button>
           <button id="stopButton" className="button" onClick={stopStreaming}>
@@ -367,7 +362,7 @@ function CameraMobilePage() {
           {errorMessage}
         </div>
       </div>
-      <button onClick={() => navigate('/StudyGoals')}>학습하기</button>
+      <button onClick={() => navigate('/StudyGoals')}>학습</button>
     </div>
   );
 }
