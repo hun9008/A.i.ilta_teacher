@@ -27,7 +27,7 @@ function SignIn() {
       console.log(data);
       localStorage.setItem('u_id', data.u_id);
 
-      navigate('/setting');
+      navigate('/main');
     } catch (error: any) {
       console.error('로그인 에러:', error);
       alert(error.message || '로그인 중 문제가 발생했습니다.');
