@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
+import { User, Settings, MessageCircle } from 'lucide-react';
 
 import logo from './assets/logo.svg';
-import userIcon from './assets/user_icons.png';
-import settingsIcon from './assets/setting_icons.png';
-import chatIcon from './assets/chat_icons.png';
 
 function StudyMain() {
   const [messages, setMessages] = useState<
@@ -172,148 +170,69 @@ function StudyMain() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          width: '80px',
-          backgroundColor: '#f0f0f0',
-        }}
-      >
+    <div className="flex h-screen">
+      <div className="flex flex-col items-center w-20 bg-gray-100">
         <img
           src={logo}
           alt="Logo"
-          style={{ width: '40px', height: '40px', marginBottom: '10px' }}
+          className="w-10 h-10 mb-2.5"
         />
-        <img
-          src={userIcon}
-          alt="User Icon"
-          style={{
-            width: '40px',
-            height: '40px',
-            marginBottom: '15px',
-            cursor: 'pointer',
-          }}
-        />
-        <img
-          src={settingsIcon}
-          alt="Settings Icon"
-          style={{
-            width: '30px',
-            height: '30px',
-            marginBottom: '15px',
-            cursor: 'pointer',
-          }}
-        />
-        <img
-          src={chatIcon}
-          alt="Chat Icon"
-          style={{ width: '30px', height: '30px', cursor: 'pointer' }}
+        <User className="mb-6" />
+        <Settings className="mb-6" />
+        <MessageCircle
           onClick={toggleChatVisibility}
+          className="cursor-pointer"
         />
       </div>
-      <div style={{ display: 'flex', marginBottom: '10px' }}>
-        <div style={{ marginRight: '20px' }}>
+      <div className="flex mb-2.5">
+        <div className="mr-5">
           <h3>
-            {' '}
             오늘 공부 목표 시간
             <h4>{formatTime(timer1)}</h4>
           </h3>
           <button
             onClick={() => setIsRunning1(!isRunning1)}
-            style={{
-              marginRight: '10px',
-              padding: '5px 10px',
-              borderRadius: '5px',
-              backgroundColor: isRunning1 ? '#dc3545' : '#28a745',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+            className={`mr-2.5 px-2.5 py-1 rounded ${isRunning1 ? 'bg-red-600' : 'bg-green-600'} text-white border-none cursor-pointer`}
           >
             {isRunning1 ? 'Stop' : 'Start'}
           </button>
         </div>
         <div>
           <h3>
-            {' '}
             공부 중 쉬는 시간
             <h4>{formatTime(timer2)}</h4>
-          </h3>{' '}
+          </h3>
           <button
             onClick={() => setIsRunning2(!isRunning2)}
-            style={{
-              marginRight: '10px',
-              padding: '5px 10px',
-              borderRadius: '5px',
-              backgroundColor: isRunning2 ? '#dc3545' : '#28a745',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+            className={`mr-2.5 px-2.5 py-1 rounded ${isRunning2 ? 'bg-red-600' : 'bg-green-600'} text-white border-none cursor-pointer`}
           >
             {isRunning2 ? 'Stop' : 'Start'}
           </button>
         </div>
       </div>
       {isChatVisible && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            width: '300px',
-            backgroundColor: '#f9f9f9',
-            padding: '10px',
-            borderLeft: '1px solid #ddd',
-            marginLeft: 'auto',
-          }}
-        >
-          <div style={{ overflowY: 'auto', flexGrow: 1, marginBottom: '10px' }}>
+        <div className="flex flex-col justify-between w-72 bg-gray-50 p-2.5 border-l border-gray-300 ml-auto">
+          <div className="overflow-y-auto flex-grow mb-2.5">
             {messages.map((message, index) => (
               <div
                 key={index}
-                style={{
-                  margin: '5px 0',
-                  padding: '5px 10px',
-                  backgroundColor:
-                    message.sender === 'user' ? '#007bff' : '#fff', // 사용자 메시지는 파란 배경
-                  color: message.sender === 'user' ? '#fff' : '#000', // 사용자 메시지는 흰 글씨
-                  borderRadius: '5px',
-                  alignSelf:
-                    message.sender === 'user' ? 'flex-end' : 'flex-start', // 정렬 방향 다르게
-                }}
+                className={`my-1.5 p-2.5 rounded ${message.sender === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-white text-black self-start'}`}
               >
                 {message.text}
               </div>
             ))}
           </div>
-          <div style={{ display: 'flex' }}>
+          <div className="flex">
             <input
               type="text"
-              value={inputMessage} // 상태가 입력 필드에 제대로 바인딩되었는지 확인
-              onChange={(e) => setInputMessage(e.target.value)} // 입력 필드를 업데이트하는 함수 확인
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-              style={{
-                flexGrow: 1,
-                padding: '5px',
-                borderRadius: '5px',
-                border: '1px solid #ddd',
-              }}
+              className="flex-grow p-1 rounded border border-gray-300"
             />
             <button
               onClick={sendMessage}
-              style={{
-                marginLeft: '10px',
-                padding: '5px 10px',
-                borderRadius: '5px',
-                backgroundColor: '#007bff',
-                color: '#fff',
-                border: 'none',
-                cursor: 'pointer',
-              }}
+              className="ml-2.5 px-2.5 py-1 rounded bg-blue-500 text-white border-none cursor-pointer"
             >
               Send
             </button>

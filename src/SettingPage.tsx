@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronRight, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import QrPage from './QrPage';
 
 interface Step {
@@ -18,6 +19,8 @@ const steps: Step[] = [
 function SettingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
+
+  const navigate = useNavigate()
 
   const updateCompletedSteps = (stepIndex: number) => {
     const newCompleted: Record<string, boolean> = {};
@@ -93,18 +96,18 @@ function SettingPage() {
         <h2 className="text-xl font-semibold mb-4">{steps[currentStep].title}</h2>
         {renderStepContent(steps[currentStep])}
       </div>
+      
       <div className="flex justify-between">
         <button
           onClick={prevStep}
           disabled={currentStep === 0}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50"
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-2xl hover:bg-gray-300 disabled:opacity-50"
         >
           이전
         </button>
         <button
-          onClick={nextStep}
-          disabled={currentStep === steps.length - 1}
-          className="px-4 py-2 bg-primary-400 text-white rounded hover:bg-primary-500 disabled:opacity-50"
+          onClick={currentStep === steps.length -1 ? ()=> navigate('/StudyMain') : nextStep}
+          className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
         >
           {currentStep === steps.length - 1 ? '완료' : '다음'}
         </button>

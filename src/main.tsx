@@ -12,6 +12,8 @@ import StudyMain from './StudyMain';
 import ErrorBoundary from './ErrorBoundary';
 import SettingPage from './SettingPage.tsx';
 import MobileScreen from './MobileScreen.tsx';
+import Study from './StudyMain copy.tsx';
+import Game from './Game.tsx';
 
 import './css/index.css';
 import './css/tailwind.css';
@@ -30,6 +32,8 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/camera-mobile" element={<CameraMobilePage />} />
         <Route path="/setting" element={<SettingPage />} />
         <Route path="/mobilescreen" element={<MobileScreen />} />
+        <Route path="/study" element={<Study />} />
+        <Route path="/game" element={<Game/>} />
 
         <Route
           path="/StudyMain"
