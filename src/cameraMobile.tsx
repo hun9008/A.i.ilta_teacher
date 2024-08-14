@@ -260,6 +260,7 @@ function CameraMobilePage() {
   };
 
   const startStreaming = () => {
+    console.log('open click start');
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       console.log('WebSocket connection is not opened');
       setErrorMessage('WebSocket connection is not open.');
@@ -345,7 +346,7 @@ function CameraMobilePage() {
               startStreaming();
             }}
           >
-            Start Streaming
+            Start
           </button>
           <button id="stopButton" className="button" onClick={stopStreaming}>
             Stop
