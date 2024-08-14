@@ -7,7 +7,7 @@ from utils.problem import concepts, solutions, ocrs
 
 route = APIRouter()
 
-connections = []
+connections = {}
 performing_ocr = False
 
 @route.websocket("/ws")
