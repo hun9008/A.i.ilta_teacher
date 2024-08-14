@@ -67,10 +67,12 @@ async def handle_ws_rtc(frame_data, websocket, u_id):
     pc_key = f'{u_id}_pc'
 
     if pc_key in connections:
+        print("pc_key found in connections(socket)")
         pc_websocket = connections[pc_key]
         response = {'type': 'rtc-frame', 'payload': frame_data}
         await pc_websocket.send_json(response)
     else:
+        print("pc_key not found in connections(socket)")
         response = {'type': 'error', 'message': 'Peer connection not found'}
         await websocket.send_json(response)
 
