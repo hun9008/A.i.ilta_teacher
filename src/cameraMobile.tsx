@@ -236,6 +236,7 @@ function CameraMobilePage() {
     socket.onopen = () => {
       console.log('WebSocket connection opened');
       setErrorMessage('');
+      setWs(socket); // WebSocket 객체 상태 업데이트
     };
 
     socket.onmessage = (message) => {
@@ -254,9 +255,8 @@ function CameraMobilePage() {
 
     socket.onclose = () => {
       console.log('WebSocket connection closed');
+      setWs(null); // WebSocket 객체를 null로 설정
     };
-
-    setWs(socket);
   };
 
   const startStreaming = () => {
@@ -269,7 +269,6 @@ function CameraMobilePage() {
 
     const sendFrame = () => {
       console.log('open send frame start');
-      console.log(videoRef);
       if (videoRef.current && ws && ws.readyState === WebSocket.OPEN) {
         console.log('open canvas');
         const canvas = document.createElement('canvas');
@@ -307,7 +306,7 @@ function CameraMobilePage() {
     }
     if (ws) {
       ws.close();
-      setWs(null);
+      setWs(null); // WebSocket 객체를 null로 설정
     }
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => track.stop());
