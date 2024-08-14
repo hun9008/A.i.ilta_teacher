@@ -55,8 +55,11 @@ function CameraMobilePage() {
 
     socket.onmessage = (message) => {
       const data = JSON.parse(message.data);
-      if (data.type === 'ocr-result' && data.text.trim() !== '') {
-        setOcrText(data.text);
+      if (data.type === 'ocr-result' && data.ocrs) {
+        setOcrText(data.ocrs);
+      } else if (data.type === 'rtc-frame' && data.payload) {
+        console.log('Received RTC frame:', data.payload);
+        // 여기에서 PC로 프레임 데이터를 처리할 수 있습니다.
       }
     };
 
@@ -65,11 +68,8 @@ function CameraMobilePage() {
       setErrorMessage('WebSocket error occurred. Check console for details.');
     };
 
-    socket.onclose = (event) => {
-      console.log('WebSocket connection closed:', event.code, event.reason);
-      setErrorMessage(
-        `WebSocket closed: ${event.reason || 'No reason provided'}`
-      );
+    socket.onclose = () => {
+      console.log('WebSocket connection closed');
     };
 
     setWs(socket);
