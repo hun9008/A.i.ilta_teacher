@@ -42,7 +42,8 @@ async def websocket_endpoint(websocket: WebSocket):
             if chat_request.status == "open":
                 connections.append(websocket)
                 await websocket.send_text("WebSocket connection opened.")
-                
+            else: #chat_request.status == "chat":
+                print("test) WebSocket connection not opened or already open")
             # 메시지 처리
             response = await process_message(chat_request)
             
@@ -57,9 +58,9 @@ async def websocket_endpoint(websocket: WebSocket):
 # 메시지 처리 로직
 async def process_message(chat: ChatRequest):
     
-    user_text = chat.text
+    print("test) Now start process_message function")
     
-    # 사용자의 고유 ID
+    user_text = chat.text
     user_id = chat.u_id
     
     # (assume) 지금 어떤 문제 풀고 있는지 알아내기
@@ -69,7 +70,13 @@ async def process_message(chat: ChatRequest):
     ocr = ocrs[problem_index]
     prev_chat = user_context[user_id].get("prev_chat", "")
     
+    print("test) OCR : "+ ocr)
+    print("test) PREV_CHAT : "+ prev_chat)
+    
     if user_status == "solve_delay":
+        
+        print("test) user_status is always solve_delay in test.")
+        
         # init: 질문 전송
         if not user_context[user_id].get("solve_delay"):
             user_context[user_id] = {"solve_delay": True, "prev_chat": ""}
@@ -78,7 +85,12 @@ async def process_message(chat: ChatRequest):
         # 사용자의 응답을 받은 경우, OpenAI API로 전송
         concept = concepts[problem_index]
         prompt = prompt_delay(ocr, concept, user_text, prev_chat)
+        
+        print("test) Sucessfully generate prompt. \nprompt : "+ prompt)
+        
         response = await call_openai_api(prompt)
+        
+        print("test) Sucessfully get response. \nresponse : "+ response)
         
         user_context[user_id]["solve_delay"] = False
         user_context[user_id]["prev_chat"] = prompt+"\n"+response
@@ -119,6 +131,8 @@ async def call_openai_api(prompt):
             ],
             max_tokens=2000,
         )
+        
+        print("test) Get response from call_open_api func. response : "+response)
         
         # JSON 형식으로 return 
         return JSONResponse(content=response.choices[0].message.content)
