@@ -289,7 +289,7 @@ function VideoDisplay() {
       // }
     };
 
-    intervalRef.current = window.setInterval(sendFrame, 5000); // 초당 1프레임 전송
+    intervalRef.current = window.setInterval(sendFrame, 1000 / 10000); // 초당 1프레임 전송
     console.log('send img');
   };
 
