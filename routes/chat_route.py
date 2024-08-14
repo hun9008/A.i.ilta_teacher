@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse # API response를 JSON 형식으로 �
 from openai import OpenAI
 from dotenv import load_dotenv
 from models.chat import ChatRequest
+from fastapi import WebSocket, WebSocketDisconnect
 # import request #?
 
 route = APIRouter()
