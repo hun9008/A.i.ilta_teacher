@@ -13,14 +13,13 @@ const VideoDisplay: React.FC = () => {
       };
 
       socket.onmessage = (message) => {
-        console.log('Message received:', message); // 추가 로그
+        console.log('Message received:', message);
         const data = JSON.parse(message.data);
         if (data.type === 'rtc-frame' && data.payload) {
-          // 서버에서 받은 이미지 데이터를 화면에 표시
           const imgData = `data:image/jpeg;base64,${data.payload}`;
-          setImageSrc(imgData);
+          setImageSrc(imgData); // 새로운 프레임을 수신하면 이미지 업데이트
         } else {
-          console.log('Received message but not rtc-frame:', data); // 추가 로그
+          console.log('Received message but not rtc-frame:', data);
         }
       };
 
@@ -28,8 +27,12 @@ const VideoDisplay: React.FC = () => {
         console.error('WebSocket error on PC:', error);
       };
 
-      socket.onclose = () => {
-        console.log('WebSocket connection closed on PC');
+      socket.onclose = (event) => {
+        console.log('WebSocket connection closed on PC', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        });
       };
 
       setWs(socket);
@@ -42,7 +45,7 @@ const VideoDisplay: React.FC = () => {
         ws.close();
       }
     };
-  }, []);
+  }, [ws]);
 
   return (
     <div>
@@ -50,7 +53,7 @@ const VideoDisplay: React.FC = () => {
       {imageSrc ? (
         <img
           src={imageSrc}
-          alt="Captured from mobile"
+          alt="Live from mobile"
           style={{ width: '500px', height: 'auto' }}
         />
       ) : (
