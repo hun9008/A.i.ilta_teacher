@@ -58,8 +58,10 @@ async def websocket_endpoint(websocket: WebSocket):
 async def process_message(chat: ChatRequest):
     
     user_text = chat.text
+    
     # 사용자의 고유 ID
-    user_id = abc321 #user_id = chat.user_id 
+    user_id = chat.u_id
+    
     # (assume) 지금 어떤 문제 풀고 있는지 알아내기
     problem_index = 1
     
