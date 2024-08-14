@@ -14,6 +14,7 @@ performing_ocr = False
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     # connections.append(websocket)
+    connection_key = None
     try:
         while True:
             data = await websocket.receive_text()
@@ -25,6 +26,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             connection_key = f'{u_id}_{device}'
             connections[connection_key] = websocket
+            print("current connections: ", connections.keys())
 
             if type == 'ocr':
                 await handle_ws_ocr(image, websocket)
@@ -32,11 +34,15 @@ async def websocket_endpoint(websocket: WebSocket):
                 await handle_ws_rtc(image, websocket, u_id)
             else:
                 response = {'type': 'error', 'message': 'Invalid message type'}
-                await websocket.send_json
+                await websocket.send_json(response)
                 
     except WebSocketDisconnect:
         # connections.remove(websocket)
-        connections.pop(connection_key, None)
+        print("connection_key: ", connection_key)
+        if connection_key in connections:
+            connections.pop(connection_key, None)
+        else:
+            print("connection_key not found in connections")
 
 async def handle_ws_ocr(frame_data, websocket): 
     global performing_ocr
