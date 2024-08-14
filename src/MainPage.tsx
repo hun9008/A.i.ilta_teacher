@@ -102,8 +102,8 @@ function MainPage() {
           <h3 style={{ marginBottom: '10px' }}>푼 문제 수</h3>
           <p>{solvedProblems}</p>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <button onClick={() => navigate('/setting')}>학습하기</button>
-            <button onClick={() => navigate('/wrongnote')}>오답노트</button>
+            <button onClick={() => navigate('/setting')} className='bg-primary-400 text-white py-2 mb-4 hover:bg-primary-500'>학습하기</button>
+            <button onClick={() => navigate('/wrongnote')} className='bg-primary-400 text-white py-2 hover:bg-primary-500'>오답노트</button>
           </div>
         </div>
       </div>

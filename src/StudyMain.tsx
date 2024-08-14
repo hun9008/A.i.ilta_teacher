@@ -1,355 +1,248 @@
-// import { useEffect, useState } from 'react';
-// import { useLocation } from 'react-router-dom';
-// import logo from './assets/logo.svg';
-// import userIcon from './assets/user_icons.png';
-// import settingsIcon from './assets/setting_icons.png';
-// import chatIcon from './assets/chat_icons.png';
-
-// // interface StudyMainProps {
-// //   socket: WebSocket;
-// // }
-
-// function StudyMain() {
-//   const location = useLocation();
-//   const socket = location.state?.socket;
-
-//   const [messages, setMessages] = useState<
-//     { text: string; sender: 'user' | 'bot' }[]
-//   >([]);
-//   const [inputMessage, setInputMessage] = useState('');
-//   const [isChatVisible, setIsChatVisible] = useState(false);
-//   const [timer1, setTimer1] = useState(90);
-//   const [timer2, setTimer2] = useState(45);
-//   const [isRunning1, setIsRunning1] = useState(false);
-//   const [isRunning2, setIsRunning2] = useState(false);
-
-//   useEffect(() => {
-//     let intervalId: number;
-//     if (isRunning1) {
-//       intervalId = window.setInterval(() => {
-//         setTimer1((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
-//       }, 60000); // 분 단위로 감소
-//     }
-//     return () => clearInterval(intervalId);
-//   }, [isRunning1]);
-
-//   useEffect(() => {
-//     let intervalId: number;
-//     if (isRunning2) {
-//       intervalId = window.setInterval(() => {
-//         setTimer2((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
-//       }, 60000); // 분 단위로 감소
-//     }
-//     return () => clearInterval(intervalId);
-//   }, [isRunning2]);
-
-//   const formatTime = (totalMinutes: number) => {
-//     const hours = Math.floor(totalMinutes / 60);
-//     const minutes = totalMinutes % 60;
-
-//     const formattedHours = hours >= 0 ? `${hours}:` : '';
-//     const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-
-//     return `${formattedHours}${formattedMinutes}`;
-//   };
-
-//   // 웹소켓을 통한 메시지 수신 처리
-//   useEffect(() => {
-//     if (socket) {
-//       socket.onmessage = (event: MessageEvent) => {
-//         const data = event.data;
-//         setMessages((prevMessages) => [
-//           ...prevMessages,
-//           { text: data, sender: 'bot' },
-//         ]);
-//       };
-
-//       socket.onerror = (error: Event) => {
-//         console.error('WebSocket error:', error);
-//       };
-
-//       socket.onclose = (event: CloseEvent) => {
-//         console.warn('WebSocket connection closed:', event);
-//       };
-//     }
-
-//     return () => {
-//       if (socket) {
-//         socket.close();
-//       }
-//     };
-//   }, [socket]);
-
-//   const sendMessage = () => {
-//     if (!socket) {
-//       console.error('Socket is not initialized');
-//       return;
-//     }
-
-//     if (inputMessage.trim() !== '' && socket.readyState === WebSocket.OPEN) {
-//       const message = {
-//         u_id: localStorage.getItem('u_id'),
-//         status: 'chat',
-//         text: inputMessage,
-//       };
-
-//       socket.send(JSON.stringify(message));
-
-//       setMessages((prevMessages) => [
-//         ...prevMessages,
-//         { text: inputMessage, sender: 'user' },
-//       ]);
-
-//       setInputMessage('');
-//     } else {
-//       console.error('WebSocket is not open:', socket.readyState);
-//     }
-//   };
-
-//   const toggleChatVisibility = () => {
-//     setIsChatVisible((prevState) => !prevState);
-//   };
-//   return (
-//     <div style={{ display: 'flex', height: '100vh' }}>
-//       <div
-//         style={{
-//           display: 'flex',
-//           flexDirection: 'column',
-//           alignItems: 'center',
-//           width: '80px',
-//           backgroundColor: '#f0f0f0',
-//         }}
-//       >
-//         <img
-//           src={logo}
-//           alt="Logo"
-//           style={{ width: '40px', height: '40px', marginBottom: '10px' }}
-//         />
-//         <img
-//           src={userIcon}
-//           alt="User Icon"
-//           style={{
-//             width: '40px',
-//             height: '40px',
-//             marginBottom: '15px',
-//             cursor: 'pointer',
-//           }}
-//         />
-//         <img
-//           src={settingsIcon}
-//           alt="Settings Icon"
-//           style={{
-//             width: '30px',
-//             height: '30px',
-//             marginBottom: '15px',
-//             cursor: 'pointer',
-//           }}
-//         />
-//         <img
-//           src={chatIcon}
-//           alt="Chat Icon"
-//           style={{ width: '30px', height: '30px', cursor: 'pointer' }}
-//           onClick={toggleChatVisibility}
-//         />
-//       </div>
-//       <div style={{ display: 'flex', marginBottom: '10px' }}>
-//         <div style={{ marginRight: '20px' }}>
-//           <h3> 오늘 공부 목표 시간</h3>
-//           <h4>{formatTime(timer1)}</h4>
-//           <button
-//             onClick={() => setIsRunning1(!isRunning1)}
-//             style={{
-//               marginRight: '10px',
-//               padding: '5px 10px',
-//               borderRadius: '5px',
-//               backgroundColor: isRunning1 ? '#dc3545' : '#28a745',
-//               color: '#fff',
-//               border: 'none',
-//               cursor: 'pointer',
-//             }}
-//           >
-//             {isRunning1 ? 'Stop' : 'Start'}
-//           </button>
-//         </div>
-//         <div>
-//           <h3> 공부 중 쉬는 시간</h3>
-//           <h4>{formatTime(timer2)}</h4>
-//           <button
-//             onClick={() => setIsRunning2(!isRunning2)}
-//             style={{
-//               marginRight: '10px',
-//               padding: '5px 10px',
-//               borderRadius: '5px',
-//               backgroundColor: isRunning2 ? '#dc3545' : '#28a745',
-//               color: '#fff',
-//               border: 'none',
-//               cursor: 'pointer',
-//             }}
-//           >
-//             {isRunning2 ? 'Stop' : 'Start'}
-//           </button>
-//         </div>
-//       </div>
-
-//       {isChatVisible && (
-//         <div
-//           style={{
-//             display: 'flex',
-//             flexDirection: 'column',
-//             justifyContent: 'space-between',
-//             width: '300px',
-//             backgroundColor: '#f9f9f9',
-//             padding: '10px',
-//             borderLeft: '1px solid #ddd',
-//             marginLeft: 'auto',
-//           }}
-//         >
-//           <div style={{ overflowY: 'auto', flexGrow: 1, marginBottom: '10px' }}>
-//             {messages.map((message, index) => (
-//               <div
-//                 key={index}
-//                 style={{
-//                   margin: '5px 0',
-//                   padding: '5px 10px',
-//                   backgroundColor:
-//                     message.sender === 'user' ? '#007bff' : '#fff',
-//                   color: message.sender === 'user' ? '#fff' : '#000',
-//                   borderRadius: '5px',
-//                   alignSelf:
-//                     message.sender === 'user' ? 'flex-end' : 'flex-start',
-//                 }}
-//               >
-//                 {message.text}
-//               </div>
-//             ))}
-//           </div>
-//           <div style={{ display: 'flex' }}>
-//             <input
-//               type="text"
-//               value={inputMessage}
-//               onChange={(e) => setInputMessage(e.target.value)}
-//               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-//               style={{
-//                 flexGrow: 1,
-//                 padding: '5px',
-//                 borderRadius: '5px',
-//                 border: '1px solid #ddd',
-//               }}
-//             />
-//             <button
-//               onClick={sendMessage}
-//               style={{
-//                 marginLeft: '10px',
-//                 padding: '5px 10px',
-//                 borderRadius: '5px',
-//                 backgroundColor: '#007bff',
-//                 color: '#fff',
-//                 border: 'none',
-//                 cursor: 'pointer',
-//               }}
-//             >
-//               Send
-//             </button>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default StudyMain;
 import { useEffect, useState } from 'react';
-import { useWebSocket } from './WebSocketContext';
+import { User, Settings, MessageCircle } from 'lucide-react';
+
+import logo from './assets/logo.svg';
 
 function StudyMain() {
-  const { socket, sendMessage, isConnected } = useWebSocket();
   const [messages, setMessages] = useState<
     { text: string; sender: 'user' | 'bot' }[]
   >([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [previousQuestion, setPreviousQuestion] = useState<string | null>(null);
+  const [previousAnswer, setPreviousAnswer] = useState<string | null>(null);
+  const [isChatVisible, setIsChatVisible] = useState(false);
 
+  // const [timer1, setTimer1] = useState(0);
+  // const [timer2, setTimer2] = useState(0);
+  const [timer1, setTimer1] = useState(90);
+  const [timer2, setTimer2] = useState(45);
+  const [isRunning1, setIsRunning1] = useState(false);
+  const [isRunning2, setIsRunning2] = useState(false);
+
+  // useEffect(() => {
+  //   const fetchTimerValues = async () => {
+  //     const baseUrl = import.meta.env.VITE_BASE_URL;
+
+  //     try {
+  //       const response = await fetch(`${baseUrl}/get-timers`, {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
+
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         setTimer1(data.timer1);
+  //         setTimer2(data.timer2);
+  //       } else {
+  //         console.error(`Failed to fetch timer values: ${response.statusText}`);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching timer values:', error);
+  //     }
+  //   };
+
+  //   fetchTimerValues();
+  // }, []);
+
+  // 첫 번째 타이머 제어
   useEffect(() => {
-    if (socket && isConnected) {
-      console.log('WebSocket is connected');
-
-      socket.onmessage = (event: MessageEvent) => {
-        const data = event.data;
-
-        // 받은 메시지를 콘솔에 출력
-        console.log('Received WebSocket message:', data);
-
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { text: data, sender: 'bot' },
-        ]);
-      };
+    let intervalId: number;
+    if (isRunning1) {
+      intervalId = window.setInterval(() => {
+        setTimer1((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+      }, 60000); // 분 단위로 감소
     }
-  }, [socket, isConnected]);
+    return () => clearInterval(intervalId);
+  }, [isRunning1]);
 
-  const handleSendMessage = () => {
-    const u_id = localStorage.getItem('u_id');
+  // 두 번째 타이머 제어
+  useEffect(() => {
+    let intervalId: number;
+    if (isRunning2) {
+      intervalId = window.setInterval(() => {
+        setTimer2((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+      }, 60000); // 분 단위로 감소
+    }
+    return () => clearInterval(intervalId);
+  }, [isRunning2]);
 
-    if (inputMessage.trim()) {
-      const message = {
-        u_id: u_id,
-        status: 'chat',
-        text: inputMessage,
+  // 시간:분 포맷 함수
+  const formatTime = (totalMinutes: number) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    const formattedHours = hours >= 0 ? `${hours}:` : '';
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+    return `${formattedHours}${formattedMinutes}`;
+  };
+
+  // 메시지를 가져오는 함수
+  useEffect(() => {
+    if (isChatVisible) {
+      const fetchMessages = async () => {
+        const baseUrl = import.meta.env.VITE_BASE_URL;
+
+        try {
+          const response = await fetch(`${baseUrl}/chat`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              status: 'fetch_messages', // 서버가 필요로 하는 action이 있다면 여기서 전달
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json(); // 응답을 JSON으로 처리
+            console.log('Fetched messages:', data); // 디버깅용 로그
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { text: data, sender: 'bot' },
+            ]);
+            setPreviousAnswer(data); // 가장 마지막 답변을 저장
+          } else {
+            console.error(`Failed to fetch messages: ${response.statusText}`);
+          }
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+        }
       };
 
-      console.log('u_id:', u_id);
-      console.log('inputMessage:', inputMessage);
-      console.log(
-        'Sending WebSocket message:',
-        JSON.stringify(message, null, 2)
-      );
+      fetchMessages();
+      const intervalId = setInterval(fetchMessages, 3000);
 
-      sendMessage(message);
+      return () => clearInterval(intervalId);
+    }
+  }, [isChatVisible]);
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text: inputMessage, sender: 'user' },
-      ]);
-      setInputMessage('');
-    } else {
-      console.log('Message is empty or connection is not ready.');
+  // 메시지를 보내는 함수
+  const sendMessage = async () => {
+    if (inputMessage.trim() !== '') {
+      const baseUrl = import.meta.env.VITE_BASE_URL;
+
+      // 서버로 보낼 요청 본문
+      const requestBody = {
+        status: 'solve_delay',
+        text: `
+        previousQuestion: ${previousQuestion},
+        previousAnswer: ${previousAnswer},
+        currentQuestion: ${inputMessage},
+        `,
+      };
+
+      try {
+        const response = await fetch(`${baseUrl}/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (response.ok) {
+          const data = await response.json(); // 응답을 JSON으로 처리
+          console.log('Sent message:', inputMessage); // 디버깅용 로그
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { text: inputMessage, sender: 'user' }, // 보낸 메시지를 user로 표시
+            { text: data, sender: 'bot' }, // 받은 메시지를 bot으로 표시
+          ]);
+          setPreviousQuestion(inputMessage); // 현재 질문을 이전 질문으로 설정
+          setPreviousAnswer(data); // 서버에서 받은 답변을 이전 답변으로 설정
+          setInputMessage(''); // 입력 필드를 비움
+        } else {
+          console.error(`Failed to send message: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
   };
 
+  // 채팅창 보이기/숨기기
+  const toggleChatVisibility = () => {
+    console.log('Toggling chat visibility');
+    setIsChatVisible((prevState) => !prevState);
+  };
+
   return (
-    <div>
-      <div>
-        {isConnected ? 'Connected to server' : 'Not connected to server'}
+    <div className="flex h-screen">
+      <div className="flex flex-col items-center w-20 bg-gray-100">
+        <img src={logo} alt="Logo" className="w-10 h-10 mb-2.5" />
+        <User className="mb-6" />
+        <Settings className="mb-6" />
+        <MessageCircle
+          onClick={toggleChatVisibility}
+          className="cursor-pointer"
+        />
       </div>
-      <div>
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            style={{
-              margin: '5px 0',
-              padding: '5px 10px',
-              borderRadius: '5px',
-            }}
+      <div className="flex mb-2.5">
+        <div className="mr-5">
+          <h3>
+            오늘 공부 목표 시간
+            <h4>{formatTime(timer1)}</h4>
+          </h3>
+          <button
+            onClick={() => setIsRunning1(!isRunning1)}
+            className={`mr-2.5 px-2.5 py-1 rounded ${
+              isRunning1 ? 'bg-red-600' : 'bg-green-600'
+            } text-white border-none cursor-pointer`}
           >
-            <span
-              style={{
-                fontWeight: message.sender === 'user' ? 'bold' : 'normal',
-              }}
-            >
-              {message.sender === 'user' ? 'You' : 'Bot'}:
-            </span>
-            <span> {message.text}</span>
-          </div>
-        ))}
+            {isRunning1 ? 'Stop' : 'Start'}
+          </button>
+        </div>
+        <div>
+          <h3>
+            공부 중 쉬는 시간
+            <h4>{formatTime(timer2)}</h4>
+          </h3>
+          <button
+            onClick={() => setIsRunning2(!isRunning2)}
+            className={`mr-2.5 px-2.5 py-1 rounded ${
+              isRunning2 ? 'bg-red-600' : 'bg-green-600'
+            } text-white border-none cursor-pointer`}
+          >
+            {isRunning2 ? 'Stop' : 'Start'}
+          </button>
+        </div>
       </div>
-      <input
-        type="text"
-        value={inputMessage}
-        onChange={(e) => setInputMessage(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-      />
-      <button onClick={handleSendMessage} disabled={!isConnected}>
-        Send
-      </button>
+      {isChatVisible && (
+        <div className="flex flex-col justify-between w-72 bg-gray-50 p-2.5 border-l border-gray-300 ml-auto">
+          <div className="overflow-y-auto flex-grow mb-2.5">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`my-1.5 p-2.5 rounded ${
+                  message.sender === 'user'
+                    ? 'bg-blue-500 text-white self-end'
+                    : 'bg-white text-black self-start'
+                }`}
+              >
+                {message.text}
+              </div>
+            ))}
+          </div>
+          <div className="flex">
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+              className="flex-grow p-1 rounded border border-gray-300"
+            />
+            <button
+              onClick={sendMessage}
+              className="ml-2.5 px-2.5 py-1 rounded bg-blue-500 text-white border-none cursor-pointer"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
