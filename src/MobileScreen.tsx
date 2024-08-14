@@ -9,9 +9,9 @@ function VideoDisplay() {
   const [ocrText, setOcrText] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
-  const localStreamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<number | null>(null);
   const [imageSrc, setImageSrc] = useState<string>('');
+  const localStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     if (!u_id) {
@@ -20,7 +20,6 @@ function VideoDisplay() {
       return;
     }
 
-    // WebSocket 초기화 및 스트리밍 시작
     initWebSocket();
 
     return () => {
@@ -84,32 +83,32 @@ function VideoDisplay() {
 
     const sendFrame = () => {
       console.log('open send frame start');
-      if (videoRef.current && socket.readyState === WebSocket.OPEN) {
-        console.log('open canvas');
-        const canvas = document.createElement('canvas');
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          console.log('Failed to get 2D context');
-          return;
-        }
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        const frame = canvas.toDataURL('image/jpeg').split(',')[1];
-
-        const message = {
-          type: 'rtc',
-          payload: frame,
-          device: 'pc',
-          u_id: u_id,
-        };
-
-        console.log('Sending message:', message);
-        socket.send(JSON.stringify(message)); // 프레임 데이터와 함께 PC 정보 전송
+      // if (videoRef.current && socket.readyState === WebSocket.OPEN) {
+      console.log('open canvas');
+      const canvas = document.createElement('canvas');
+      // canvas.width = videoRef.current.videoWidth;
+      // canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        console.log('Failed to get 2D context');
+        return;
       }
+      // ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      const frame = canvas.toDataURL('image/jpeg').split(',')[1];
+
+      const message = {
+        type: 'rtc',
+        payload: frame,
+        device: 'pc',
+        u_id: u_id,
+      };
+
+      console.log('Sending message:', message);
+      socket.send(JSON.stringify(message)); // 프레임 데이터와 함께 PC 정보 전송
+      // }
     };
 
-    intervalRef.current = window.setInterval(sendFrame, 1000 / 3); // 초당 3프레임 전송
+    intervalRef.current = window.setInterval(sendFrame, 1000 / 50); // 초당 3프레임 전송
     console.log('send img');
   };
 
@@ -145,11 +144,13 @@ function VideoDisplay() {
 
         <div className="button-container">
           <button id="startButton" className="button" onClick={initWebSocket}>
-            Start
+            제발
           </button>
-          <button id="stopButton" className="button" onClick={stopStreaming}>
-            Stop
-          </button>
+          <button
+            id="stopButton"
+            className="button"
+            onClick={stopStreaming}
+          ></button>
           <button id="resetButton" className="button" onClick={resetStreaming}>
             Reset
           </button>
