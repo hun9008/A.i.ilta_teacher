@@ -267,6 +267,8 @@ function CameraMobilePage() {
     }
 
     const sendFrame = () => {
+      console.log('open send frame start');
+      console.log(videoRef);
       if (videoRef.current && ws && ws.readyState === WebSocket.OPEN) {
         console.log('open canvas');
         const canvas = document.createElement('canvas');
