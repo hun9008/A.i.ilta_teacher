@@ -1,58 +1,95 @@
 import { useEffect, useState } from 'react';
-import { useWebSocket } from './WebSocketContext';
 import { MessageCircle } from 'lucide-react';
 
-function StudyMain() {
-  const { socket, sendMessage, isConnected } = useWebSocket();
+function Study() {
   const [messages, setMessages] = useState<
     { text: string; sender: 'user' | 'bot' }[]
   >([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [previousQuestion, setPreviousQuestion] = useState<string | null>(null);
+  const [previousAnswer, setPreviousAnswer] = useState<string | null>(null);
   const [isChatVisible, setIsChatVisible] = useState(false);
 
   useEffect(() => {
-    if (socket && isConnected) {
-      console.log('WebSocket is connected');
+    if (isChatVisible) {
+      const fetchMessages = async () => {
+        const baseUrl = import.meta.env.VITE_BASE_URL;
 
-      socket.onmessage = (event: MessageEvent) => {
-        const data = event.data;
+        try {
+          const response = await fetch(`${baseUrl}/chat`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              status: 'fetch_messages',
+            }),
+          });
 
-        console.log('Received WebSocket message:', data);
-
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { text: data, sender: 'bot' },
-        ]);
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Fetched messages:', data);
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { text: data, sender: 'bot' },
+            ]);
+            setPreviousAnswer(data);
+          } else {
+            console.error(`Failed to fetch messages: ${response.statusText}`);
+          }
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+        }
       };
+
+      fetchMessages();
+      const intervalId = setInterval(fetchMessages, 3000);
+
+      return () => clearInterval(intervalId);
     }
-  }, [socket, isConnected]);
+  }, [isChatVisible]);
 
-  const handleSendMessage = () => {
-    const u_id = localStorage.getItem('u_id');
+  // 메시지를 보내는 함수
+  const sendMessage = async () => {
+    if (inputMessage.trim() !== '') {
+      const baseUrl = import.meta.env.VITE_BASE_URL;
 
-    if (inputMessage.trim()) {
-      const message = {
-        u_id: u_id,
-        status: 'chat',
-        text: inputMessage,
+      // 서버로 보낼 요청 본문
+      const requestBody = {
+        status: 'solve_delay',
+        text: `
+        previousQuestion: ${previousQuestion},
+        previousAnswer: ${previousAnswer},
+        currentQuestion: ${inputMessage},
+        `,
       };
 
-      console.log('u_id:', u_id);
-      console.log('inputMessage:', inputMessage);
-      console.log(
-        'Sending WebSocket message:',
-        JSON.stringify(message, null, 2)
-      );
+      try {
+        const response = await fetch(`${baseUrl}/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
 
-      sendMessage(message);
-
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text: inputMessage, sender: 'user' },
-      ]);
-      setInputMessage('');
-    } else {
-      console.log('Message is empty or connection is not ready.');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Sent message:', inputMessage);
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { text: inputMessage, sender: 'user' },
+            { text: data, sender: 'bot' },
+          ]);
+          setPreviousQuestion(inputMessage);
+          setPreviousAnswer(data);
+          setInputMessage('');
+        } else {
+          console.error(`Failed to send message: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
   };
 
@@ -89,11 +126,11 @@ function StudyMain() {
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               className="flex-grow p-1 rounded border border-gray-300"
             />
             <button
-              onClick={handleSendMessage}
+              onClick={sendMessage}
               className="ml-2.5 px-2.5 py-1 rounded bg-blue-500 text-white border-none cursor-pointer"
             >
               Send
@@ -105,4 +142,4 @@ function StudyMain() {
   );
 }
 
-export default StudyMain;
+export default Study;
