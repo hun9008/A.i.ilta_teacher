@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { Outlines } from '@react-three/drei'
 import * as THREE from 'three'
 
 interface IceFloeProps {
@@ -39,9 +40,22 @@ const IceFloe: React.FC<IceFloeProps> = ({ position, onPointerOver, onClick }) =
       <icosahedronGeometry args={[0.5, 1]} />
       <meshStandardMaterial
         color={hovered ? 'lightblue' : 'white'}
-        roughness={0.3}
+        roughness={0.1}
         metalness={0.2}
       />
+      {hovered && (
+        <Outlines
+          screenspace
+          toneMapped={false}
+          polygonOffset
+          polygonOffsetFactor={100}
+          transparent
+          opacity={1}
+          color="white"
+          angle={Math.PI}
+          thickness={0.1}
+        />
+      )}
     </mesh>
   )
 }
