@@ -31,7 +31,7 @@ async def websocket_endpoint(websocket: WebSocket):
             if type == 'ocr':
                 await handle_ws_ocr(image, websocket)
             elif type == 'rtc':
-                await handle_ws_rtc(image, websocket, u_id)
+                await handle_ws_rtc(image, websocket, u_id, device)
             else:
                 response = {'type': 'error', 'message': 'Invalid message type'}
                 await websocket.send_json(response)
@@ -68,7 +68,14 @@ async def handle_ws_ocr(frame_data, websocket):
     response = {'type': 'ocr-result', 'ocrs': ocr_result.get('ocrs')}
     await websocket.send_json(response)
 
-async def handle_ws_rtc(frame_data, websocket, u_id):
+async def handle_ws_rtc(frame_data, websocket, u_id, device):
+    
+    if device == 'mobile':
+        print("You are using mobile")
+        response = {'type': 'error', 'message': 'Mobile device not supported'}
+        await websocket.send_json(response)
+        return
+
     print("Handling RTC")
     pc_key = f'{u_id}_pc'
 
