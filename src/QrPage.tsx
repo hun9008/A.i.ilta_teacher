@@ -12,9 +12,7 @@ function QrPage() {
 
     if (email && u_id) {
       const hostUrl = import.meta.env.VITE_HOST_URL;
-      const qrCodeUrl = `${hostUrl}/camera-mobile?email=${encodeURIComponent(
-        email
-      )}&u_id=${encodeURIComponent(u_id)}`;
+      const qrCodeUrl = `${hostUrl}/camera-mobile?email=${encodeURIComponent(email)}`;
       setQrUrl(qrCodeUrl);
     }
 
