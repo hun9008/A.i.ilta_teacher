@@ -4,16 +4,17 @@ import QRCode from 'qrcode.react';
 
 function QrPage() {
   const navigate = useNavigate();
-
   const [qrUrl, setQrUrl] = useState<string>('');
 
   useEffect(() => {
     const email = localStorage.getItem('email');
-    if (email) {
+    const u_id = localStorage.getItem('u_id');
+
+    if (email && u_id) {
       const hostUrl = import.meta.env.VITE_HOST_URL;
       const qrCodeUrl = `${hostUrl}/camera-mobile?email=${encodeURIComponent(
         email
-      )}`;
+      )}&u_id=${encodeURIComponent(u_id)}`;
       setQrUrl(qrCodeUrl);
     }
 

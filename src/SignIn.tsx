@@ -24,6 +24,7 @@ function SignIn() {
       }
       const data = await response.json();
       localStorage.setItem('email', email);
+      console.log(data);
       localStorage.setItem('u_id', data.u_id);
 
       navigate('/setting');
