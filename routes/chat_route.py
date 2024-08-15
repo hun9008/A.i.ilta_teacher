@@ -90,8 +90,13 @@ async def process_message(chat: ChatRequest):
         concept = concepts[problem_index]
         prompt = prompt_delay(ocr, concept, user_text, prev_chat)
         print("test) Sucessfully generate prompt. \nprompt : "+ prompt)
+
+        json_response = await call_openai_api(prompt)
+        response_content = await json_response.json()
+
+        # 텍스트 추출해 문자열로 변환
+        response = response_content["message"]
         
-        response = await call_openai_api(prompt)
         print("test) Sucessfully get response. \nresponse : "+ response)
         
         user_context[user_id]["solve_delay"] = False
