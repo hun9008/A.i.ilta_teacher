@@ -64,7 +64,7 @@ async def process_message(chat: ChatRequest):
     user_id = chat.u_id
     
     # (assume) 지금 어떤 문제 풀고 있는지 알아내기
-    problem_index = 1
+    problem_index = 0
     
     # 해당 인덱스에 해당하는 문제(ocr 결과), concept, solution 가져오기
     ocr = ocrs[problem_index]

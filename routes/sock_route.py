@@ -98,7 +98,7 @@ async def handle_ws_rtc(frame_data, websocket, u_id, device):
 
 async def perform_ocr(frame_data):
     # print("Performing OCR")
-    # url = "http://llm.hunian.site/api/solution"
+    # url = "http://llm.hunian.site/problems_ocr"
     # payload = {'image_base64': frame_data}
     # print(payload)
     # headers = {'Content-Type': 'application/json'}  # JSON 형식임을 명시
