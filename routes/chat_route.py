@@ -95,22 +95,17 @@ async def process_message(chat: ChatRequest):
 
         # json_response의 타입에 따라 처리
         if isinstance(gpt_response, JSONResponse):
-            # JSONResponse 객체의 내용을 추출 (JSON 형식의 문자열)
-            response_content_str = gpt_response.body.decode("utf-8")  # content 대신 body를 사용
-
-            # JSON 문자열을 파싱하여 딕셔너리로 변환
-            response_content = json.loads(response_content_str)
-
-            # 필요한 텍스트를 추출
-            response = response_content["content"]
             
-            print("test) Successfully got response. \nresponse : " + response)
+            response_content = gpt_response.content
+            response_content = json.loads(response_content)
+            response = response_content.get("content")
+            
+            print("test) Successfully got response. \nresponse : ", response)
             
             user_context[user_id]["solve_delay"] = False
             user_context[user_id]["prev_chat"] = prompt + "\n" + response
 
         else:
-            # 예상치 못한 반환값 처리
             print("Unexpected response type")
             response = "Unexpected response type received from OpenAI API"
             user_context[user_id]["prev_chat"] = prompt + "\n" + response
