@@ -3,6 +3,7 @@ import { ChevronRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import QrPage from './QrPage';
 import Camera from './camera.tsx';
+import MobileScreen from './MobileScreen.tsx';
 
 interface Step {
   id: string;
@@ -51,17 +52,12 @@ function SettingPage() {
 
   const renderStepContent = (step: Step) => {
     switch (step.id) {
+      case 'webcam':
+        return <Camera />;
       case 'qr':
         return <QrPage />;
       case 'mobcam':
-        return (
-          <p>
-            모바일 카메라 잘 뜨는지 확인 후 자바라 잘 설치하시오, 빛의 양을
-            조절하시오 등등
-          </p>
-        );
-      case 'webcam':
-        return <Camera />;
+        return <MobileScreen />;
       case 'goals':
         return <p>공부 목표를 설정해주세요.</p>;
       case 'complete':

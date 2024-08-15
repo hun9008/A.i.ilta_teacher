@@ -1,14 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import LaptopImage from './assets/Laptop.jpg';
-import { useNavigate } from 'react-router-dom';
 
 function VideoDisplay() {
   const u_id = localStorage.getItem('u_id');
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
-  const [ocrText, setOcrText] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const navigate = useNavigate();
+
   const intervalRef = useRef<number | null>(null);
   const [imageSrc, setImageSrc] = useState<string>('');
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -17,7 +14,6 @@ function VideoDisplay() {
   useEffect(() => {
     if (!u_id) {
       console.log('no u_id');
-      setErrorMessage('u_id is missing from URL.');
       return;
     }
 
@@ -40,7 +36,6 @@ function VideoDisplay() {
 
     socket.onopen = () => {
       console.log('WebSocket connection opened');
-      setErrorMessage('');
       setWs(socket); // WebSocket 객체 상태 업데이트
 
       // WebSocket 연결이 열렸을 때 스트리밍 시작
@@ -48,7 +43,6 @@ function VideoDisplay() {
     };
 
     socket.onmessage = (message) => {
-      console.log(message.data);
       console.log('Message received:', message);
       const data = JSON.parse(message.data);
 
@@ -59,7 +53,6 @@ function VideoDisplay() {
 
     socket.onerror = (error) => {
       console.error('WebSocket error:', error);
-      setErrorMessage('WebSocket error occurred. Check console for details.');
     };
 
     socket.onclose = (event) => {
@@ -82,23 +75,17 @@ function VideoDisplay() {
     console.log('open click start');
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.log('WebSocket connection is not opened');
-      setErrorMessage('WebSocket connection is not open.');
       return;
     }
 
     const sendFrame = (socket: WebSocket) => {
       console.log('open send frame start');
-      // if (videoRef.current && socket.readyState === WebSocket.OPEN) {
-      console.log('open canvas');
       const canvas = document.createElement('canvas');
-      // canvas.width = videoRef.current.videoWidth;
-      // canvas.height = videoRef.current.videoHeight;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         console.log('Failed to get 2D context');
         return;
       }
-      // ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
       const frame = canvas.toDataURL('image/jpeg').split(',')[1];
 
       const message = {
@@ -110,15 +97,9 @@ function VideoDisplay() {
 
       console.log('Sending message:', message);
       socket.send(JSON.stringify(message)); // 프레임 데이터와 함께 PC 정보 전송
-      // }
     };
 
-<<<<<<< Updated upstream
-    // intervalRef.current = window.setInterval(sendFrame, 1000 / 10000); // 초당 1프레임 전송
     animationFrameRef.current = requestAnimationFrame(() => sendFrame(socket));
-=======
-    animationFrameRef.current = requestAnimationFrame(() => sendFrame());
->>>>>>> Stashed changes
     console.log('send img');
   };
 
@@ -138,49 +119,43 @@ function VideoDisplay() {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-    setOcrText('');
-    setErrorMessage('');
-  };
-
-  const resetStreaming = () => {
-    stopStreaming();
-    initWebSocket();
   };
 
   return (
-    <div>
-      <div>
-        <img src={LaptopImage} style={{ width: '100px', height: '100px' }} />
-
-        <div className="button-container">
-          <button id="startButton" className="button" onClick={initWebSocket}>
-            Start
-          </button>
-          <button id="stopButton" className="button" onClick={stopStreaming}>
-            Stop
-          </button>
-          <button id="resetButton" className="button" onClick={resetStreaming}>
-            Reset
-          </button>
+    <div className="flex flex-col items-center justify-center bg-gray-50 min-h-screen">
+      <h1 className="text-xl font-bold mb-6 mt-6 text-center">
+        학습할 문제집 사진이 필요해요.
+        <br />
+        사진과 같이 문제집 정보가 카메라에 담길 수 있도록 해주세요.
+      </h1>
+      <div className="flex flex-row items-center justify-center space-x-8">
+        <div className="text-center">
+          <img
+            src={LaptopImage}
+            className="w-72 h-72 mb-10 p-4 bg-white rounded-xl animate-border-glow"
+          />
         </div>
-
-        <div id="ocr-result">
-          <h2>OCR Result:</h2>
-          <p>{ocrText}</p>
-        </div>
-        <div>
-          {/* 모바일에서 수신한 이미지 렌더링 */}
-          {imageSrc && (
+        <div className="w-72 h-72 mb-10 p-4 bg-white rounded-xl flex items-center justify-center">
+          {imageSrc ? (
             <img
               src={imageSrc}
-              style={{ width: '300px', height: '300px' }}
               alt="Captured Frame"
+              className="rounded-xl w-full h-full object-cover"
             />
+          ) : (
+            <p>No image received</p>
           )}
-          {errorMessage}
         </div>
       </div>
-      <button onClick={() => navigate('/StudyGoals')}>학습</button>
+      <div className="flex space-x-4">
+        <button
+          id="startButton"
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={initWebSocket}
+        >
+          Start
+        </button>
+      </div>
     </div>
   );
 }
