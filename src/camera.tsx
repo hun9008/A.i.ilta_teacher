@@ -146,7 +146,7 @@ function CameraPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-gray-50 min-h-screen">
+    <div className="flex flex-col items-center justify-center bg-gray-50">
       <h1 className="text-xl font-bold mb-6 mt-6 text-center">
         집중도를 확인 하기 위해 카메라 세팅이 필요해요.
         <br />

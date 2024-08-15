@@ -122,7 +122,7 @@ function VideoDisplay() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-gray-50 min-h-screen">
+    <div className="flex flex-col items-center justify-center bg-gray-50">
       <h1 className="text-xl font-bold mb-6 mt-6 text-center">
         학습할 문제집 사진이 필요해요.
         <br />
