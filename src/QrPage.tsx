@@ -5,8 +5,7 @@ import { useWebSocket } from './WebSocketContext';
 
 function QrPage() {
   const navigate = useNavigate();
-  const { sendMessage } = useWebSocket();
-
+  const { sendMessage, connectWebSocket, isConnected } = useWebSocket();
   const [qrUrl, setQrUrl] = React.useState<string>('');
 
   useEffect(() => {
@@ -25,6 +24,10 @@ function QrPage() {
   const handleStartStudy = () => {
     const u_id = localStorage.getItem('u_id');
     if (u_id) {
+      if (!isConnected) {
+        connectWebSocket(); // Connect WebSocket when the button is clicked
+      }
+
       sendMessage({
         u_id,
         status: 'open',
@@ -32,7 +35,7 @@ function QrPage() {
       });
       console.log('Sent status: open message to server.');
 
-      navigate('/StudyMain'); // 공부시작하기 페이지로 이동
+      navigate('/StudyMain'); // Navigate to the study page
     }
   };
 

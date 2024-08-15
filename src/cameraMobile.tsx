@@ -182,8 +182,7 @@
 // export default CameraMobilePage;
 
 import { useEffect, useState, useRef } from 'react';
-import LaptopImage from './assets/Laptop.jpg';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -194,9 +193,7 @@ function CameraMobilePage() {
   const u_id = query.get('u_id');
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
-  const [ocrText, setOcrText] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const navigate = useNavigate();
   const localStreamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<number | null>(null);
 
@@ -244,9 +241,7 @@ function CameraMobilePage() {
 
     socket.onmessage = (message) => {
       const data = JSON.parse(message.data);
-      if (data.type === 'ocr-result' && data.ocrs) {
-        setOcrText(data.ocrs);
-      } else if (data.type === 'rtc-frame' && data.payload) {
+      if (data.type === 'rtc-frame' && data.payload) {
         console.log('Received RTC frame:', data.payload);
       }
     };
@@ -328,7 +323,6 @@ function CameraMobilePage() {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-    setOcrText('');
     setErrorMessage('');
   };
 
@@ -340,15 +334,6 @@ function CameraMobilePage() {
   return (
     <div>
       <div>
-        <img src={LaptopImage} style={{ width: '100px', height: '100px' }} />
-
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          style={{ width: '300px', height: '300px' }}
-        ></video>
-
         <div className="button-container">
           <button id="startButton" className="button" onClick={initWebSocket}>
             Start
@@ -360,10 +345,7 @@ function CameraMobilePage() {
             Reset
           </button>
         </div>
-        <div id="ocr-result">
-          <h2>OCR Result:</h2>
-          <p>{ocrText}</p>
-        </div>
+
         <div>
           <video
             ref={videoRef}
@@ -373,7 +355,6 @@ function CameraMobilePage() {
           {errorMessage}
         </div>
       </div>
-      <button onClick={() => navigate('/StudyGoals')}>학습</button>
     </div>
   );
 }
