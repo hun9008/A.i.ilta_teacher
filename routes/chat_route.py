@@ -167,7 +167,7 @@ async def call_openai_api(prompt):
             max_tokens=2000,
         )
         
-        print("test) Get response from call_open_api func. response : "+response)
+        print("test) Get response from call_open_api func. response : ", response)
         
         # JSON 형식으로 return 
         return JSONResponse(content=response.choices[0].message.content)
