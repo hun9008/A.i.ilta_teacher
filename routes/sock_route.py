@@ -54,6 +54,13 @@ async def handle_ws_ocr(frame_data, websocket):
     message = json.loads(frame_data)
     image_url = message['payload']
     
+    #
+    with open("example.txt", "r") as file:
+        frame_data = file.read()
+    message = json.loads(frame_data)
+    image_url = message['image']
+    # 
+    
     # 이미지 URL로부터 OCR 수행
     performing_ocr = True
     ocr_result = await perform_ocr(image_url)
