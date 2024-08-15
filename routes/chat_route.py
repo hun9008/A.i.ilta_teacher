@@ -96,7 +96,7 @@ async def process_message(chat: ChatRequest):
         # json_response의 타입에 따라 처리
         if isinstance(gpt_response, JSONResponse):
             # JSONResponse 객체의 내용을 파싱
-            response_content = await gpt_response.json()
+            response_content = await gpt_response.content
             
             # 필요한 텍스트를 추출
             response = response_content["message"]
