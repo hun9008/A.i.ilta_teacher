@@ -68,6 +68,10 @@ async def process_message(chat: ChatRequest):
     
     # 해당 인덱스에 해당하는 문제(ocr 결과), concept, solution 가져오기
     ocr = ocrs[problem_index]
+    
+    if user_id not in user_context:
+        user_context[user_id] = {"prev_chat": ""}
+        
     prev_chat = user_context[user_id].get("prev_chat", "")
     
     print("test) OCR : "+ ocr)
@@ -85,11 +89,9 @@ async def process_message(chat: ChatRequest):
         # 사용자의 응답을 받은 경우, OpenAI API로 전송
         concept = concepts[problem_index]
         prompt = prompt_delay(ocr, concept, user_text, prev_chat)
-        
         print("test) Sucessfully generate prompt. \nprompt : "+ prompt)
         
         response = await call_openai_api(prompt)
-        
         print("test) Sucessfully get response. \nresponse : "+ response)
         
         user_context[user_id]["solve_delay"] = False
