@@ -96,9 +96,10 @@ async def process_message(chat: ChatRequest):
         # json_response의 타입에 따라 처리
         if isinstance(gpt_response, JSONResponse):
             
-            response_content = gpt_response.content
-            response_content = json.loads(response_content)
-            response = response_content.get("content")
+            # response_content = gpt_response.content
+            # response_content = json.loads(response_content)
+            # response = response_content.get("content")
+            response = gpt_response
             
             print("test) Successfully got response. \nresponse : ", response)
             
@@ -162,8 +163,12 @@ async def call_openai_api(prompt):
         
         print("test) Get response from call_open_api func. response : ", response)
         
+        print(JSONResponse(content=response.choices[0].message.content))
+        response_content = response.choices[0].message.content
+        return response_content
+    
         # JSON 형식으로 return 
-        return JSONResponse(content=response.choices[0].message.content)
+        # return JSONResponse(content=response.choices[0].message.content)
     
     except Exception as e:
         return f"OpenAI API error: {str(e)}"
