@@ -54,8 +54,6 @@ function QrPage() {
         />
       )}
 
-      <button onClick={() => navigate('/MobileScreen')}>MobileCamera</button>
-      <button onClick={() => navigate('/camera')}>LaptopCamera</button>
       <button onClick={handleStartStudy}>공부시작하기</button>
     </div>
   );
