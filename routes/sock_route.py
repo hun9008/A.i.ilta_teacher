@@ -26,7 +26,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             connection_key = f'{u_id}_{device}'
             connections[connection_key] = websocket
-            print("current connections: ", connections.keys())
+            # print("current connections: ", connections.keys())
 
             if type == 'ocr':
                 await handle_ws_ocr(image, websocket)
@@ -38,11 +38,11 @@ async def websocket_endpoint(websocket: WebSocket):
                 
     except WebSocketDisconnect:
         # connections.remove(websocket)
-        print("connection_key: ", connection_key)
+        # print("connection_key: ", connection_key)
         if connection_key in connections:
             connections.pop(connection_key, None)
-        else:
-            print("connection_key not found in connections")
+        # else:
+        #     print("connection_key not found in connections")
 
 async def handle_ws_ocr(frame_data, websocket): 
     global performing_ocr
@@ -71,26 +71,26 @@ async def handle_ws_ocr(frame_data, websocket):
 async def handle_ws_rtc(frame_data, websocket, u_id, device):
     
     if device == 'mobile':
-        print("You are using mobile")
+        # print("You are using mobile")
         response = {'type': 'error', 'message': 'Mobile device not supported'}
         await websocket.send_json(response)
         return
 
-    print("Handling RTC")
+    # print("Handling RTC")
     pc_key = f'{u_id}_pc'
 
     if pc_key in connections:
-        print("pc_key found in connections(socket)")
+        # print("pc_key found in connections(socket)")
         pc_websocket = connections[pc_key]
         response = {'type': 'rtc-frame', 'payload': frame_data}
         await pc_websocket.send_json(response)
     else:
-        print("pc_key not found in connections(socket)")
+        # print("pc_key not found in connections(socket)")
         response = {'type': 'error', 'message': 'Peer connection not found'}
         await websocket.send_json(response)
 
 async def perform_ocr(frame_data):
-    print("Performing OCR")
+    # print("Performing OCR")
     # url = "http://llm.hunian.site/api/solution"
     # payload = {'image_base64': frame_data}
     # print(payload)
