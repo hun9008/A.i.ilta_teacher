@@ -92,7 +92,7 @@ async def process_message(chat: ChatRequest):
         print("test) Sucessfully generate prompt. \nprompt : "+ prompt)
 
         json_response = await call_openai_api(prompt)
-        response_content = await json_response.json()
+        response_content = await json.loads(json_response)
 
         # 텍스트 추출해 문자열로 변환
         response = response_content["message"]
