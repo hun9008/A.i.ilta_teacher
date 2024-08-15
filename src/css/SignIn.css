@@ -340,26 +340,13 @@
   }
 
   .sign-in .signin-container {
-    order: 2;
     width: 100%;
   }
 
   .sign-in .image-container {
-    order: 1;
-    width: 100%;
-    height: 100%;
-    margin-bottom: 20px;
+    display:none;
   }
 
-  .sign-in .text-title {
-    font-size: 24px;
-  }
-
-  .sign-in .signin-button,
-  .sign-in .signup-button {
-    font-size: 18px;
-    padding: 10px 0;
-  }
 }
 
 .sign-in .back-button {
