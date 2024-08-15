@@ -77,11 +77,11 @@ async def handle_ws_ocr(frame_data, websocket):
 
 async def handle_ws_rtc(frame_data, websocket, u_id, device):
     
-    if device == 'mobile':
-        # print("You are using mobile")
-        response = {'type': 'error', 'message': 'Mobile device not supported'}
-        await websocket.send_json(response)
-        return
+    # if device == 'mobile':
+    #     # print("You are using mobile")
+    #     response = {'type': 'error', 'message': 'Mobile device not supported'}
+    #     await websocket.send_json(response)
+    #     return
 
     # print("Handling RTC")
     pc_key = f'{u_id}_pc'
