@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
+import LaptopImage from './assets/Laptop.jpg';
 import { useNavigate } from 'react-router-dom';
 
 function VideoDisplay() {
   const u_id = localStorage.getItem('u_id');
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
+  const [ocrText, setOcrText] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
   const intervalRef = useRef<number | null>(null);
@@ -72,46 +74,6 @@ function VideoDisplay() {
     };
   };
 
-  // const startStreaming = (socket: WebSocket) => {
-  //   console.log('open click start');
-  //   if (!socket || socket.readyState !== WebSocket.OPEN) {
-  //     console.log('WebSocket connection is not opened');
-  //     setErrorMessage('WebSocket connection is not open.');
-  //     return;
-  //   }
-
-  //   const sendFrame = (socket: WebSocket) => {
-  //     console.log('open send frame start');
-  //     // if (videoRef.current && socket.readyState === WebSocket.OPEN) {
-  //     console.log('open canvas');
-  //     const canvas = document.createElement('canvas');
-  //     // canvas.width = videoRef.current.videoWidth;
-  //     // canvas.height = videoRef.current.videoHeight;
-  //     const ctx = canvas.getContext('2d');
-  //     if (!ctx) {
-  //       console.log('Failed to get 2D context');
-  //       return;
-  //     }
-  //     // ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-  //     const frame = canvas.toDataURL('image/jpeg').split(',')[1];
-
-  //     const message = {
-  //       type: 'rtc',
-  //       payload: frame,
-  //       device: 'pc',
-  //       u_id: u_id,
-  //     };
-
-  //     console.log('Sending message:', message);
-  //     socket.send(JSON.stringify(message)); // 프레임 데이터와 함께 PC 정보 전송
-  //     // }
-  //   };
-
-  //   intervalRef.current = window.setInterval(sendFrame, 1000 / 10000); // 초당 1프레임 전송
-  //   animationFrameRef.current = requestAnimationFrame(() => sendFrame(socket));
-  //   console.log('send img');
-  // };
-
   const startStreaming = (socket: WebSocket) => {
     console.log('open click start');
     if (!socket || socket.readyState !== WebSocket.OPEN) {
@@ -120,14 +82,19 @@ function VideoDisplay() {
       return;
     }
 
-    const sendFrame = () => {
+    const sendFrame = (socket: WebSocket) => {
       console.log('open send frame start');
+      // if (videoRef.current && socket.readyState === WebSocket.OPEN) {
+      console.log('open canvas');
       const canvas = document.createElement('canvas');
+      // canvas.width = videoRef.current.videoWidth;
+      // canvas.height = videoRef.current.videoHeight;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         console.log('Failed to get 2D context');
         return;
       }
+      // ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
       const frame = canvas.toDataURL('image/jpeg').split(',')[1];
 
       const message = {
@@ -139,10 +106,11 @@ function VideoDisplay() {
 
       console.log('Sending message:', message);
       socket.send(JSON.stringify(message)); // 프레임 데이터와 함께 PC 정보 전송
+      // }
     };
 
-    intervalRef.current = window.setInterval(sendFrame, 1000 / 100); // 초당 1프레임 전송
-    animationFrameRef.current = requestAnimationFrame(sendFrame);
+    // intervalRef.current = window.setInterval(sendFrame, 1000 / 10000); // 초당 1프레임 전송
+    animationFrameRef.current = requestAnimationFrame(() => sendFrame(socket));
     console.log('send img');
   };
 
@@ -162,28 +130,42 @@ function VideoDisplay() {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    setOcrText('');
     setErrorMessage('');
   };
 
-  // const resetStreaming = () => {
-  //   stopStreaming();
-  //   initWebSocket();
-  // };
+  const resetStreaming = () => {
+    stopStreaming();
+    initWebSocket();
+  };
 
   return (
     <div>
       <div>
+        <img src={LaptopImage} style={{ width: '100px', height: '100px' }} />
+
         <div className="button-container">
           <button id="startButton" className="button" onClick={initWebSocket}>
             Start
           </button>
+          <button id="stopButton" className="button" onClick={stopStreaming}>
+            Stop
+          </button>
+          <button id="resetButton" className="button" onClick={resetStreaming}>
+            Reset
+          </button>
+        </div>
+
+        <div id="ocr-result">
+          <h2>OCR Result:</h2>
+          <p>{ocrText}</p>
         </div>
         <div>
           {/* 모바일에서 수신한 이미지 렌더링 */}
           {imageSrc && (
             <img
               src={imageSrc}
-              style={{ width: '600px', height: '600px' }}
+              style={{ width: '300px', height: '300px' }}
               alt="Captured Frame"
             />
           )}
