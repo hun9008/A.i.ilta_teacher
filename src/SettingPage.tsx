@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import QrPage from './QrPage';
 import Camera from './camera.tsx';
 import MobileScreen from './MobileScreen.tsx';
+import StudyGoals from './StudyGoals.tsx';
 
 interface Step {
   id: string;
@@ -59,7 +60,7 @@ function SettingPage() {
       case 'mobcam':
         return <MobileScreen />;
       case 'goals':
-        return <p>공부 목표를 설정해주세요.</p>;
+        return <StudyGoals />;
       case 'complete':
         return (
           <p>모든 설정이 완료되었습니다. 공부를 시작할 준비가 되었습니다.</p>

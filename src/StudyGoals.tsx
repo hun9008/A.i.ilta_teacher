@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 function StudyGoals() {
-  const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_BASE_URL;
   const [goals, setGoals] = useState({
     goal1: false,
@@ -10,6 +8,7 @@ function StudyGoals() {
     goal3: false,
   });
 
+  const [problems, setProblems] = useState(''); // 문제 풀기 입력 상태
   const [time, setTime] = useState({
     goal2Hours: '',
     goal2Minutes: '',
@@ -25,10 +24,21 @@ function StudyGoals() {
       validatedValue = 59;
     }
 
+    if (name === 'problems') {
+      // goal1 입력 값에 대해 최소값 1로 설정
+      if (validatedValue < 1) {
+        validatedValue = 1;
+      }
+    }
+
     setTime((prevTime) => ({
       ...prevTime,
       [name]: validatedValue.toString().padStart(2, '0'),
     }));
+
+    if (name === 'problems') {
+      setProblems(validatedValue.toString());
+    }
   };
 
   const convertToMinutes = (hours: string, minutes: string) => {
@@ -66,8 +76,9 @@ function StudyGoals() {
     }
   };
 
-  const handleSelectionComplete = (goalName: 'goal2' | 'goal3') => {
+  const handleSelectionComplete = (goalName: 'goal1' | 'goal2' | 'goal3') => {
     if (
+      (goalName === 'goal1' && problems) ||
       (goalName === 'goal2' && (time.goal2Hours || time.goal2Minutes)) ||
       (goalName === 'goal3' && (time.goal3Hours || time.goal3Minutes))
     ) {
@@ -81,7 +92,11 @@ function StudyGoals() {
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name } = event.target;
 
-    if (name === 'goal1') {
+    if (
+      (name === 'goal1' && problems) ||
+      (name === 'goal2' && (time.goal2Hours || time.goal2Minutes)) ||
+      (name === 'goal3' && (time.goal3Hours || time.goal3Minutes))
+    ) {
       setGoals((prevGoals) => ({
         ...prevGoals,
         [name]: !prevGoals[name],
@@ -89,34 +104,56 @@ function StudyGoals() {
     }
   };
 
+  const allGoalsCompleted = goals.goal1 && goals.goal2 && goals.goal3;
+
   return (
-    <div>
-      <h1>공부목표 설정</h1>
-      <div>
-        <div>
-          <label>
-            1. 어디부터 어디까지 풀건가요?
+    <div className="flex flex-col items-center justify-center bg-gray-50">
+      <h1 className="text-2xl font-bold mb-6">오늘의 공부 목표 설정하기</h1>
+      <div className="space-y-4 w-full max-w-md">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-lg">1. 몇 문제 풀건가요?</label>
             <input
               type="checkbox"
               name="goal1"
               checked={goals.goal1}
               onChange={handleCheckboxChange}
+              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-          </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <input
+              type="number"
+              name="problems"
+              value={problems}
+              onChange={handleTimeChange}
+              placeholder="01"
+              min="1"
+              className="w-16 text-center border border-gray-300 rounded p-1"
+            />{' '}
+            문제 풀기
+            <button
+              onClick={() => handleSelectionComplete('goal1')}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              선택
+            </button>
+          </div>
         </div>
 
-        <div>
-          <label>
-            2. 얼마나 공부할건가요?
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-lg">2. 얼마나 공부할건가요?</label>
             <input
               type="checkbox"
               name="goal2"
               checked={goals.goal2}
               onChange={handleCheckboxChange}
               readOnly
+              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-          </label>
-          <div>
+          </div>
+          <div className="flex items-center space-x-2">
             <input
               type="number"
               name="goal2Hours"
@@ -124,7 +161,7 @@ function StudyGoals() {
               onChange={handleTimeChange}
               placeholder="00"
               min="0"
-              style={{ width: '50px', textAlign: 'center' }}
+              className="w-16 text-center border border-gray-300 rounded p-1"
             />{' '}
             시간{' '}
             <input
@@ -134,27 +171,31 @@ function StudyGoals() {
               onChange={handleTimeChange}
               placeholder="00"
               min="0"
-              style={{ width: '50px', textAlign: 'center' }}
+              className="w-16 text-center border border-gray-300 rounded p-1"
             />{' '}
             분 할 거야.
-            <button onClick={() => handleSelectionComplete('goal2')}>
+            <button
+              onClick={() => handleSelectionComplete('goal2')}
+              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
               선택
             </button>
           </div>
         </div>
 
-        <div>
-          <label>
-            3. 공부 중 얼마나 쉴건가요?
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-lg">3. 공부 중 얼마나 쉴건가요?</label>
             <input
               type="checkbox"
               name="goal3"
               checked={goals.goal3}
               onChange={handleCheckboxChange}
               readOnly
+              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-          </label>
-          <div>
+          </div>
+          <div className="flex items-center space-x-2">
             <input
               type="number"
               name="goal3Hours"
@@ -162,7 +203,7 @@ function StudyGoals() {
               onChange={handleTimeChange}
               placeholder="00"
               min="0"
-              style={{ width: '50px', textAlign: 'center' }}
+              className="w-16 text-center border border-gray-300 rounded p-1"
             />{' '}
             시간{' '}
             <input
@@ -172,32 +213,30 @@ function StudyGoals() {
               onChange={handleTimeChange}
               placeholder="00"
               min="0"
-              style={{ width: '50px', textAlign: 'center' }}
+              className="w-16 text-center border border-gray-300 rounded p-1"
             />{' '}
             분 쉴꺼야.
-            <button onClick={() => handleSelectionComplete('goal3')}>
+            <button
+              onClick={() => handleSelectionComplete('goal3')}
+              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
               선택
             </button>
           </div>
         </div>
       </div>
 
-      <div style={{ marginTop: '20px' }}>
-        <button
-          disabled={!goals.goal1 || !goals.goal2 || !goals.goal3}
-          onClick={() => navigate('/tts')}
-        >
-          TTS
-        </button>
-        <button
-          onClick={async () => {
-            await sendTimeToServer();
-            navigate('/StudyMain');
-          }}
-        >
-          공부 시작하기
-        </button>
-      </div>
+      <button
+        onClick={sendTimeToServer}
+        disabled={!allGoalsCompleted}
+        className={`mt-8 px-6 py-3 rounded ${
+          allGoalsCompleted
+            ? 'bg-green-500 text-white hover:bg-green-600'
+            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+        }`}
+      >
+        설정 완료
+      </button>
     </div>
   );
 }

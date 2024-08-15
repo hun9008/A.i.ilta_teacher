@@ -10,23 +10,6 @@ function CameraPage() {
   const reconnectAttemptsRef = useRef<number>(0);
 
   useEffect(() => {
-    const constraints = {
-      video: { facingMode: 'user' },
-    };
-
-    navigator.mediaDevices
-      .getUserMedia(constraints)
-      .then((stream) => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          localStreamRef.current = stream;
-          console.log('Camera stream started:', stream);
-        }
-      })
-      .catch((err) => {
-        console.error('Error accessing camera: ', err);
-      });
-
     return () => {
       stopStreaming();
     };
@@ -68,6 +51,29 @@ function CameraPage() {
     console.log('WebSocket initialized:', wsRef.current);
   };
 
+  const requestCameraAccess = () => {
+    const constraints = {
+      video: { facingMode: 'user' },
+    };
+
+    navigator.mediaDevices
+      .getUserMedia(constraints)
+      .then((stream) => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          localStreamRef.current = stream;
+          console.log('Camera stream started:', stream);
+          initWebSocket(); // 권한이 허용된 후 WebSocket 초기화
+        }
+      })
+      .catch((err) => {
+        console.error('Error accessing camera:', err);
+        alert(
+          '카메라 권한이 필요합니다. 브라우저 설정에서 카메라 권한을 허용해주세요.'
+        );
+      });
+  };
+
   const attemptReconnect = () => {
     const maxReconnectAttempts = 5;
     if (reconnectAttemptsRef.current < maxReconnectAttempts) {
@@ -75,7 +81,7 @@ function CameraPage() {
       console.log(
         `Attempting to reconnect... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
       );
-      setTimeout(initWebSocket, 1000 / 20); // Try to reconnect after 1 second
+      setTimeout(initWebSocket, 1000 / 20); // Try to reconnect after 50ms
     } else {
       console.log('Max reconnect attempts reached.');
     }
@@ -171,7 +177,7 @@ function CameraPage() {
         <button
           id="startButton"
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={initWebSocket}
+          onClick={requestCameraAccess}
         >
           Run
         </button>
