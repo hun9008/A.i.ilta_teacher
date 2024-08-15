@@ -113,8 +113,12 @@ function VideoDisplay() {
       // }
     };
 
+<<<<<<< Updated upstream
     // intervalRef.current = window.setInterval(sendFrame, 1000 / 10000); // 초당 1프레임 전송
     animationFrameRef.current = requestAnimationFrame(() => sendFrame(socket));
+=======
+    animationFrameRef.current = requestAnimationFrame(() => sendFrame());
+>>>>>>> Stashed changes
     console.log('send img');
   };
 

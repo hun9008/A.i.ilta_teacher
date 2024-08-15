@@ -1,61 +1,45 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
+import { PerspectiveCamera, Grid } from '@react-three/drei'
 import * as THREE from 'three'
 import Penguin from './3D/Penguin'
 import IceFloe from './3D/IceFloe'
 import CameraController from './3D/CameraController'
 import { AnimatePresence } from 'framer-motion'
 import AnimatedModal from './AnimatedModal'
-import logo from './assets/logo.svg';
-import { LogOut, User } from 'lucide-react';
-
-const BlinkingRec: React.FC<{ text: string }> = ({ text }) => {
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsVisible(prev => !prev);
-    }, 500); // 0.5초마다 깜빡임
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="flex items-center">
-      <div className={`w-3 h-3 rounded-full mr-2 ${isVisible ? 'bg-green-400' : 'bg-transparent'}`} />
-      <span>{text}</span>
-    </div>
-  );
-};
-
-const Game: React.FC = () => {
-  const [penguinPosition, setPenguinPosition] = useState<THREE.Vector3>(new THREE.Vector3(0, 0.5, 0))
-  const [showModal, setShowModal] = useState(false)
-  const [selectedFloe, setSelectedFloe] = useState<number>(0)
-  const penguinTargetPosition = useRef(new THREE.Vector3(0, 0.5, 0))
-
+import logo from './assets/logo.svg'
+import { LogOut, User } from 'lucide-react'
+import BlinkingRec from './3D/BlinkingRec'
+import DebugInfo from './3D/DebugInfo'
+import Axes from './3D/Axes'
+function Game(){
+  const [penguinPosition, setPenguinPosition] = useState<THREE.Vector3>(new THREE.Vector3(0, 0.5, 0));
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [selectedFloe, setSelectedFloe] = useState<number>(0);
+  const penguinTargetPosition = useRef<THREE.Vector3>(new THREE.Vector3(0, 0.5, 0));
+  const [showDebugInfo, setShowDebugInfo] = useState<boolean>(false);
   const icePositions: [number, number, number][] = Array(12).fill(0).map((_, i) => [
     (i % 4) * 2, 0, Math.floor(i / 4) * 2
-  ])
-
+  ]);
   const handleFloeClick = useCallback((index: number) => {
-    const newPosition = new THREE.Vector3(...icePositions[index])
-    newPosition.y = 0.5
+    const newPosition = new THREE.Vector3(...icePositions[index]);
+    newPosition.y = 0.5;
     if (penguinPosition.equals(newPosition)) {
-      setSelectedFloe(index)
-      setShowModal(true)
+      setSelectedFloe(index);
+      setShowModal(true);
     } else {
-      penguinTargetPosition.current = newPosition
+      penguinTargetPosition.current = newPosition;
     }
-  }, [icePositions, penguinPosition])
-
+  }, [icePositions, penguinPosition]);
   return (
     <div className="w-screen h-screen bg-gradient-to-b from-blue-100 to-blue-200 relative">
       <Canvas className="w-full h-full">
-        <PerspectiveCamera makeDefault position={[-2, 6, 6]} />
-        <OrbitControls />
-        <CameraController target={penguinPosition} targetPosition={penguinTargetPosition.current} />
+        <PerspectiveCamera makeDefault position={[-2, 8, 8]} />
+        <CameraController 
+          target={penguinPosition} 
+          offset={new THREE.Vector3(-2, 6, 6)}
+          smoothness={0.1}
+        />
         <ambientLight intensity={1} />
         <pointLight position={[10, 10, 10]} />
         <fog attach="fog" args={['#b9d5ff', 0, 20]} />
@@ -67,47 +51,71 @@ const Game: React.FC = () => {
           />
         ))}
         <Penguin position={penguinPosition.toArray()} targetPosition={penguinTargetPosition} setPenguinPosition={setPenguinPosition} />
+        {showDebugInfo && <Grid args={[20, 20]} />}
+        {showDebugInfo && <Axes length={5} />}
+        {showDebugInfo && <DebugInfo penguinPosition={penguinPosition} />}
       </Canvas>
-
-      <div className="absolute top-0 left-0 p-4 text-white">
-      <img
-        src={logo}
-        alt="Logo"
-        className="w-10 h-10 mb-2.5"
+      <UI 
+        showDebugInfo={showDebugInfo} 
+        setShowDebugInfo={setShowDebugInfo} 
+        showModal={showModal}
+        setShowModal={setShowModal}
+        selectedFloe={selectedFloe}
       />
-      </div>
-      <div className="absolute top-4 right-4 flex items-center space-x-4">
-      <div className="border-2 border-primary-400 text-black px-4 py-2 rounded-full">
-          <BlinkingRec text="웹캠" />
-        </div>
-        <div className="border-2 border-primary-400 text-black px-4 py-2 rounded-full">
-          <BlinkingRec text="모바일캠" />
-        </div>
-        <div className="w-10 h-10 bg-primary-300 rounded-full flex items-center justify-center">
-          <User size={24} color="white" />
-        </div>
-      </div>
-      <div className="absolute bottom-4 right-4">
-        <button
-          className="p-4 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200 flex"
-          onClick={() => {/* 여기에 나가기 로직 추가 */}}
-        >
-          <p className='mr-2'>공부 종료하기</p>
-          <LogOut size={24} />
-        </button>
-      </div>
-
-      <AnimatePresence>
-        {showModal && (
-          <AnimatedModal 
-            isOpen={showModal} 
-            onClose={() => setShowModal(false)} 
-            selectedFloe={selectedFloe} 
-          />
-        )}
-      </AnimatePresence>
     </div>
-  )
+  );
+};
+interface UIProps {
+  showDebugInfo: boolean;
+  setShowDebugInfo: (show: boolean) => void;
+  showModal: boolean;
+  setShowModal: (show: boolean) => void;
+  selectedFloe: number;
 }
-
-export default Game
+const UI: React.FC<UIProps> = ({ showDebugInfo, setShowDebugInfo, showModal, setShowModal, selectedFloe }) => (
+  <>
+    <div className="absolute top-0 left-0 p-4 text-white">
+      <img src={logo} alt="Logo" className="w-10 h-10 mb-2.5" />
+    </div>
+    <div className="absolute top-4 right-4 flex items-center space-x-4">
+      <div className="border-2 border-primary-400 text-black px-4 py-2 rounded-full">
+        <BlinkingRec text="웹캠" />
+      </div>
+      <div className="border-2 border-primary-400 text-black px-4 py-2 rounded-full">
+        <BlinkingRec text="모바일캠" />
+      </div>
+      <div className="w-10 h-10 bg-primary-300 rounded-full flex items-center justify-center">
+        <User size={24} color="white" />
+      </div>
+    </div>
+    <div className="absolute bottom-4 right-4 flex space-x-4">
+      <button
+        className="p-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-200"
+        onClick={() => setShowDebugInfo(!showDebugInfo)}
+      >
+        {showDebugInfo ? '디버그 정보 숨기기' : '디버그 정보 표시'}
+      </button>
+      <button
+        className="p-4 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200 flex"
+        onClick={() => {/* 여기에 나가기 로직 추가 */}}
+      >
+        <p className='mr-2'>공부 종료하기</p>
+        <LogOut size={24} />
+      </button>
+    </div>
+    {showDebugInfo && (
+      <div id="debug-info" className="absolute bottom-4 left-4 bg-white bg-opacity-75 p-2 rounded text-black">
+      </div>
+    )}
+    <AnimatePresence>
+      {showModal && (
+        <AnimatedModal 
+          isOpen={showModal} 
+          onClose={() => setShowModal(false)} 
+          selectedFloe={selectedFloe} 
+        />
+      )}
+    </AnimatePresence>
+  </>
+);
+export default Game;

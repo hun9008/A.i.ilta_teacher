@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useGLTF } from '@react-three/drei'
 
 const Penguin: React.FC<{
   position: [number, number, number]
@@ -11,10 +12,15 @@ const Penguin: React.FC<{
   const currentPosition = useRef(new THREE.Vector3(...position))
   const isJumping = useRef(false)
   const jumpProgress = useRef(0)
+  
+  // GLTF 모델 로드
+  const { scene } = useGLTF('/penguin.glb')
 
   useEffect(() => {
     if (groupRef.current) {
       groupRef.current.position.set(...position)
+      groupRef.current.scale.set(0.25, 0.25, 0.25)
+      groupRef.current.rotation.y =+ Math.PI / 2
     }
   }, [position])
 
@@ -44,74 +50,17 @@ const Penguin: React.FC<{
       if (!currentPosition.current.equals(targetPosition.current)) {
         const direction = new THREE.Vector3().subVectors(targetPosition.current, currentPosition.current)
         const angle = Math.atan2(direction.x, direction.z)
-        groupRef.current.rotation.y = angle
+        groupRef.current.rotation.y = angle + Math.PI / 2
       }
 
       // Add subtle swaying motion
-      groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 2) * 0.05
+      groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 2) * 0.05
     }
   })
 
   return (
     <group ref={groupRef}>
-      {/* 몸통 */}
-      <mesh position={[0, 0.3, 0]}>
-        <capsuleGeometry args={[0.2, 0.3, 8, 16]} />
-        <meshStandardMaterial color="#2C3E50" />
-      </mesh>
-      {/* 배 */}
-      <mesh position={[0, 0.25, 0.08]}>
-        <sphereGeometry args={[0.18, 32, 16]} />
-        <meshStandardMaterial color="white" />
-      </mesh>
-      {/* 머리 */}
-      <mesh position={[0, 0.65, 0]}>
-        <sphereGeometry args={[0.18, 32, 32]} />
-        <meshStandardMaterial color="#2C3E50" />
-      </mesh>
-      {/* 눈 (왼쪽) */}
-      <mesh position={[-0.07, 0.7, 0.13]}>
-        <sphereGeometry args={[0.04, 16, 16]} />
-        <meshStandardMaterial color="white" />
-      </mesh>
-      <mesh position={[-0.08, 0.71, 0.15]}>
-        <sphereGeometry args={[0.02, 16, 16]} />
-        <meshStandardMaterial color="black" />
-      </mesh>
-      {/* 눈 (오른쪽) */}
-      <mesh position={[0.07, 0.7, 0.13]}>
-        <sphereGeometry args={[0.04, 16, 16]} />
-        <meshStandardMaterial color="white" />
-      </mesh>
-      <mesh position={[0.08, 0.71, 0.15]}>
-        <sphereGeometry args={[0.02, 16, 16]} />
-        <meshStandardMaterial color="black" />
-      </mesh>
-      {/* 부리 */}
-      <mesh position={[0, 0.65, 0.18]} rotation={[Math.PI / 2, 0, 0]}>
-        <coneGeometry args={[0.04, 0.1, 16]} />
-        <meshStandardMaterial color="#F39C12" />
-      </mesh>
-      {/* 날개 (왼쪽) */}
-      <mesh position={[-0.22, 0.3, 0]} rotation={[0, 0, -Math.PI / 4]}>
-        <capsuleGeometry args={[0.05, 0.2, 8, 16]} />
-        <meshStandardMaterial color="#2C3E50" />
-      </mesh>
-      {/* 날개 (오른쪽) */}
-      <mesh position={[0.22, 0.3, 0]} rotation={[0, 0, Math.PI / 4]}>
-        <capsuleGeometry args={[0.05, 0.2, 8, 16]} />
-        <meshStandardMaterial color="#2C3E50" />
-      </mesh>
-      {/* 발 (왼쪽) */}
-      <mesh position={[-0.1, 0, 0]} rotation={[0, 0, Math.PI / 6]}>
-        <boxGeometry args={[0.08, 0.05, 0.15]} />
-        <meshStandardMaterial color="#F39C12" />
-      </mesh>
-      {/* 발 (오른쪽) */}
-      <mesh position={[0.1, 0, 0]} rotation={[0, 0, -Math.PI / 6]}>
-        <boxGeometry args={[0.08, 0.05, 0.15]} />
-        <meshStandardMaterial color="#F39C12" />
-      </mesh>
+      <primitive object={scene} />
     </group>
   )
 }
