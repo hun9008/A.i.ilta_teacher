@@ -90,8 +90,35 @@ async def process_message(chat: ChatRequest):
         concept = concepts[problem_index]
         prompt = prompt_delay(ocr, concept, user_text, prev_chat)
         print("test) Sucessfully generate prompt. \nprompt : "+ prompt)
+        
+        gpt_response = await call_openai_api(prompt)
 
-        json_response = await call_openai_api(prompt)
+        # json_response의 타입에 따라 처리
+        if isinstance(gpt_response, JSONResponse):
+            # JSONResponse 객체의 내용을 파싱
+            response_content = await gpt_response.json()
+            
+            # 필요한 텍스트를 추출
+            response = response_content["message"]
+            
+            print("test) Successfully got response. \nresponse : " + response)
+            
+            user_context[user_id]["solve_delay"] = False
+            user_context[user_id]["prev_chat"] = prompt + "\n" + response
+
+        elif isinstance(gpt_response, str):
+            print(f"Error occurred: {gpt_response}")
+
+            response = gpt_response
+            user_context[user_id]["prev_chat"] = prompt + "\n" + "Error: " + response
+        else:
+            # 예상치 못한 반환값 처리
+            print("Unexpected response type")
+            response = "Unexpected response type received from OpenAI API"
+            user_context[user_id]["prev_chat"] = prompt + "\n" + response
+            
+        '''
+        openai_response = await call_openai_api(prompt)
         response_content = await json.loads(json_response)
 
         # 텍스트 추출해 문자열로 변환
@@ -101,7 +128,8 @@ async def process_message(chat: ChatRequest):
         
         user_context[user_id]["solve_delay"] = False
         user_context[user_id]["prev_chat"] = prompt+"\n"+response
-            
+        '''
+
     elif user_status == "solve":
         response = "Your solution has been saved."
 
