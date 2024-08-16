@@ -108,16 +108,18 @@ async def problems_ocr(input: OCRInput):
     problem_crop(image)
     
     image_path = './temp'
-    # file_name = str(int(time.time())) + ".jpg"
-    # image_urls = []
+    file_name = str(int(time.time())) + ".jpg"
+    image_urls = []
 
     # for filename in os.listdir(image_path):
-    #     file_path = os.path.join(image_path, filename)
-    #     image_url = upload_to_s3(file_path, 'flyai', filename)
-    #     image_urls.append(image_url)
+    #     if not filename.startswith('_'):
+    #         file_path = os.path.join(image_path, filename)
+    #         image_url = upload_to_s3(file_path, 'flyai', filename)
+    #         image_urls.append(image_url)
 
     for filename in os.listdir(image_path):
-        encoded_imgs.append(base64.b64encode(open(os.path.join(image_path, filename), "rb").read()).decode())
+        if not filename.startswith('_'):
+            encoded_imgs.append(base64.b64encode(open(os.path.join(image_path, filename), "rb").read()).decode())
     
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
@@ -135,7 +137,8 @@ async def problems_ocr(input: OCRInput):
 
     ocr_tasks = [
         # fetch_solution_or_concept(client, image_url, "이 이미지에서 문제를 추출해 알려줘. (부등호에 주의해줘.)")
-        fetch_ocr_claude(claude_client, encoded_img, "이 이미지에서 문제를 추출해 알려줘. (부등호 구분에 주의) 그리고 OCR 결과로 나온 텍스트만 알려줘")
+        # fetch_ocr_claude(claude_client, encoded_img, "이 이미지에서 문제를 추출해 알려줘. (부등호 구분에 주의) 그리고 OCR 결과로 나온 텍스트만 알려줘")
+        fetch_ocr_claude(claude_client, encoded_img, "이 이미지에서 OCR로 문제를 추출해 알려줘(부등호 구분에 주의). 문제 번호 앞뒤로 별표(*)를 붙여줘. 별표 외 다른 사족은 붙이지 말고 추출한 텍스트만 출력해줘.")
         for encoded_img in encoded_imgs
     ]
     
@@ -143,17 +146,22 @@ async def problems_ocr(input: OCRInput):
     # concepts = await asyncio.gather(*concept_tasks)
     ocrs = await asyncio.gather(*ocr_tasks)
 
+    # sorted_ocrs = [None]*len(ocrs)
+    # for ocr in ocrs:
+    #     sorted_ocrs[int(ocr[1])-1] = ocr
+    sorted_ocrs = sorted(ocrs, key=lambda x: int(x.split('*')[1]))
+    
     concept_tasks = [
         fetch_solution_or_concept(client, f"이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
-        for ocr in ocrs
+        for ocr in sorted_ocrs
     ]
     solution_tasks = [
         fetch_solution_or_concept(client, f"이미지를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ..., answer: 로 알려줘. {ocr}")
-        for ocr in ocrs
+        for ocr in sorted_ocrs
     ]
 
-    concepts = await asyncio.gather(*concept_tasks)
-    solutions = await asyncio.gather(*solution_tasks)
+    concepts= await asyncio.gather(*concept_tasks)
+    solutions= await asyncio.gather(*solution_tasks)
 
     # temp directory cleanup
     for filename in os.listdir(image_path):
@@ -162,7 +170,7 @@ async def problems_ocr(input: OCRInput):
     output_json = {
         "concepts": concepts,
         "solutions": solutions,
-        "ocrs": ocrs,
+        "ocrs": sorted_ocrs,
     }
 
     return JSONResponse(content=output_json)

@@ -157,7 +157,6 @@ def ocr(image_path):
             file_path = os.path.join(image_path, file)
             text = pytesseract.image_to_string(Image.open(file_path), config='-l kor+equ')
             ocrs.append(text)
-
     return ocrs
 
 
