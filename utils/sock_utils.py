@@ -1,6 +1,7 @@
 import cv2 
 import numpy as np
 import base64 # decoding, encoding 방식
+import config.user_vars
 
 def decode_image(base64_str):
     try:
@@ -82,6 +83,6 @@ def detect_motion(saved_images):
         
     if not motion_detected:
         print("user status might be < solve_delay >")
-        user_status = "solve_delay"
+        user_vars.user_status = "solve_delay"
 
-    return user_status
+    return user_vars.user_status
