@@ -30,12 +30,15 @@ async def websocket_endpoint(websocket: WebSocket):
             connections[connection_key] = websocket
             # print("current connections: ", connections.keys())
 
-            if type == 'ocr':
-                await handle_ws_ocr(image, websocket)
-            elif type == 'rtc':
-                await handle_ws_rtc(image, websocket, u_id, device)
-            elif type == 'video':
+            if type == 'video':
                 await handle_ws_video(image, websocket, u_id, device)
+                if device == 'mobile':
+                    await handle_ws_rtc(image, websocket, u_id, device)
+            elif type == 'all':
+                await handle_ws_video(image, websocket, u_id, device)
+                if device == 'mobile':
+                    await handle_ws_rtc(image, websocket, u_id, device)
+                    await handle_ws_ocr(image, websocket, u_id, device)
             else:
                 response = {'type': 'error', 'message': 'Invalid message type'}
                 await websocket.send_json(response)
@@ -48,13 +51,13 @@ async def websocket_endpoint(websocket: WebSocket):
         # else:
         #     print("connection_key not found in connections")
 
-async def handle_ws_ocr(frame_data, websocket): 
-    global performing_ocr
-    if performing_ocr:
-        response = {'type': 'ocr-result', 'text': 'OCR in progress, please wait'}
-        await websocket.send_json(response)
-        return
-    
+async def handle_ws_ocr(frame_data, websocket, u_id, device): 
+    # global performing_ocr
+    # if performing_ocr:
+    # response = {'type': 'ocr-result', 'text': 'OCR in progress, please wait'}
+    # await websocket.send_json(response)
+    # return
+
     message = json.loads(frame_data)
     image_url = message['payload']
     
@@ -63,16 +66,25 @@ async def handle_ws_ocr(frame_data, websocket):
     message = json.loads(frame_data)
     image_url = message['image']
     
-    performing_ocr = True
+    # performing_ocr = True
     ocr_result = await perform_ocr(image_url)
-    performing_ocr = False
+    # performing_ocr = False
     
     concepts.extend(ocr_result.get("concepts", []))
     solutions.extend(ocr_result.get("solutions", []))
     ocrs.extend(ocr_result.get("ocrs", []))
     
-    response = {'type': 'ocr-result', 'ocrs': ocr_result.get('ocrs')}
-    await websocket.send_json(response)
+    pc_key = f'{u_id}_pc'
+    if pc_key in connections:
+        pc_websocket = connections[pc_key]
+        response = {'type': 'ocr-request', 'payload': frame_data}
+        await pc_websocket.send_json(response)
+    else:
+        response = {'type': 'error', 'message': 'Peer connection not found'}
+        await websocket.send_json(response)
+
+    # response = {'type': 'ocr-result', 'ocrs': ocr_result.get('ocrs')}
+    # await websocket.send_json(response)
 
 async def handle_ws_rtc(frame_data, websocket, u_id, device):
     
@@ -134,5 +146,5 @@ async def perform_ocr(frame_data):
     print(payload)
     headers = {'Content-Type': 'application/json'}  # JSON 형식임을 명시
     response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)  # JSON 형식으로 전송
-    return response.text
+    return response.json()
     # return "Dummy OCR result"
