@@ -243,6 +243,7 @@ function MobileCameraPage() {
             if (count > 30) {
               sendMessage(wsUrl, message2);
               setCount(0);
+              console.log('30 count');
             }
           }
         }
