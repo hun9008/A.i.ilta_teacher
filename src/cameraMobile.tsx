@@ -228,35 +228,22 @@ function MobileCameraPage() {
             };
 
             sendMessage(wsUrl, message); // WebSocket으로 전송
+            //다음을 30초마다 보내줘
             console.log('Image captured and sent:', message);
+
+            // const message2 = {
+            //   u_id,
+            //   type: 'video',
+            //   device: 'mobile',
+            //   payload: imageData,
+            // };
+            // sendMessage(wsUrl, message2);
           }
         }
       }, 1000 / 10); // 2초마다 캡처
 
-      const allMessageIntervalId = setInterval(() => {
-        if (canvasRef.current && videoRef.current) {
-          const canvas = canvasRef.current;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-            const fullImageData = canvas.toDataURL('image/png');
-            const imageData = fullImageData.split(',')[1];
-            const allMessage = {
-              u_id,
-              type: 'all',
-              device: 'mobile',
-              payload: imageData,
-            };
-
-            sendMessage(wsUrl, allMessage); // WebSocket으로 전송
-            console.log('All message sent:', allMessage);
-          }
-        }
-      }, 30000); // 30초마다 메시지 전송
-
       return () => {
         clearInterval(intervalId);
-        clearInterval(allMessageIntervalId);
       };
     }
   }, [isStreaming]);
