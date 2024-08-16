@@ -214,27 +214,34 @@ function MobileCameraPage() {
     disconnectWebSocket(wsUrl);
   };
 
-  const captureAndSendImage = () => {
-    if (canvasRef.current && videoRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        const fullImageData = canvas.toDataURL('image/png');
-        const imageData = fullImageData.split(',')[1]; // 메타데이터 제거 후 인코딩된 데이터 추출
-        setCapturedImage(fullImageData);
-        const message = {
-          u_id,
-          type: 'all',
-          device: 'mobile',
-          payload: imageData,
-        };
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
 
-        sendMessage(wsUrl, message); // WebSocket으로 전송
-        console.log('Image captured and sent:', message);
-      }
+    if (isStreaming) {
+      intervalId = setInterval(() => {
+        if (canvasRef.current && videoRef.current) {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const fullImageData = canvas.toDataURL('image/png');
+            const imageData = fullImageData.split(',')[1];
+            setCapturedImage(fullImageData);
+            const message = {
+              u_id,
+              type: 'all',
+              device: 'mobile',
+              payload: imageData,
+            };
+
+            sendMessage(wsUrl, message); // WebSocket으로 전송
+            console.log('Image captured and sent:', message);
+          }
+        }
+      }, 2000); // 2초마다 캡처
     }
-  };
+    return () => clearInterval(intervalId);
+  }, [isStreaming]);
 
   useEffect(() => {
     return () => {
@@ -266,13 +273,13 @@ function MobileCameraPage() {
           </button>
         ) : (
           <>
-            <button
+            {/* <button
               id="captureButton"
               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
               onClick={captureAndSendImage}
             >
               Capture & Send
-            </button>
+            </button> */}
             <button
               id="stopButton"
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
