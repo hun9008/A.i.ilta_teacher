@@ -230,21 +230,25 @@ function MobileCameraPage() {
             };
 
             sendMessage(wsUrl, message); // WebSocket으로 전송
-            setCount(count + 1);
-            //다음을 30초마다 보내줘
+            setCount((prevCount) => {
+              const newCount = prevCount + 1;
+              if (newCount >= 30) {
+                const message2 = {
+                  u_id,
+                  type: 'all',
+                  device: 'mobile',
+                  payload: imageData,
+                };
+                sendMessage(wsUrl, message2);
+                console.log(
+                  '30 count reached, sending additional message:',
+                  message2
+                );
+                return 0;
+              }
+              return newCount;
+            });
             console.log('Image captured and sent:', message);
-
-            const message2 = {
-              u_id,
-              type: 'video',
-              device: 'mobile',
-              payload: imageData,
-            };
-            if (count > 30) {
-              sendMessage(wsUrl, message2);
-              setCount(0);
-              console.log('30 count');
-            }
           }
         }
       }, 1000);
@@ -253,7 +257,7 @@ function MobileCameraPage() {
         clearInterval(intervalId);
       };
     }
-  }, [isStreaming]);
+  }, [isStreaming, count]);
 
   useEffect(() => {
     return () => {
