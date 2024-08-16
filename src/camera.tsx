@@ -3,16 +3,18 @@ import LaptopImage from './assets/Laptop.jpg';
 import { useWebSocket } from './WebSocketContext';
 
 const wsUrl = import.meta.env.VITE_SOCKET_URL;
+const u_id = localStorage.getItem('u_id');
 
 function CameraPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
-  const { connectWebSocket, disconnectWebSocket } = useWebSocket();
+  const { connectWebSocket, disconnectWebSocket, sendMessage } = useWebSocket();
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   const startStreaming = () => {
-    const constraints = { video: { facingMode: 'user' },};
-
+    const constraints = { video: { facingMode: 'user' } };
     navigator.mediaDevices
       .getUserMedia(constraints)
       .then((stream) => {
@@ -21,8 +23,7 @@ function CameraPage() {
           localStreamRef.current = stream;
           setIsStreaming(true);
           console.log('Camera stream started:', stream);
-          //웹소켓 커넥트
-          connectWebSocket(wsUrl);       
+          connectWebSocket(wsUrl);
         }
       })
       .catch((err) => {
@@ -41,9 +42,37 @@ function CameraPage() {
     }
     setIsStreaming(false);
     console.log('Camera stream stopped');
-    //웹소켓 연결종료
     disconnectWebSocket(wsUrl);
   };
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (isStreaming) {
+      intervalId = setInterval(() => {
+        if (canvasRef.current && videoRef.current) {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const fullImageData = canvas.toDataURL('image/png');
+            const imageData = fullImageData.split(',')[1]; // 메타데이터를 제거하고 인코딩된 데이터만 추출
+            setCapturedImage(fullImageData);
+            const message = {
+              u_id, 
+              type: 'video', 
+              device: 'pc', 
+              payload: imageData
+            };
+  
+            sendMessage(wsUrl, message); // WebSocket으로 전송
+            }
+        }
+      }, 2000); // 2초마다 캡처
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isStreaming]);
 
   useEffect(() => {
     return () => {
@@ -75,7 +104,6 @@ function CameraPage() {
           className="w-72 h-72 mb-10 p-4 bg-white rounded-xl animate-border-glow"
         ></video>
       </div>
-
       <div className="flex space-x-4">
         {!isStreaming ? (
           <button
@@ -95,6 +123,13 @@ function CameraPage() {
           </button>
         )}
       </div>
+      {capturedImage && (
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold text-center mb-2">Captured Image</h2>
+          <img src={capturedImage} alt="Captured" className="border rounded-lg" />
+        </div>
+      )}
+      <canvas ref={canvasRef} style={{ display: 'none' }} width={640} height={480} />
     </div>
   );
 }

@@ -71,8 +71,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const sendMessage = (url: string, message: any) => {
     const socket = socketRefs.current[url];
+    console.log("Sendmessage 호출!")
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(message));
+      console.log('메세지 보내짐', message);
     } else {
       console.error(`WebSocket for ${url} is not connected or ready to send messages`);
     }
