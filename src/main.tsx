@@ -26,29 +26,36 @@ const Loading = () => <div>Loading...</div>;
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <WebSocketProvider>
-      <WebcamStreamProvider>
-        <Router>
-          <ErrorBoundary>
-            <Suspense fallback={<Loading />}>
-              <Routes>
-                <Route path="/" element={<SignIn />} />
-                <Route path="/signin" element={<SignIn />} />
-                <Route path="/qrpage" element={<QrPage />} />
-                <Route path="/camera" element={<CameraPage />} />
-                <Route path="/studygoals" element={<StudyGoals />} />
-                <Route path="/tts" element={<TextToSpeech />} />
-                <Route path="/main" element={<MainPage />} />
-                <Route path="/camera-mobile" element={<CameraMobilePage />} />
-                <Route path="/setting" element={<SettingPage />} />
-                <Route path="/mobilescreen" element={<MobileScreen />} />
-                <Route path="/study" element={<Study />} />
-                <Route path="/game" element={<Game />} />
-                <Route path="/StudyMain" element={<StudyMain />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
-        </Router>
-      </WebcamStreamProvider>
+      <Router>
+        <ErrorBoundary>
+          <Suspense fallback={<Loading />}>
+            <Routes>
+              <Route path="/" element={<SignIn />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/camera-mobile" element={<CameraMobilePage />} />
+              <Route path="/main" element={<MainPage />} />
+              <Route
+                path="/*"
+                element={
+                  <WebcamStreamProvider>
+                    <Routes>
+                      <Route path="/qrpage" element={<QrPage />} />
+                      <Route path="/camera" element={<CameraPage />} />
+                      <Route path="/studygoals" element={<StudyGoals />} />
+                      <Route path="/tts" element={<TextToSpeech />} />
+                      <Route path="/setting" element={<SettingPage />} />
+                      <Route path="/mobilescreen" element={<MobileScreen />} />
+                      <Route path="/study" element={<Study />} />
+                      <Route path="/game" element={<Game />} />
+                      <Route path="/StudyMain" element={<StudyMain />} />
+                    </Routes>
+                  </WebcamStreamProvider>
+                }
+              />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
+      </Router>
     </WebSocketProvider>
   </StrictMode>
 );
