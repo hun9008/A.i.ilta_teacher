@@ -78,7 +78,7 @@ function VideoDisplay() {
       return;
     }
 
-    const sendFrame = (socket: WebSocket) => {
+    const sendFrame = () => {
       console.log('open send frame start');
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
