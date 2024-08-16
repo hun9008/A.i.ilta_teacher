@@ -45,7 +45,7 @@ export const WebcamStreamProvider: React.FC<{ children: React.ReactNode }> = ({ 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     if (isStreaming) {
-      intervalId = setInterval(captureAndSendImage, 3000);
+      intervalId = setInterval(captureAndSendImage, 500);
     }
     return () => clearInterval(intervalId);
   }, [isStreaming, captureAndSendImage]);

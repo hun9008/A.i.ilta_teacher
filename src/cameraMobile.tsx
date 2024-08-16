@@ -7,7 +7,6 @@ function useQuery() {
 }
 
 const wsUrl = import.meta.env.VITE_SOCKET_URL;
-// const u_id = localStorage.getItem('u_id');
 
 function MobileCameraPage() {
   const query = useQuery();
@@ -17,7 +16,9 @@ function MobileCameraPage() {
   const localStreamRef = useRef<MediaStream | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const { connectWebSocket, disconnectWebSocket, sendMessage } = useWebSocket();
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);  
+  const [count, setCount] = useState(0);
+
 
   const startStreaming = () => {
     const constraints = { video: { facingMode: 'environment' } };
@@ -74,13 +75,33 @@ function MobileCameraPage() {
             };
 
             sendMessage(wsUrl, message); // WebSocket으로 전송
+            setCount((prevCount) => {
+              const newCount = prevCount + 1;
+              if (newCount == 15) {
+                const message2 = {
+                  u_id,
+                  type: 'all',
+                  device: 'mobile',
+                  payload: imageData,
+                };
+                sendMessage(wsUrl, message2);
+                console.log(
+                  '30 count reached, sending additional message:',
+                  message2
+                );
+              }
+              return newCount;
+            });
             console.log('Image captured and sent:', message);
           }
         }
-      }, 2000); // 2초마다 캡처
+      }, 1000);
+
+      return () => {
+        clearInterval(intervalId);
+      };
     }
-    return () => clearInterval(intervalId);
-  }, [isStreaming]);
+  }, [isStreaming, count]);
 
   useEffect(() => {
     return () => {
