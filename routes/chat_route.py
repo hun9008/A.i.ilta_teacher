@@ -94,22 +94,22 @@ async def process_message(chat: ChatRequest):
         gpt_response = await call_openai_api(prompt)
 
         # json_response의 타입에 따라 처리
-        if isinstance(gpt_response, JSONResponse):
+        # if isinstance(gpt_response, JSONResponse):
             
             # response_content = gpt_response.content
             # response_content = json.loads(response_content)
             # response = response_content.get("content")
-            response = gpt_response
+        response = gpt_response
             
-            print("test) Successfully got response. \nresponse : ", response)
+        print("test) Successfully got response. \nresponse : ", response)
             
-            user_context[user_id]["solve_delay"] = False
-            user_context[user_id]["prev_chat"] = prompt + "\n" + response
+        user_context[user_id]["solve_delay"] = False
+        user_context[user_id]["prev_chat"] = prompt + "\n" + response
 
-        else:
-            print("Unexpected response type")
-            response = "Unexpected response type received from OpenAI API"
-            user_context[user_id]["prev_chat"] = prompt + "\n" + response
+        # else:
+        #     print("Unexpected response type")
+        #     response = "Unexpected response type received from OpenAI API"
+        #     user_context[user_id]["prev_chat"] = prompt + "\n" + response
             
         '''
         openai_response = await call_openai_api(prompt)
