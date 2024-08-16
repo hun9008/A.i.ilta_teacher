@@ -2,6 +2,7 @@ import { StrictMode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { WebSocketProvider } from './WebSocketContext';
+import { WebcamStreamProvider } from './WebcamStreamContext'
 
 const SignIn = lazy(() => import('./SignIn'));
 const QrPage = lazy(() => import('./QrPage'));
@@ -25,27 +26,29 @@ const Loading = () => <div>Loading...</div>;
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <WebSocketProvider>
-      <Router>
-        <ErrorBoundary>
-          <Suspense fallback={<Loading />}>
-            <Routes>
-              <Route path="/" element={<SignIn />} />
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/qrpage" element={<QrPage />} />
-              <Route path="/camera" element={<CameraPage />} />
-              <Route path="/studygoals" element={<StudyGoals />} />
-              <Route path="/tts" element={<TextToSpeech />} />
-              <Route path="/main" element={<MainPage />} />
-              <Route path="/camera-mobile" element={<CameraMobilePage />} />
-              <Route path="/setting" element={<SettingPage />} />
-              <Route path="/mobilescreen" element={<MobileScreen />} />
-              <Route path="/study" element={<Study />} />
-              <Route path="/game" element={<Game />} />
-              <Route path="/StudyMain" element={<StudyMain />} />
-            </Routes>
-          </Suspense>
-        </ErrorBoundary>
-      </Router>
+      <WebcamStreamProvider>
+        <Router>
+          <ErrorBoundary>
+            <Suspense fallback={<Loading />}>
+              <Routes>
+                <Route path="/" element={<SignIn />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/qrpage" element={<QrPage />} />
+                <Route path="/camera" element={<CameraPage />} />
+                <Route path="/studygoals" element={<StudyGoals />} />
+                <Route path="/tts" element={<TextToSpeech />} />
+                <Route path="/main" element={<MainPage />} />
+                <Route path="/camera-mobile" element={<CameraMobilePage />} />
+                <Route path="/setting" element={<SettingPage />} />
+                <Route path="/mobilescreen" element={<MobileScreen />} />
+                <Route path="/study" element={<Study />} />
+                <Route path="/game" element={<Game />} />
+                <Route path="/StudyMain" element={<StudyMain />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
+        </Router>
+      </WebcamStreamProvider>
     </WebSocketProvider>
   </StrictMode>
 );
