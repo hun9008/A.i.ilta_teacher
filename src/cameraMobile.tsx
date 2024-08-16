@@ -159,7 +159,7 @@
 
 // export default CameraMobilePage;
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 // @ts-ignore
 import Scanner from 'react-scanner';
 
