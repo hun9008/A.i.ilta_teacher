@@ -53,3 +53,35 @@ def detect_hand(frame):
             return True
     # print("No hand detected")
     return False
+
+
+def detect_motion(saved_images):
+    
+    # user의 초기 상태 설정 -> 공부 시작하면 doing으로 설정해야 함
+    # user_status = "doing"
+    
+    frames = [cv2.imread(image_path) for image_path in saved_images]
+
+    # 움직임 파악을 위한 초기 설정
+    motion_detected = False
+        
+    prev_gray = cv2.cvtColor(frames[0], cv2.COLOR_BGR2GRAY)
+    for i in range(1, len(frames)):
+        curr_gray = cv2.cvtColor(frames[i], cv2.COLOR_BGR2GRAY)
+
+        diff = cv2.absdiff(prev_gray, curr_gray) 
+        _, thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
+        motion = cv2.countNonZero(thresh) # 움직인 픽셀 수 측정 
+
+        if motion > 5000:  # 임계값 조정 필요
+            motion_detected = True
+            break
+            
+        # 현재 프레임을 이전 프레임으로 설정해 다음 프레임과 비교
+        prev_gray = curr_gray
+        
+    if not motion_detected:
+        print("user status might be < solve_delay >")
+        user_status = "solve_delay"
+
+    return user_status
