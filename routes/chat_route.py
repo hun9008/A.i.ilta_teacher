@@ -26,7 +26,6 @@ user_status = "solve_delay"
 user_context = {}  # 사용자의 상태와 관련된 데이터를 저장
 
 @route.websocket("/ws/chat")
-# front에서 status를 open으로 주면 websocket 열어줌
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 
@@ -42,7 +41,7 @@ async def websocket_endpoint(websocket: WebSocket):
             if chat_request.status == "open":
                 connections.append(websocket)
                 await websocket.send_text("WebSocket connection opened.")
-            else: #chat_request.status == "chat":
+            else:
                 print("test) WebSocket connection not opened or already open")
             # 메시지 처리
             response = await process_message(chat_request)
@@ -53,7 +52,6 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         if websocket in connections:
             connections.remove(websocket)
-        # await websocket.close()
         
 # 메시지 처리 로직
 async def process_message(chat: ChatRequest):
@@ -65,8 +63,6 @@ async def process_message(chat: ChatRequest):
     
     # (assume) 지금 어떤 문제 풀고 있는지 알아내기
     problem_index = 0
-    
-    # 해당 인덱스에 해당하는 문제(ocr 결과), concept, solution 가져오기
     ocr = ocrs[problem_index]
     
     if user_id not in user_context:
@@ -84,50 +80,21 @@ async def process_message(chat: ChatRequest):
         # init: 질문 전송
         if not user_context[user_id].get("solve_delay"):
             user_context[user_id] = {"solve_delay": True, "prev_chat": ""}
-            return "어디가 이해가 안돼?"
+            return "문제에서 어디가 이해가 안돼?" # 상황에 맞게 바꿔야 한다고 생각함
         
         # 사용자의 응답을 받은 경우, OpenAI API로 전송
         concept = concepts[problem_index]
         prompt = prompt_delay(ocr, concept, user_text, prev_chat)
         print("test) Sucessfully generate prompt. \nprompt : "+ prompt)
         
-        gpt_response = await call_openai_api(prompt)
-
-        # json_response의 타입에 따라 처리
-        # if isinstance(gpt_response, JSONResponse):
+        response = await call_openai_api(prompt)
+        print("test) Successfully got response. User status: solve_delay \nresponse : ", response)
             
-            # response_content = gpt_response.content
-            # response_content = json.loads(response_content)
-            # response = response_content.get("content")
-        response = gpt_response
-            
-        print("test) Successfully got response. \nresponse : ", response)
-            
-        user_context[user_id]["solve_delay"] = False
-        user_context[user_id]["prev_chat"] = prompt + "\n" + response
-
-        # else:
-        #     print("Unexpected response type")
-        #     response = "Unexpected response type received from OpenAI API"
-        #     user_context[user_id]["prev_chat"] = prompt + "\n" + response
-            
-        '''
-        openai_response = await call_openai_api(prompt)
-        response_content = await json.loads(json_response)
-
-        # 텍스트 추출해 문자열로 변환
-        response = response_content["message"]
-        
-        print("test) Sucessfully get response. \nresponse : "+ response)
-        
-        user_context[user_id]["solve_delay"] = False
-        user_context[user_id]["prev_chat"] = prompt+"\n"+response
-        '''
-
-    elif user_status == "solve":
-        response = "Your solution has been saved."
+        # user_context[user_id]["solve_delay"] = False 
+        user_context[user_id]["prev_chat"] = prompt + "\n" + "나의 답변 : " + response + "\n"
 
     elif user_status == "wrong":
+        
         # init: 질문 전송
         if not user_context[user_id].get("wrong"):
             user_context[user_id] = {"wrong": True, "prev_chat": ""}
@@ -138,10 +105,20 @@ async def process_message(chat: ChatRequest):
         prompt = prompt_wrong(ocr, solution, user_text, prev_chat)
         response = await call_openai_api(prompt)
         
-        user_context[user_id]["wrong"] = False
-        user_context[user_id]["prev_chat"] = prompt+"\n"+response
+        print("test) Successfully got response. User status: wrong. \nresponse : ", response)
+        
+        #user_context[user_id]["wrong"] = False
+        user_context[user_id]["prev_chat"] = prompt + "\n" + "나의 답변 : " + response + "\n"
 
+    elif user_status == "solve":
+        user_context[user_id]["solve_delay"] = False 
+        user_context[user_id]["wrong"] = False
+        # question) prev_chat을 DB에 저장하고 지워버리기?
+        response = "Your solution has been saved."
+        
     elif user_status == "doing":
+        #user_context[user_id]["solve_delay"] = False 
+        #user_context[user_id]["wrong"] = False
         response = "The user is continuing their work."
         
     else:
@@ -163,12 +140,11 @@ async def call_openai_api(prompt):
         
         print("test) Get response from call_open_api func. response : ", response)
         
-        print(JSONResponse(content=response.choices[0].message.content))
+        # print(JSONResponse(content=response.choices[0].message.content))
         response_content = response.choices[0].message.content
+        
+        # string으로 return 
         return response_content
-    
-        # JSON 형식으로 return 
-        # return JSONResponse(content=response.choices[0].message.content)
-    
+
     except Exception as e:
         return f"OpenAI API error: {str(e)}"
