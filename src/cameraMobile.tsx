@@ -293,7 +293,7 @@ function MobileCameraPage() {
       {capturedImage && (
         <div className="mt-4">
           <h2 className="text-lg font-semibold text-center mb-2">
-            Captured Image
+            Captured Image11
           </h2>
           <img
             src={capturedImage}
