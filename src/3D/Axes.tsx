@@ -6,7 +6,7 @@ interface AxesProps {
   length?: number;
 }
 
-const Axes: React.FC<AxesProps> = ({ length = 5 }) => {
+const Axes: React.FC<AxesProps> = ({ length = 20 }) => {
   const points = useMemo(() => [
     [new THREE.Vector3(0, 0, 0), new THREE.Vector3(length, 0, 0)],
     [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, length, 0)],
