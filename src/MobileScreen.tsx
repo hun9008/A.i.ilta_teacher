@@ -99,7 +99,7 @@ function VideoDisplay() {
       socket.send(JSON.stringify(message)); // 프레임 데이터와 함께 PC 정보 전송
     };
 
-    animationFrameRef.current = requestAnimationFrame(() => sendFrame(socket));
+    animationFrameRef.current = requestAnimationFrame(() => sendFrame());
     console.log('send img');
   };
 
