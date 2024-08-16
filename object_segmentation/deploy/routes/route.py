@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 import time
-from models.cv_ocr import problem_crop, ocr
+from models.cv_ocr import problem_crop
 from models.ocr_input import OCRInput, Determinent
 import boto3
 from botocore.exceptions import NoCredentialsError

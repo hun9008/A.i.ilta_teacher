@@ -11,3 +11,4 @@ FaceTracker
 hand
 hand_write_data/*
 keys
+deploy_env

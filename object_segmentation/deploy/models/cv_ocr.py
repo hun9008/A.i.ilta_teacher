@@ -3,7 +3,6 @@ import cv2
 import os
 # import matplotlib.pyplot as plt
 from PIL import Image
-import pytesseract
 
 problem_idx = 0
 
@@ -142,22 +141,3 @@ def problem_crop(image):
 
     contour(right, output_dir, 'right', origin_right)
     contour(left, output_dir, 'left', origin_left)
-
-def ocr(image_path):
-
-    # path = 'src/scenes/prob_9.png'
-    os.environ['TESSDATA_PREFIX'] = '/Users/jeong-yonghun/Desktop/FLY_AI/project/model/A.i.ilta_teacher/object_segmentation/deploy/tessdata'
-    # kor_equ = pytesseract.image_to_string(Image.open(path), config='-l kor + equ')
-
-    ocrs = []
-
-    image_files = os.listdir(image_path)
-    for file in image_files:
-        if not file.startswith('_'):
-            file_path = os.path.join(image_path, file)
-            text = pytesseract.image_to_string(Image.open(file_path), config='-l kor+equ')
-            ocrs.append(text)
-    return ocrs
-
-
-# problem_crop('src/scenes/prob_8.png')
