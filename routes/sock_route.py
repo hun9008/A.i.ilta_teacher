@@ -6,6 +6,7 @@ import asyncio
 from utils.problem import concepts, solutions, ocrs
 import os
 from datetime import datetime
+import base64
 
 route = APIRouter()
 
@@ -128,8 +129,10 @@ async def handle_ws_video(frame_data, websocket, u_id, device):
     filename = f"{timestamp}_{u_id}.jpg"
     filepath = os.path.join(storage_dir, filename)
     
+    byte_data = base64.b64decode(frame_data)
+
     with open(filepath, "wb") as f:
-        f.write(frame_data)
+        f.write(byte_data)
     
     # Manage the saved images
     saved_images = sorted(
