@@ -159,36 +159,82 @@
 
 // export default CameraMobilePage;
 
-import { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // @ts-ignore
 import Scanner from 'react-scanner';
-// import { useWebSocket } from './WebSocketContext';
 
 const DocumentScanner = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [scannedImage, setScannedImage] = useState<string | null>(null);
-  // const { sendMessage } = useWebSocket();
+  const localStreamRef = useRef<MediaStream | null>(null);
+
+  const startStreaming = () => {
+    const constraints = { video: { facingMode: 'environment' } };
+    navigator.mediaDevices
+      .getUserMedia(constraints)
+      .then((stream) => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          localStreamRef.current = stream;
+          console.log('Camera stream started:', stream);
+        }
+      })
+      .catch((err) => {
+        console.error('Error accessing camera:', err);
+        alert(
+          '카메라 권한이 필요합니다. 브라우저 설정에서 카메라 권한을 허용해주세요.'
+        );
+      });
+  };
+
+  const stopStreaming = () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => track.stop());
+      localStreamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    console.log('Camera stream stopped');
+  };
 
   const handleScan = (imageData: string) => {
     setScannedImage(imageData);
-    // 스캔된 이미지를 서버로 전송
-    /*
-
-    sendMessage('ws://your_server_url', {
-      type: 'all',
-      payload: imageData.split(',')[1], // 메타데이터 제거 후 전송
-    });
-    */
   };
+
+  useEffect(() => {
+    startStreaming(); // 컴포넌트가 마운트되면 스트리밍 시작
+
+    return () => {
+      stopStreaming(); // 컴포넌트가 언마운트될 때 스트리밍 중지
+    };
+  }, []);
 
   return (
     <div>
       <h1>Document Scanner</h1>
+      {/* 스트리밍 비디오 표시 */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        style={{
+          width: '640px',
+          height: '480px',
+          border: '1px solid #ccc',
+          backgroundColor: '#000',
+        }}
+      ></video>
+
+      {/* Scanner 컴포넌트 (보이지 않도록 설정하고 스캔 기능만 사용) */}
       <Scanner
         onScan={handleScan} // 스캔 완료 후 호출되는 콜백
         width={640}
         height={480}
         facingMode="environment" // 후면 카메라 사용
+        style={{ display: 'none' }} // 화면에 표시하지 않음
       />
+
       {scannedImage && (
         <div>
           <h2>Scanned Image</h2>
