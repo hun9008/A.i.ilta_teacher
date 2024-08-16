@@ -1,10 +1,10 @@
 # model에서 전송해온 정보
 
-# concepts = []
-# solutions = []
-# ocrs = []
+concepts = []
+solutions = []
+ocrs = []
 
-#
+'''
 ## 현재 dummy
 
 concepts= [
@@ -32,4 +32,4 @@ solutions = [
 ocrs=[
     "1. 부등식 ax<2a_bx의 해가 x>1일 때, 부등식 (a-b)x+3a+b>0의 해를 구하시오.\n (단, a,b는 상수)"
       ]
-#
+'''
