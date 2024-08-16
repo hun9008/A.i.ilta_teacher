@@ -229,7 +229,7 @@ function MobileCameraPage() {
             setCapturedImage(fullImageData);
             const message = {
               u_id,
-              type: 'all',
+              type: 'video',
               device: 'mobile',
               payload: imageData,
             };

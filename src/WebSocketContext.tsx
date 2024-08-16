@@ -22,6 +22,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const socketRefs = useRef<{ [key: string]: WebSocket | null }>({});
   const [connectedStates, setConnectedStates] = useState<{ [key: string]: boolean }>({});
+  const [imageData, setImageData] = useState<string | null>(null); // 이미지 데이터를 저장할 상태
 
   const connectWebSocket = (url: string) => {
     if (socketRefs.current[url]) return; // Prevent re-connecting if already connected
@@ -49,6 +50,12 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     socket.onmessage = (event) => {
       console.log(`Message from server on ${url}:`, event.data);
+      
+      // JSON 형식의 메세지를 파싱하여 이미지 데이터 추출
+      const parsedData = JSON.parse(event.data);
+      if (parsedData.type === 'rtc-frame') {
+        setImageData(parsedData.payload); // 이미지 데이터를 상태에 저장
+      }
     };
   };
 
@@ -99,6 +106,12 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
       }}
     >
       {children}
+      {/* 이미지를 렌더링하는 부분 */}
+      {imageData && (
+        <div>
+          <img src={`data:image/png;base64,${imageData}`} alt="Received from WebSocket" />
+        </div>
+      )}
     </WebSocketContext.Provider>
   );
 };
