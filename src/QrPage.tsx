@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode.react';
-import { useWebSocket } from './WebSocketContext';
+// import { useWebSocket } from './WebSocketContext';
 
 function QrPage() {
-  const navigate = useNavigate();
-  const { sendMessage, connectWebSocket, isConnected } = useWebSocket();
+  // const navigate = useNavigate();
+  // const { sendMessage, connectWebSocket, isConnected } = useWebSocket();
   const [qrUrl, setQrUrl] = React.useState<string>('');
 
   useEffect(() => {
@@ -21,23 +21,23 @@ function QrPage() {
     }
   }, []);
 
-  const handleStartStudy = () => {
-    const u_id = localStorage.getItem('u_id');
-    if (u_id) {
-      if (!isConnected) {
-        connectWebSocket(); // Connect WebSocket when the button is clicked
-      }
+  // const handleStartStudy = () => {
+  //   const u_id = localStorage.getItem('u_id');
+  //   if (u_id) {
+  //     if (!isConnected) {
+  //       connectWebSocket(); // Connect WebSocket when the button is clicked
+  //     }
 
-      sendMessage({
-        u_id,
-        status: 'open',
-        text: '',
-      });
-      console.log('Sent status: open message to server.');
+  //     sendMessage({
+  //       u_id,
+  //       status: 'open',
+  //       text: '',
+  //     });
+  //     console.log('Sent status: open message to server.');
 
-      navigate('/StudyMain'); // Navigate to the study page
-    }
-  };
+  //     navigate('/StudyMain'); // Navigate to the study page
+  // }
+  // };
 
   return (
     <div className="flex flex-col items-center justify-center bg-gray-50">
@@ -54,7 +54,7 @@ function QrPage() {
         />
       )}
 
-      <button onClick={handleStartStudy}>공부시작하기</button>
+      {/* <button onClick={handleStartStudy}>공부시작하기</button> */}
     </div>
   );
 }
