@@ -53,14 +53,15 @@ async def websocket_endpoint(websocket: WebSocket):
         #     print("connection_key not found in connections")
 
 async def handle_ws_ocr(frame_data, websocket, u_id, device): 
-    # global performing_ocr
-    # if performing_ocr:
-    # response = {'type': 'ocr-result', 'text': 'OCR in progress, please wait'}
-    # await websocket.send_json(response)
-    # return
 
-    message = json.loads(frame_data)
-    image_url = message['payload']
+    try:
+        decoded_data = base64.b64decode(frame_data)
+        message = json.loads(decoded_data)
+        image_url = message['payload']
+    except (json.JSONDecodeError, KeyError) as e:
+        response = {'type': 'error', 'message': 'Invalid frame data'}
+        await websocket.send_json(response)
+        return
     
     with open("example.txt", "r") as file:
         frame_data = file.read()
