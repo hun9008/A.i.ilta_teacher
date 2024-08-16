@@ -95,7 +95,7 @@ async def handle_ws_rtc(frame_data, websocket, u_id, device):
     #     await websocket.send_json(response)
     #     return
 
-    # print("Handling RTC")
+    print("Handling RTC")
     pc_key = f'{u_id}_pc'
 
     if pc_key in connections:
@@ -148,7 +148,7 @@ async def handle_ws_video(frame_data, websocket, u_id, device):
 
 async def perform_ocr(frame_data):
     print("Performing OCR")
-    url = "http://llm.hunian.site/problems_ocr"
+    url = "http://model.maitutor.site//problems_ocr"
     payload = {'image_base64': frame_data}
     print(payload)
     headers = {'Content-Type': 'application/json'}  # JSON 형식임을 명시
