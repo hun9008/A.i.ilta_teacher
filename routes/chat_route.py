@@ -114,12 +114,12 @@ async def process_message(chat: ChatRequest):
     elif user_vars.user_status == "solve":
         user_context[user_id]["solve_delay"] = False 
         user_context[user_id]["wrong"] = False
-        # question) prev_chat을 DB에 저장하고 지워버리기?
+        
+        #한 문제 풀었으면 prev_chat init
+        user_context[user_id] = {"prev_chat": ""} 
         response = "Your solution has been saved."
         
     elif user_vars.user_status == "doing":
-        #user_context[user_id]["solve_delay"] = False 
-        #user_context[user_id]["wrong"] = False
         response = "The user is continuing their work."
         
     else:
