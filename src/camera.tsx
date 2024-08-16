@@ -1,55 +1,23 @@
 import { useEffect, useRef } from 'react';
 import LaptopImage from './assets/Laptop.jpg';
+import { useWebSocket } from './WebSocketContext';
 
 function CameraPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const captureIntervalRef = useRef<number | null>(null);
   const u_id = localStorage.getItem('u_id');
-  const reconnectAttemptsRef = useRef<number>(0);
+  const cameraSocketUrl = import.meta.env.VITE_SOCKET_URL; // 환경변수에서 가져온 URL 사용
+
+  const { connectWebSocket, sendMessage, isConnected } = useWebSocket();
 
   useEffect(() => {
+    connectWebSocket(cameraSocketUrl);
+
     return () => {
       stopStreaming();
     };
-  }, []);
-
-  const initWebSocket = () => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      console.log('WebSocket is already open');
-      return;
-    }
-
-    console.log('Initializing WebSocket...');
-    wsRef.current = new WebSocket(import.meta.env.VITE_SOCKET_URL);
-
-    wsRef.current.onopen = () => {
-      console.log('WebSocket connection opened');
-      reconnectAttemptsRef.current = 0; // Reset reconnect attempts on successful connection
-      startCapturingFrames();
-    };
-
-    wsRef.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    wsRef.current.onmessage = (event) => {
-      console.log('WebSocket message received:', event.data);
-    };
-
-    wsRef.current.onclose = (event) => {
-      console.log('WebSocket connection closed');
-      console.log('Close event:', event);
-      stopCapturingFrames();
-      if (event.code !== 1000) {
-        // 1000 is a normal closure, attempt to reconnect if not
-        attemptReconnect();
-      }
-    };
-
-    console.log('WebSocket initialized:', wsRef.current);
-  };
+  }, [connectWebSocket, cameraSocketUrl]);
 
   const requestCameraAccess = () => {
     const constraints = {
@@ -63,7 +31,10 @@ function CameraPage() {
           videoRef.current.srcObject = stream;
           localStreamRef.current = stream;
           console.log('Camera stream started:', stream);
-          initWebSocket(); // 권한이 허용된 후 WebSocket 초기화
+
+          if (isConnected(cameraSocketUrl)) {
+            startCapturingFrames();
+          }
         }
       })
       .catch((err) => {
@@ -72,19 +43,6 @@ function CameraPage() {
           '카메라 권한이 필요합니다. 브라우저 설정에서 카메라 권한을 허용해주세요.'
         );
       });
-  };
-
-  const attemptReconnect = () => {
-    const maxReconnectAttempts = 5;
-    if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-      reconnectAttemptsRef.current += 1;
-      console.log(
-        `Attempting to reconnect... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
-      );
-      setTimeout(initWebSocket, 1000 / 20); // Try to reconnect after 50ms
-    } else {
-      console.log('Max reconnect attempts reached.');
-    }
   };
 
   const startCapturingFrames = () => {
@@ -123,13 +81,9 @@ function CameraPage() {
       console.log('Video element not available');
       return;
     }
-    if (!wsRef.current) {
-      console.log('WebSocket is null');
-      return;
-    }
 
-    if (wsRef.current.readyState !== WebSocket.OPEN) {
-      console.log('WebSocket is not open');
+    if (!isConnected(cameraSocketUrl)) {
+      console.log('WebSocket is not connected');
       return;
     }
 
@@ -140,13 +94,13 @@ function CameraPage() {
     if (ctx) {
       ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
       const frame = canvas.toDataURL('image/jpeg').split(',')[1];
-      const message = JSON.stringify({
+      const message = {
         type: 'video',
         payload: frame,
         device: 'pc',
         u_id: u_id,
-      });
-      wsRef.current.send(message);
+      };
+      sendMessage(cameraSocketUrl, message);
       console.log('captureFrame sent');
     }
   };

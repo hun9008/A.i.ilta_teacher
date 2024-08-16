@@ -83,6 +83,7 @@
 //   return context;
 // };
 
+// WebSocketContext.tsx
 import React, {
   createContext,
   useContext,
@@ -92,10 +93,10 @@ import React, {
 } from 'react';
 
 interface WebSocketContextType {
-  socket: WebSocket | null;
-  sendMessage: (message: any) => void;
-  connectWebSocket: () => void;
-  isConnected: boolean;
+  getSocket: (url: string) => WebSocket | null;
+  sendMessage: (url: string, message: any) => void;
+  connectWebSocket: (url: string) => void;
+  isConnected: (url: string) => boolean;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -105,78 +106,68 @@ const WebSocketContext = createContext<WebSocketContextType | undefined>(
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const socketRef = useRef<WebSocket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [shouldReconnect, setShouldReconnect] = useState(true);
-  const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const socketRefs = useRef<{ [key: string]: WebSocket | null }>({});
+  const [connectedStates, setConnectedStates] = useState<{ [key: string]: boolean }>({});
 
-  const connectWebSocket = () => {
-    if (socketRef.current) return; // Prevent re-connecting if already connected
+  const connectWebSocket = (url: string) => {
+    if (socketRefs.current[url]) return; // Prevent re-connecting if already connected
 
-    const socket = new WebSocket(import.meta.env.VITE_CHAT_SOCKET_URL);
-    socketRef.current = socket;
+    const socket = new WebSocket(url);
+    socketRefs.current[url] = socket;
 
     socket.onopen = () => {
-      console.log('WebSocket connection opened');
-      setIsConnected(true);
-      setShouldReconnect(true); // Allow reconnection on future disconnects
+      console.log(`WebSocket connection opened for ${url}`);
+      setConnectedStates((prev) => ({ ...prev, [url]: true }));
     };
 
     socket.onclose = (event) => {
-      console.log(`WebSocket connection closed, code=${event.code}`);
-      setIsConnected(false);
-      socketRef.current = null;
+      console.log(`WebSocket connection closed for ${url}, code=${event.code}`);
+      setConnectedStates((prev) => ({ ...prev, [url]: false }));
+      socketRefs.current[url] = null;
 
-      if (shouldReconnect && event.code !== 1000) {
+      if (event.code !== 1000) {
         // Reconnect only if the close wasn't clean (code 1000)
-        attemptReconnect();
+        attemptReconnect(url);
       }
     };
 
     socket.onerror = (error) => {
-      console.error('WebSocket error observed:', error);
+      console.error(`WebSocket error observed for ${url}:`, error);
     };
 
     socket.onmessage = (event) => {
-      console.log('Message from server:', event.data);
+      console.log(`Message from server on ${url}:`, event.data);
     };
   };
 
-  const attemptReconnect = () => {
-    if (reconnectIntervalRef.current) return; // Already attempting to reconnect
-
-    reconnectIntervalRef.current = setInterval(() => {
-      console.log('Attempting to reconnect WebSocket...');
-      connectWebSocket();
-
-      if (isConnected) {
-        clearInterval(reconnectIntervalRef.current!);
-        reconnectIntervalRef.current = null;
-      }
-    }, 5000); // Try to reconnect every 5 seconds
+  const attemptReconnect = (url: string) => {
+    setTimeout(() => {
+      console.log(`Attempting to reconnect WebSocket for ${url}...`);
+      connectWebSocket(url);
+    }, 5000); // Try to reconnect after 5 seconds
   };
 
-  const sendMessage = (message: any) => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify(message));
+  const sendMessage = (url: string, message: any) => {
+    const socket = socketRefs.current[url];
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(message));
     } else {
-      console.error('WebSocket is not connected or ready to send messages');
+      console.error(`WebSocket for ${url} is not connected or ready to send messages`);
     }
   };
 
-  useEffect(() => {
-    // Cleanup interval on unmount
-    return () => {
-      if (reconnectIntervalRef.current) {
-        clearInterval(reconnectIntervalRef.current);
-      }
-    };
-  }, []);
+  const getSocket = (url: string) => {
+    return socketRefs.current[url];
+  };
+
+  const isConnected = (url: string) => {
+    return connectedStates[url] || false;
+  };
 
   return (
     <WebSocketContext.Provider
       value={{
-        socket: socketRef.current,
+        getSocket,
         sendMessage,
         connectWebSocket,
         isConnected,
