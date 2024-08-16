@@ -3,7 +3,9 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import requests
 import asyncio
 #from utils.sock_utils import decode_image, detect_hand 
+from utils.sock_utils import detect_motion
 from utils.problem import concepts, solutions, ocrs
+import config.user_vars
 import os
 from datetime import datetime
 import base64
@@ -142,6 +144,11 @@ async def handle_ws_video(frame_data, websocket, u_id, device):
     
     if len(saved_images) > 10:
         os.remove(saved_images[0])
+        
+    if device == "mobile" and len(saved_images) == 10:
+        print("test) Back decide user status by detecting motion in mobile camera.\n")
+        user_vars.user_status = detect_motion(saved_images)
+        print("test) user_status : " + user_vars.user_status + "\n")
     
     response = {'type': 'response', 'message': 'Image received'}
     await websocket.send_json(response)

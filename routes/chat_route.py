@@ -9,6 +9,7 @@ from models.chat import ChatRequest
 from utils.problem import concepts, solutions, ocrs
 from utils.chat_utils import prompt_delay, prompt_wrong
 from fastapi import WebSocket, WebSocketDisconnect
+import config.user_vars
 
 route = APIRouter()
 
@@ -22,7 +23,7 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 connections = []
 
 # (assume) define user_status
-user_status = "solve_delay"
+# user_vars.user_status = "solve_delay"
 user_context = {}  # 사용자의 상태와 관련된 데이터를 저장
 
 @route.websocket("/ws/chat")
@@ -56,7 +57,7 @@ async def websocket_endpoint(websocket: WebSocket):
 # 메시지 처리 로직
 async def process_message(chat: ChatRequest):
     
-    print("test) Now start process_message function")
+    print("test) Now start process_message function. user_status : "+ user_vars.user_status + "\n")
     
     user_text = chat.text
     user_id = chat.u_id
@@ -73,9 +74,9 @@ async def process_message(chat: ChatRequest):
     print("test) OCR : "+ ocr)
     print("test) PREV_CHAT : "+ prev_chat)
     
-    if user_status == "solve_delay":
+    if user_vars.user_status == "solve_delay":
         
-        print("test) user_status is always solve_delay in test.")
+        #print("test) user_status is always solve_delay in test.")
         
         # init: 질문 전송
         if not user_context[user_id].get("solve_delay"):
@@ -93,7 +94,7 @@ async def process_message(chat: ChatRequest):
         # user_context[user_id]["solve_delay"] = False 
         user_context[user_id]["prev_chat"] = prompt + "\n" + "나의 답변 : " + response + "\n"
 
-    elif user_status == "wrong":
+    elif user_vars.user_status == "wrong":
         
         # init: 질문 전송
         if not user_context[user_id].get("wrong"):
@@ -110,13 +111,13 @@ async def process_message(chat: ChatRequest):
         #user_context[user_id]["wrong"] = False
         user_context[user_id]["prev_chat"] = prompt + "\n" + "나의 답변 : " + response + "\n"
 
-    elif user_status == "solve":
+    elif user_vars.user_status == "solve":
         user_context[user_id]["solve_delay"] = False 
         user_context[user_id]["wrong"] = False
         # question) prev_chat을 DB에 저장하고 지워버리기?
         response = "Your solution has been saved."
         
-    elif user_status == "doing":
+    elif user_vars.user_status == "doing":
         #user_context[user_id]["solve_delay"] = False 
         #user_context[user_id]["wrong"] = False
         response = "The user is continuing their work."
