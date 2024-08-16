@@ -124,20 +124,24 @@ async def handle_ws_video(frame_data, websocket, u_id, device):
     
     saved_images = []
     
-    while True:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}_{u_id}.jpg"
-        filepath = os.path.join(storage_dir, filename)
-        
-        with open(filepath, "wb") as f:
-            f.write(frame_data)
-        
-        saved_images.append(filepath)
-        
-        if len(saved_images) > 10:
-            os.remove(saved_images.pop(0))
-        
-        await asyncio.sleep(1)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{timestamp}_{u_id}.jpg"
+    filepath = os.path.join(storage_dir, filename)
+    
+    with open(filepath, "wb") as f:
+        f.write(frame_data)
+    
+    # Manage the saved images
+    saved_images = sorted(
+        [os.path.join(storage_dir, f) for f in os.listdir(storage_dir) if f.endswith(".jpg")],
+        key=os.path.getctime
+    )
+    
+    if len(saved_images) > 10:
+        os.remove(saved_images[0])
+    
+    response = {'type': 'response', 'message': 'Image received'}
+    await websocket.send_json(response)
 
 async def perform_ocr(frame_data):
     print("Performing OCR")
