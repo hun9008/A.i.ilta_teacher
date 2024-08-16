@@ -42,6 +42,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 if device == 'mobile':
                     await handle_ws_rtc(image, websocket, u_id, device)
                     await handle_ws_ocr(image, websocket, u_id, device)
+            elif type == 'hi':
+                response = {'type': 'response', 'message': 'Hello!'}
+                await websocket.send_json(response)
             else:
                 response = {'type': 'error', 'message': 'Invalid message type'}
                 await websocket.send_json(response)
@@ -55,23 +58,9 @@ async def websocket_endpoint(websocket: WebSocket):
         #     print("connection_key not found in connections")
 
 async def handle_ws_ocr(frame_data, websocket, u_id, device): 
-
-    try:
-        decoded_data = base64.b64decode(frame_data)
-        message = json.loads(decoded_data)
-        image_url = message['payload']
-    except (json.JSONDecodeError, KeyError) as e:
-        response = {'type': 'error', 'message': 'Invalid frame data'}
-        await websocket.send_json(response)
-        return
-    
-    with open("example.txt", "r") as file:
-        frame_data = file.read()
-    message = json.loads(frame_data)
-    image_url = message['image']
     
     # performing_ocr = True
-    ocr_result = await perform_ocr(image_url)
+    ocr_result = await perform_ocr(frame_data)
     # performing_ocr = False
     
     concepts.extend(ocr_result.get("concepts", []))
