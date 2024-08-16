@@ -173,6 +173,8 @@ function MobileCameraPage() {
   const { connectWebSocket, disconnectWebSocket, sendMessage } = useWebSocket();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
+  const [count, setCount] = useState(0);
+
   const startStreaming = () => {
     const constraints = { video: { facingMode: 'environment' } };
     navigator.mediaDevices
@@ -228,19 +230,23 @@ function MobileCameraPage() {
             };
 
             sendMessage(wsUrl, message); // WebSocket으로 전송
+            setCount(count + 1);
             //다음을 30초마다 보내줘
             console.log('Image captured and sent:', message);
 
-            // const message2 = {
-            //   u_id,
-            //   type: 'video',
-            //   device: 'mobile',
-            //   payload: imageData,
-            // };
-            // sendMessage(wsUrl, message2);
+            const message2 = {
+              u_id,
+              type: 'video',
+              device: 'mobile',
+              payload: imageData,
+            };
+            if (count > 30) {
+              sendMessage(wsUrl, message2);
+              setCount(0);
+            }
           }
         }
-      }, 1000 / 10); // 2초마다 캡처
+      }, 1000);
 
       return () => {
         clearInterval(intervalId);
