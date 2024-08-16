@@ -1,28 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import LaptopImage from './assets/Laptop.jpg';
 import { useWebSocket } from './WebSocketContext';
+
+const wsUrl = import.meta.env.VITE_SOCKET_URL;
 
 function CameraPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
-  const captureIntervalRef = useRef<number | null>(null);
-  const u_id = localStorage.getItem('u_id');
-  const cameraSocketUrl = import.meta.env.VITE_SOCKET_URL; // 환경변수에서 가져온 URL 사용
+  const [isStreaming, setIsStreaming] = useState(false);
+  const { connectWebSocket, disconnectWebSocket } = useWebSocket();
 
-  const { connectWebSocket, sendMessage, isConnected } = useWebSocket();
-
-  useEffect(() => {
-    connectWebSocket(cameraSocketUrl);
-
-    return () => {
-      stopStreaming();
-    };
-  }, [connectWebSocket, cameraSocketUrl]);
-
-  const requestCameraAccess = () => {
-    const constraints = {
-      video: { facingMode: 'user' },
-    };
+  const startStreaming = () => {
+    const constraints = { video: { facingMode: 'user' },};
 
     navigator.mediaDevices
       .getUserMedia(constraints)
@@ -30,80 +19,39 @@ function CameraPage() {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           localStreamRef.current = stream;
+          setIsStreaming(true);
           console.log('Camera stream started:', stream);
-
-          if (isConnected(cameraSocketUrl)) {
-            startCapturingFrames();
-          }
+          //웹소켓 커넥트
+          connectWebSocket(wsUrl);       
         }
       })
       .catch((err) => {
         console.error('Error accessing camera:', err);
-        alert(
-          '카메라 권한이 필요합니다. 브라우저 설정에서 카메라 권한을 허용해주세요.'
-        );
+        alert('카메라 권한이 필요합니다. 브라우저 설정에서 카메라 권한을 허용해주세요.');
       });
-  };
-
-  const startCapturingFrames = () => {
-    if (captureIntervalRef.current) return;
-
-    console.log('Starting to capture frames...');
-    captureIntervalRef.current = window.setInterval(() => {
-      captureFrame();
-    }, 1000);
-  };
-
-  const stopCapturingFrames = () => {
-    if (captureIntervalRef.current) {
-      console.log('Stopping frame capture...');
-      clearInterval(captureIntervalRef.current);
-      captureIntervalRef.current = null;
-    }
   };
 
   const stopStreaming = () => {
     if (localStreamRef.current) {
-      console.log('Stopping camera stream...');
       localStreamRef.current.getTracks().forEach((track) => track.stop());
       localStreamRef.current = null;
     }
     if (videoRef.current) {
-      console.log('Releasing video element...');
       videoRef.current.srcObject = null;
     }
-    stopCapturingFrames();
+    setIsStreaming(false);
+    console.log('Camera stream stopped');
+    //웹소켓 연결종료
+    disconnectWebSocket(wsUrl);
   };
 
-  const captureFrame = () => {
-    console.log('captureFrame called');
-    if (!videoRef.current) {
-      console.log('Video element not available');
-      return;
-    }
-
-    if (!isConnected(cameraSocketUrl)) {
-      console.log('WebSocket is not connected');
-      return;
-    }
-
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-      const frame = canvas.toDataURL('image/jpeg').split(',')[1];
-      const message = {
-        type: 'video',
-        payload: frame,
-        device: 'pc',
-        u_id: u_id,
-      };
-      sendMessage(cameraSocketUrl, message);
-      console.log('captureFrame sent');
-    }
-  };
+  useEffect(() => {
+    return () => {
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center bg-gray-50">
@@ -117,6 +65,7 @@ function CameraPage() {
           <img
             src={LaptopImage}
             className="w-72 h-72 mb-10 p-4 bg-white rounded-xl animate-border-glow"
+            alt="Laptop"
           />
         </div>
         <video
@@ -128,13 +77,23 @@ function CameraPage() {
       </div>
 
       <div className="flex space-x-4">
-        <button
-          id="startButton"
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={requestCameraAccess}
-        >
-          Run
-        </button>
+        {!isStreaming ? (
+          <button
+            id="startButton"
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            onClick={startStreaming}
+          >
+            Run
+          </button>
+        ) : (
+          <button
+            id="stopButton"
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            onClick={stopStreaming}
+          >
+            Stop
+          </button>
+        )}
       </div>
     </div>
   );
