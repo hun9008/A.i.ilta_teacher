@@ -104,7 +104,7 @@ function CameraMobilePage() {
         const frame = canvas.toDataURL('image/jpeg').split(',')[1];
 
         const message = {
-          type: 'rtc',
+          type: 'video',
           payload: frame,
           device: 'mobile',
           u_id: u_id,
