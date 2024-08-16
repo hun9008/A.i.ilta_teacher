@@ -7,7 +7,7 @@ const u_id = localStorage.getItem('u_id');
 
 function CameraPage() {
   const { startStreaming, stopStreaming, isStreaming } = useWebcamStream();
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedImage] = useState<string | null>(null);
 
   const handleStartStreaming = () => {
     startStreaming(wsUrl, u_id || '', 'video', 'pc');
