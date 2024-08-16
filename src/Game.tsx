@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera, Grid } from '@react-three/drei'
 import * as THREE from 'three'
@@ -55,7 +55,6 @@ function Game() {
       penguinTargetPosition.current = newPosition;
     }
   }, [icePositions, penguinPosition]);
-
   return (
     <div className="w-screen h-screen bg-gradient-to-b from-blue-100 to-blue-200 relative">
       <Canvas className="w-full h-full">
@@ -164,5 +163,4 @@ const UI: React.FC<UIProps> = ({
     </AnimatePresence>
   </>
 );
-
 export default Game;
