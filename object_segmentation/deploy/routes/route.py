@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 import time
 from models.cv_ocr import problem_crop, ocr
-from models.ocr_input import OCRInput
+from models.ocr_input import OCRInput, Determinent
 import boto3
 from botocore.exceptions import NoCredentialsError
 import requests
@@ -24,6 +24,11 @@ def decode_image(base64_str):
     np_arr = np.frombuffer(img_data, np.uint8)
     image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
     return image
+
+def encode_image_to_binary(image):
+    _, buffer = cv2.imencode('.jpg', image)
+    binary_data = buffer.tobytes()
+    return binary_data
 
 def upload_to_s3(file_name, bucket, object_name=None):
     s3_client = boto3.client(
@@ -45,7 +50,41 @@ def upload_to_s3(file_name, bucket, object_name=None):
         print("AWS 자격 증명을 찾을 수 없습니다.")
         return None
 
-async def fetch_solution_or_concept(client, prompt_type):
+def detect_hand_ocr_text(img):
+    """Detects text in the file."""
+    from google.cloud import vision
+
+    client = vision.ImageAnnotatorClient()
+
+    decoded_img = decode_image(img)
+    content = encode_image_to_binary(decoded_img)
+
+    image = vision.Image(content=content)
+
+    response = client.text_detection(image=image)
+    texts = response.text_annotations
+    print("Texts:")
+
+    for text in texts:
+        # print(f'\n"{text.description}"')
+
+        vertices = [
+            f"({vertex.x},{vertex.y})" for vertex in text.bounding_poly.vertices
+        ]
+
+        # print("bounds: {}".format(",".join(vertices)))
+
+    if response.error.message:
+        raise Exception(
+            "{}\nFor more info on error messages, check: "
+            "https://cloud.google.com/apis/design/errors".format(response.error.message)
+        )
+    
+    print('len : ', len(texts[0].description))
+
+    return texts[0].description
+
+async def fetch_openai(client, prompt_type):
     message = [{
         "role": "user", 
         "content": [
@@ -152,11 +191,11 @@ async def problems_ocr(input: OCRInput):
     sorted_ocrs = sorted(ocrs, key=lambda x: int(x.split('*')[1]))
     
     concept_tasks = [
-        fetch_solution_or_concept(client, f"이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
+        fetch_openai(client, f"이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
         for ocr in sorted_ocrs
     ]
     solution_tasks = [
-        fetch_solution_or_concept(client, f"이미지를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ..., answer: 로 알려줘. {ocr}")
+        fetch_openai(client, f"이미지를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ..., answer: 로 알려줘. {ocr}")
         for ocr in sorted_ocrs
     ]
 
@@ -174,3 +213,71 @@ async def problems_ocr(input: OCRInput):
     }
 
     return JSONResponse(content=output_json)
+
+@router.post("/one_problem_ocr")
+async def one_problem_ocr(input: OCRInput):
+    start = time.time()
+    image = decode_image(input.image)
+    problem_crop(image)
+    
+    image_path = './temp'
+    file_name = str(int(time.time())) + ".jpg"
+    image_urls = []
+
+    for filename in os.listdir(image_path):
+        if not filename.startswith('_'):
+            file_path = os.path.join(image_path, filename)
+            image_url = upload_to_s3(file_path, 'flyai', filename)
+            image_urls.append(image_url)
+    
+    claude_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+    ocr_tasks = [
+        fetch_ocr_claude(claude_client, image_url, "이 이미지에서 문제를 추출해 알려줘. (부등호에 주의해줘.)")
+        for image_url in image_urls
+    ]
+    
+    ocrs = await asyncio.gather(*ocr_tasks)
+
+    # temp directory cleanup
+    for filename in os.listdir(image_path):
+        os.remove(os.path.join(image_path, filename))
+    
+    output_json = {
+        "ocrs": ocrs,
+    }
+
+    return JSONResponse(content=output_json)
+
+@router.post("/hand_ocr")
+async def hand_ocr(input: Determinent):
+
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./keys/flyai-432701-9290e087cf34.json"
+
+    ocr_result = detect_hand_ocr_text(input.image)
+
+    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+    solution = input.solution
+
+    openai_result = await fetch_openai(client, f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
+
+    determinent = "None"
+    if "##1##" in openai_result:
+        determinent = "solve"
+    elif "##2##" in openai_result:
+        determinent = "wrong"
+    elif "##3##" in openai_result:
+        determinent = "doing"
+    else:
+        determinent = "None"
+
+    output_json = {
+        "ocr_result": ocr_result,
+        "determinants": determinent,
+    }
+
+    return JSONResponse(content=output_json)
+    
+
+

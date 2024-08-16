@@ -8,3 +8,6 @@ templates/*
 results/*
 sam_output_problems/*
 FaceTracker
+hand
+hand_write_data/*
+keys
