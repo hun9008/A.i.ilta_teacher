@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from models.study_init import SetTime, RealTime
-import config.user_vars
+from config import user_vars
 
 route = APIRouter()
 

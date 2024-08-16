@@ -5,7 +5,7 @@ import asyncio
 #from utils.sock_utils import decode_image, detect_hand 
 from utils.sock_utils import detect_motion
 from utils.problem import concepts, solutions, ocrs
-import config.user_vars
+from config import user_vars
 import os
 from datetime import datetime
 import base64

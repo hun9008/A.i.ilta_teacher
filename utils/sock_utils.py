@@ -1,7 +1,7 @@
 import cv2 
 import numpy as np
 import base64 # decoding, encoding 방식
-import config.user_vars
+from config import user_vars
 
 def decode_image(base64_str):
     try:

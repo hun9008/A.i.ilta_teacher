@@ -11,7 +11,7 @@ from models.chat import ChatRequest
 from utils.problem import concepts, solutions, ocrs
 from utils.chat_utils import prompt_delay, prompt_wrong
 from fastapi import WebSocket, WebSocketDisconnect
-import config.user_vars
+from config import user_vars
 
 route = APIRouter()
 
