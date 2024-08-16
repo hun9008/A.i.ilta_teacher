@@ -40,6 +40,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 if device == 'mobile':
                     await handle_ws_rtc(image, websocket, u_id, device)
                     await handle_ws_ocr(image, websocket, u_id, device)
+            elif type == 'hi':
+                response = {'type': 'response', 'message': 'Hello!'}
+                await websocket.send_json(response)
             else:
                 response = {'type': 'error', 'message': 'Invalid message type'}
                 await websocket.send_json(response)
