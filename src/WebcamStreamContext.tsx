@@ -6,6 +6,7 @@ interface WebcamStreamContextType {
   startStreaming: (wsUrl: string, u_id: string, type: string, device: string) => void;
   stopStreaming: () => void;
   isStreaming: boolean;
+  webcamRef: React.RefObject<Webcam>;
 }
 
 const WebcamStreamContext = createContext<WebcamStreamContextType | undefined>(undefined);
@@ -51,7 +52,7 @@ export const WebcamStreamProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [isStreaming, captureAndSendImage]);
 
   return (
-    <WebcamStreamContext.Provider value={{ startStreaming, stopStreaming, isStreaming }}>
+    <WebcamStreamContext.Provider value={{ startStreaming, stopStreaming, isStreaming, webcamRef }}>
       {children}
       <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
         <Webcam

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import LaptopImage from './assets/Laptop.jpg';
 import { useWebcamStream } from './WebcamStreamContext';
+import Webcam from 'react-webcam';
 
 const wsUrl = import.meta.env.VITE_SOCKET_URL;
 const u_id = localStorage.getItem('u_id');
 
 function CameraPage() {
-  const { startStreaming, stopStreaming, isStreaming } = useWebcamStream();
+  const { startStreaming, stopStreaming, isStreaming, webcamRef } = useWebcamStream();
   const [capturedImage] = useState<string | null>(null);
 
   const handleStartStreaming = () => {
@@ -28,12 +29,21 @@ function CameraPage() {
         <div className="text-center">
           <img
             src={LaptopImage}
-            className="w-72 h-72 mb-10 p-4 bg-white rounded-xl animate-border-glow"
+            className="w-72 h-72 mb-10 p-4 bg-white rounded-xl"
             alt="Laptop"
           />
         </div>
-        {/* Webcam component is now in WebcamStreamProvider */}
+        <div className="text-center">
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/png"
+            videoConstraints={{ facingMode: 'user' }}
+            className="w-72 h-72 mb-10 p-4 bg-white rounded-xl animate-border-glow"
+          />
+        </div>
       </div>
+      
       <div className="flex space-x-4">
         {!isStreaming ? (
           <button
