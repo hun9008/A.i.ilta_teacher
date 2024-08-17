@@ -66,11 +66,17 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
     concepts.extend(ocr_result.get("concepts", []))
     solutions.extend(ocr_result.get("solutions", []))
     ocrs.extend(ocr_result.get("ocrs", []))
+
+    output_json = {
+        "concepts": concepts,
+        "solutions": solutions,
+        "ocrs": ocrs,
+    }
     
     pc_key = f'{u_id}_pc'
     if pc_key in connections:
         pc_websocket = connections[pc_key]
-        response = {'type': 'ocr-request', 'payload': frame_data}
+        response = {'type': 'ocr-request', 'payload': output_json}
         await pc_websocket.send_json(response)
     else:
         response = {'type': 'error', 'message': 'Peer connection not found'}
