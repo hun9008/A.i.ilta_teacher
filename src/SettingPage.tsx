@@ -14,7 +14,7 @@ interface Step {
 const steps: Step[] = [
   { id: 'webcam', title: '웹캠 설정' },
   { id: 'qr', title: '모바일 연결' },
-  //{ id: 'mobcam', title: '모바일 카메라 설정' },
+  { id: 'mobcam', title: '모바일 카메라 설정' },
   { id: 'goals', title: '공부 목표 설정' },
   { id: 'complete', title: '설정 완료' },
 ];
