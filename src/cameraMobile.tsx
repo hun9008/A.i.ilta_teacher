@@ -17,7 +17,6 @@
 //   const [isStreaming, setIsStreaming] = useState(false);
 //   const { connectWebSocket, disconnectWebSocket, sendMessage } = useWebSocket();
 //   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-//   const [count, setCount] = useState(0);
 
 //   const startStreaming = () => {
 //     const constraints = { video: { facingMode: 'environment' } };
@@ -74,23 +73,6 @@
 //             };
 
 //             sendMessage(wsUrl, message); // WebSocket으로 전송
-//             setCount((prevCount) => {
-//               const newCount = prevCount + 1;
-//               if (newCount == 15) {
-//                 const message2 = {
-//                   u_id,
-//                   type: 'all',
-//                   device: 'mobile',
-//                   payload: imageData,
-//                 };
-//                 sendMessage(wsUrl, message2);
-//                 console.log(
-//                   '30 count reached, sending additional message:',
-//                   message2
-//                 );
-//               }
-//               return newCount;
-//             });
 //             console.log('Image captured and sent:', message);
 //           }
 //         }
@@ -100,7 +82,7 @@
 //         clearInterval(intervalId);
 //       };
 //     }
-//   }, [isStreaming, count]);
+//   }, [isStreaming]);
 
 //   useEffect(() => {
 //     return () => {
@@ -132,13 +114,6 @@
 //           </button>
 //         ) : (
 //           <>
-//             {/* <button
-//               id="captureButton"
-//               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-//               onClick={captureAndSendImage}
-//             >
-//               Capture & Send
-//             </button> */}
 //             <button
 //               id="stopButton"
 //               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
@@ -190,7 +165,7 @@ function MobileCameraPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
-  const { connectWebSocket, disconnectWebSocket, sendMessage, getSocket } =
+  const { connectWebSocket, disconnectWebSocket, sendMessage, lastResponse } =
     useWebSocket();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
@@ -228,7 +203,7 @@ function MobileCameraPage() {
     disconnectWebSocket(wsUrl);
   };
 
-  const sendTypeAllMessage = () => {
+  const handleResponseFromServer = () => {
     if (canvasRef.current && videoRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
@@ -244,30 +219,10 @@ function MobileCameraPage() {
         };
 
         sendMessage(wsUrl, message);
-        console.log('Type: All message sent from mobile:', message);
+        console.log('Response received, sending type: all message:', message);
       }
     }
   };
-
-  useEffect(() => {
-    const handleCommandMessage = (event: MessageEvent) => {
-      const parsedData = JSON.parse(event.data);
-      if (parsedData.command === 'send_all') {
-        sendTypeAllMessage();
-      }
-    };
-
-    const socket = getSocket(wsUrl);
-    if (socket) {
-      socket.addEventListener('message', handleCommandMessage);
-    }
-
-    return () => {
-      if (socket) {
-        socket.removeEventListener('message', handleCommandMessage);
-      }
-    };
-  }, [isStreaming]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -302,6 +257,12 @@ function MobileCameraPage() {
   }, [isStreaming]);
 
   useEffect(() => {
+    if (lastResponse === 'response') {
+      handleResponseFromServer();
+    }
+  }, [lastResponse]);
+
+  useEffect(() => {
     return () => {
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach((track) => track.stop());
@@ -330,15 +291,13 @@ function MobileCameraPage() {
             Start Camera
           </button>
         ) : (
-          <>
-            <button
-              id="stopButton"
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              onClick={stopStreaming}
-            >
-              Stop Camera
-            </button>
-          </>
+          <button
+            id="stopButton"
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            onClick={stopStreaming}
+          >
+            Stop Camera
+          </button>
         )}
       </div>
       {capturedImage && (

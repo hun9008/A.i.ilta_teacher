@@ -6,6 +6,7 @@ interface WebSocketContextType {
   connectWebSocket: (url: string) => void;
   disconnectWebSocket: (url: string) => void;
   isConnected: (url: string) => boolean;
+  lastResponse: string | null; // 마지막 응답 메시지
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -19,7 +20,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [connectedStates, setConnectedStates] = useState<{
     [key: string]: boolean;
   }>({});
-  const [imageData, setImageData] = useState<string | null>(null); // 이미지 데이터를 저장할 상태
+  const [imageData, setImageData] = useState<string | null>(null);
+  const [lastResponse, setLastResponse] = useState<string | null>(null); // 마지막 응답 상태
 
   const connectWebSocket = (url: string) => {
     if (socketRefs.current[url]) return; // Prevent re-connecting if already connected
@@ -36,7 +38,6 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
       setConnectedStates((prev) => ({ ...prev, [url]: false }));
       socketRefs.current[url] = null;
       if (event.code !== 1000) {
-        // Reconnect only if the close wasn't clean (code 1000)
         attemptReconnect(url);
       }
     };
@@ -46,12 +47,12 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     socket.onmessage = (event) => {
-      //console.log(`Message from server on ${url}:`, event.data);
-      
-      // JSON 형식의 메세지를 파싱하여 이미지 데이터 추출
       const parsedData = JSON.parse(event.data);
       if (parsedData.type === 'rtc-frame') {
         setImageData(parsedData.payload); // 이미지 데이터를 상태에 저장
+      }
+      if (parsedData.type === 'response') {
+        setLastResponse(parsedData.type); // 서버에서 온 응답을 상태에 저장
       }
     };
   };
@@ -75,10 +76,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const sendMessage = (url: string, message: any) => {
     const socket = socketRefs.current[url];
-    console.log('Sendmessage 호출!');
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(message));
-      console.log('메세지 보내짐', message);
+      console.log('메시지 보내짐', message);
     } else {
       console.error(
         `WebSocket for ${url} is not connected or ready to send messages`
@@ -102,10 +102,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
         connectWebSocket,
         disconnectWebSocket,
         isConnected,
+        lastResponse, // lastResponse 상태를 다른 컴포넌트에 제공
       }}
     >
       {children}
-      {/* 이미지를 렌더링하는 부분 */}
       {imageData && (
         <div>
           <img
