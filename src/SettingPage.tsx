@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { ChevronRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useWebcamStream } from './WebcamStreamContext.tsx';
 import QrPage from './QrPage';
-import Camera from './camera.tsx';
-import MobileScreen from './MobileScreen.tsx';
+import CameraPage from './camera.tsx';
+import PCControlPage from './PCControlPage.tsx';
 import StudyGoals from './StudyGoals.tsx';
 
 interface Step {
@@ -22,7 +23,7 @@ const steps: Step[] = [
 function SettingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
-
+  const { isStreaming } = useWebcamStream();
   const navigate = useNavigate();
 
   const updateCompletedSteps = (stepIndex: number) => {
@@ -54,11 +55,11 @@ function SettingPage() {
   const renderStepContent = (step: Step) => {
     switch (step.id) {
       case 'webcam':
-        return <Camera />;
+        return <CameraPage />;
       case 'qr':
         return <QrPage />;
       case 'mobcam':
-        return <MobileScreen />;
+        return <PCControlPage />;
       case 'goals':
         return <StudyGoals />;
       case 'complete':
@@ -125,7 +126,8 @@ function SettingPage() {
               ? () => navigate('/StudyMain')
               : nextStep
           }
-          className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
+          disabled={steps[currentStep].id === 'webcam' && !isStreaming}
+          className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500 disabled:bg-gray-300"
         >
           {currentStep === steps.length - 1 ? '완료' : '다음'}
         </button>

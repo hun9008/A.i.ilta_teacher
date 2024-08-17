@@ -7,6 +7,7 @@ interface WebSocketContextType {
   disconnectWebSocket: (url: string) => void;
   isConnected: (url: string) => boolean;
   lastResponse: string | null; // 마지막 응답 메시지
+  imageData: string | null;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -103,17 +104,18 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
         disconnectWebSocket,
         isConnected,
         lastResponse, // lastResponse 상태를 다른 컴포넌트에 제공
+        imageData,
       }}
     >
       {children}
-      {imageData && (
+      {/*imageData && (
         <div>
           <img
             src={`data:image/png;base64,${imageData}`}
             alt="Received from WebSocket"
           />
         </div>
-      )}
+      )*/}
     </WebSocketContext.Provider>
   );
 };
