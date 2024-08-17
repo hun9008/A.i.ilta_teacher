@@ -8,6 +8,7 @@ interface WebSocketContextType {
   isConnected: (url: string) => boolean;
   lastResponse: string | null; // 마지막 응답 메시지
   imageData: string | null;
+  ocrResponse: string | null; // 마지막 응답 메시지
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -23,6 +24,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   }>({});
   const [imageData, setImageData] = useState<string | null>(null);
   const [lastResponse, setLastResponse] = useState<string | null>(null); // 마지막 응답 상태
+  const [ocrResponse, setOcrResponse] = useState<string | null>(null); // 마지막 응답 상태
 
   const connectWebSocket = (url: string) => {
     if (socketRefs.current[url]) return; // Prevent re-connecting if already connected
@@ -52,8 +54,13 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
       if (parsedData.type === 'rtc-frame') {
         setImageData(parsedData.payload); // 이미지 데이터를 상태에 저장
       }
-      if (parsedData.type === 'response') {
-        setLastResponse(parsedData.type); // 서버에서 온 응답을 상태에 저장
+      if (parsedData.type === 'response' && parsedData.message === 'Hello!') {
+        setLastResponse(parsedData.message); // 서버에서 온 응답을 상태에 저장
+        console.log('hello');
+      }
+      if (parsedData.type === 'ocr-request') {
+        setOcrResponse(parsedData.payload);
+        console.log('ocr done');
       }
     };
   };
@@ -105,6 +112,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
         isConnected,
         lastResponse, // lastResponse 상태를 다른 컴포넌트에 제공
         imageData,
+        ocrResponse,
       }}
     >
       {children}

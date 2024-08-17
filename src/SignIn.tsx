@@ -267,9 +267,9 @@ function SignIn() {
       <div style={{ transform: 'translateY(-40px)' }}>
         <button
           className="secondary-button"
-          onClick={() => navigate('/qrpage')}
+          onClick={() => navigate('/scanner')}
         >
-          QR 페이지로 바로가기
+          스캐너 페이지로 바로가기
         </button>
         <button className="secondary-button" onClick={() => navigate('/main')}>
           MainPage로 바로가기
