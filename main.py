@@ -6,6 +6,7 @@ from routes.chat_route import route as chat_route
 from routes.study_route import route as study_route
 
 from fastapi.middleware.cors import CORSMiddleware
+from background_task import start_task
 
 app = FastAPI()
 
@@ -23,3 +24,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup_event():
+    start_task()
