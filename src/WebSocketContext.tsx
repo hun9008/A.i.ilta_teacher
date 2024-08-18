@@ -108,8 +108,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const isConnected = (url: string) => {
     return connectedStates[url] || false;
   };
-
-  const handleResponseFromServer = (url: string, imageData: string) => {
+  function handleResponseFromServer(url: string, imageData: string) {
     if (imageData) {
       const canvas = document.createElement('canvas');
       const img = new Image();
@@ -121,56 +120,26 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
         const ctx = canvas.getContext('2d');
 
         if (ctx) {
-          // Draw the image onto the canvas
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-          // Create the source and destination matrices
-          const src = cv.matFromImageData(
-            ctx.getImageData(0, 0, canvas.width, canvas.height)
-          );
-          const gray = new cv.Mat();
-          const dst = new cv.Mat();
+          const src = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-          try {
-            // Convert the image to grayscale
-            cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+          const processedImageData = preprocessImage(src);
 
-            // Apply adaptive thresholding
-            cv.adaptiveThreshold(
-              gray, // Source image (grayscale)
-              dst, // Destination image
-              255, // Max value
-              cv.ADAPTIVE_THRESH_GAUSSIAN_C, // Adaptive method
-              cv.THRESH_BINARY, // Threshold type
-              11, // Block size
-              2 // Constant C
-            );
+          ctx.putImageData(processedImageData, 0, 0);
 
-            // Show the processed image on the canvas
-            // cv.imshow(canvas, dst);
+          const processedImageDataURL = canvas.toDataURL('image/png');
+          const imageDataBase64 = processedImageDataURL.split(',')[1];
 
-            // Convert the processed image back to a Data URL
-            const processedImageData = canvas.toDataURL('image/png');
-            const imageDataBase64 = processedImageData.split(',')[1];
+          const message = {
+            u_id: u_id,
+            type: 'all',
+            device: 'mobile',
+            payload: imageDataBase64,
+          };
 
-            // Send the processed image back to the server
-            const message = {
-              u_id: u_id,
-              type: 'all',
-              device: 'mobile',
-              payload: imageDataBase64,
-            };
-
-            sendMessage(url, message);
-            console.log('Processed image sent:', message);
-          } catch (error) {
-            console.error('Error during image processing:', error);
-          } finally {
-            // Clean up memory
-            src.delete();
-            gray.delete();
-            dst.delete();
-          }
+          sendMessage(url, message);
+          console.log('Processed image sent:', message);
         }
       };
 
@@ -180,7 +149,60 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     } else {
       console.error('No image data available to process.');
     }
-  };
+  }
+
+  function preprocessImage(imageData: ImageData): ImageData {
+    const canvas = document.createElement('canvas');
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      throw new Error('Failed to get 2D context for preprocessing.');
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+
+    const processedImageData = ctx.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    // Contrast adjustment to improve text clarity
+    adjustContrast(processedImageData.data, 40);
+
+    // No blur or dilation, directly apply thresholding with adjusted threshold level
+    thresholdFilter(processedImageData.data, 0.5); // Adjust threshold level for better text visibility
+
+    return processedImageData;
+  }
+
+  function adjustContrast(pixels: Uint8ClampedArray, contrast: number) {
+    const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+    for (let i = 0; i < pixels.length; i += 4) {
+      pixels[i] = clamp(factor * (pixels[i] - 128) + 128);
+      pixels[i + 1] = clamp(factor * (pixels[i + 1] - 128) + 128);
+      pixels[i + 2] = clamp(factor * (pixels[i + 2] - 128) + 128);
+    }
+  }
+
+  function clamp(value: number): number {
+    return Math.min(255, Math.max(0, value));
+  }
+
+  function thresholdFilter(pixels: Uint8ClampedArray, level: number) {
+    const threshold = level * 255;
+    for (let i = 0; i < pixels.length; i += 4) {
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      const gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      const value = gray >= threshold ? 255 : 0;
+      pixels[i] = pixels[i + 1] = pixels[i + 2] = value;
+    }
+  }
 
   useEffect(() => {
     console.log('Effect triggered with lastResponse:', lastResponse);
