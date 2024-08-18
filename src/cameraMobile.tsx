@@ -330,6 +330,7 @@ function MobileCameraPage() {
   }, [isStreaming]);
 
   useEffect(() => {
+    console.log(lastResponse);
     if (lastResponse === 'Hello!') {
       handleResponseFromServer();
     }
