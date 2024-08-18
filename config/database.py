@@ -1,14 +1,41 @@
-#mongoDB 연결하는거 작업 
+import mysql.connector
+from mysql.connector import Error
 
-# 비동기식(async) MongoDB driver 
-from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv
-import os
+def create_connection():
+    """ Create a database connection to the MySQL server """
+    connection = None
+    try:
+        connection = mysql.connector.connect(
+            host='118.34.163.142', 
+            user='root', 
+            password='231943', 
+            database='maitutor_0815',
+            port=3306
+        )
+        if connection.is_connected():
+            print("Connected to MySQL database")
+    except Error as e:
+        print(f"Error: '{e}'")
+    return connection
 
-load_dotenv()
+def execute_query(connection, query):
+    """ Execute a single query """
+    cursor = connection.cursor()
+    try:
+        cursor.execute(query)
+        connection.commit()
+        print("Query executed successfully")
+    except Error as e:
+        print(f"Error: '{e}'")
 
-#database 설정 파일에서 .env의 값을 사용하도록 수정
-mongo_url = os.getenv("MONGO_URL")
-client = AsyncIOMotorClient(mongo_url)
-db = client.myproject 
-users_collection = db.users # table을 만들겠다
+def read_query(connection, query):
+    """ Read data from the database """
+    cursor = connection.cursor()
+    result = None
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        return result
+    except Error as e:
+        print(f"Error: '{e}'")
+        return None
