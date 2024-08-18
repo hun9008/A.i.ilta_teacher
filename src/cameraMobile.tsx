@@ -65,7 +65,7 @@ function MobileCameraPage() {
   }, [lastResponse]);
 
   const videoConstraints = {
-    facingMode: 'environment'
+    facingMode: 'environment',
   };
 
   return (

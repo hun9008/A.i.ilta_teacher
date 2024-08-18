@@ -32,7 +32,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [imageData, setImageData] = useState<string | null>(null);
   const [lastResponse, setLastResponse] = useState<string | null>(null);
   // const [ocrResponse, setOcrResponse] = useState<string | null>(null);
-  const u_id = localStorage.getItem('u_id');
+  // const u_id = localStorage.getItem('u_id');
 
   const connectWebSocket = (url: string) => {
     if (socketRefs.current[url]) return; // Prevent re-connecting if already connected
@@ -89,29 +89,29 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     }, 1000); // Try to reconnect after 5 seconds
   };
 
-  function handleResponseFromServer(url: string, imageData: string) {
-    if (imageData) {
-      const message = {
-        u_id: u_id,
-        type: 'all',
-        device: 'mobile',
-        payload: imageData, // 이미지를 그대로 전송
-      };
+  // function handleResponseFromServer(url: string, imageData: string) {
+  //   if (imageData) {
+  //     const message = {
+  //       u_id: u_id,
+  //       type: 'all',
+  //       device: 'mobile',
+  //       payload: imageData, // 이미지를 그대로 전송
+  //     };
 
-      sendMessage(url, message);
-      console.log('Original image sent:', message);
-    } else {
-      console.error('No image data available to process.');
-    }
-  }
+  //     sendMessage(url, message);
+  //     console.log('Original image sent:', message);
+  //   } else {
+  //     console.error('No image data available to process.');
+  //   }
+  // }
 
   useEffect(() => {
     console.log('Effect triggered with lastResponse:', lastResponse);
 
-    if (lastResponse === 'Hello!' && imageData) {
-      handleResponseFromServer(Object.keys(socketRefs.current)[0], imageData);
-      setLastResponse(null); // Reset lastResponse to prevent repeated processing
-    }
+    // if (lastResponse === 'Hello!' && imageData) {
+    //   handleResponseFromServer(Object.keys(socketRefs.current)[0], imageData);
+    //   setLastResponse(null); // Reset lastResponse to prevent repeated processing
+    // }
   }, [lastResponse, imageData]);
 
   const sendMessage = (url: string, message: any) => {

@@ -14,9 +14,9 @@ function PCControlPage() {
 
     const message = {
       u_id,
-      type: 'hi',
-      device: 'pc',
-      payload: null,
+      type: 'all',
+      device: 'device',
+      payload: imageData,
     };
     sendMessage(wsUrl, message);
     console.log('Capture request sent from PC');
