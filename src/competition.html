@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문제집 생성기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 1200px; /* 더 넓게 설정 */
+            margin: auto;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .problem-set, .answer-set {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .problem, .answer {
+            width: 48%; /* 두 열로 나누어 배치 */
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .mathjax {
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        .answer strong {
+            color: red;
+            font-weight: bold;
+        }
+        select {
+            padding: 5px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+    </style>
+    <!-- MathJax를 사용하여 LaTeX 수식을 렌더링 -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+    <div class="container">
+        <h1>문제집 생성기</h1>
+        <div class="button-container">
+            <select id="difficultySelect">
+                <option value="1">Teer 1</option>
+                <option value="2">Teer 2</option>
+                <option value="3">Teer 3</option>
+            </select>
+            <button id="generateProblems">문제집 만들기</button>
+            <button id="generateAnswers" style="display:none;">답지 만들기</button>
+        </div>
+        <div id="content">
+            <!-- 문제와 답지가 여기에 표시됩니다. -->
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('generateProblems').addEventListener('click', function() {
+            const difficulty = document.getElementById('difficultySelect').value;
+            fetch('http://localhost:8000/get_latest_competition', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ difficulty: parseInt(difficulty) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayProblems(data.problem_set);
+                document.getElementById('generateAnswers').style.display = 'inline-block';
+                MathJax.typeset();  // MathJax로 수식 렌더링
+            })
+            .catch(error => console.error('Error fetching problem set:', error));
+        });
+
+        document.getElementById('generateAnswers').addEventListener('click', function() {
+            const difficulty = document.getElementById('difficultySelect').value;
+            fetch('http://localhost:8000/get_latest_competition', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ difficulty: parseInt(difficulty) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayAnswers(data.answer_set);
+                MathJax.typeset();  // MathJax로 수식 렌더링
+            })
+            .catch(error => console.error('Error fetching answer set:', error));
+        });
+
+        function displayProblems(problems) {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '<h2>문제집</h2>';
+            const problemSetDiv = document.createElement('div');
+            problemSetDiv.className = 'problem-set';
+            problems.forEach((problem, index) => {
+                const problemDiv = document.createElement('div');
+                problemDiv.className = 'problem';
+                problemDiv.innerHTML = `
+                    <h3>문제 ${index + 1}</h3>
+                    <p><strong>정답률:</strong> ${problem.question_success_rate}%</p>
+                    <div class="mathjax">${parseLaTeX(problem.question_text)}</div>
+                `;
+                problemSetDiv.appendChild(problemDiv);
+            });
+            contentDiv.appendChild(problemSetDiv);
+            MathJax.typeset(); // 새로 추가된 수식을 렌더링
+        }
+
+        function displayAnswers(answers) {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '<h2>답지</h2>';
+            const answerSetDiv = document.createElement('div');
+            answerSetDiv.className = 'answer-set';
+            answers.forEach((answer, index) => {
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'answer';
+                answerDiv.innerHTML = `
+                    <h3>문제 ${index + 1} 답</h3>
+                    <div class="mathjax">${parseLaTeX(answer.answer_text)}</div>
+                    <p><strong>정답:</strong> <span class="mathjax">${answer.answer}</span></p>
+                `;
+                answerSetDiv.appendChild(answerDiv);
+            });
+            contentDiv.appendChild(answerSetDiv);
+            MathJax.typeset(); // 새로 추가된 수식을 렌더링
+        }
+
+        function parseLaTeX(text) {
+            // 수식만 LaTeX 처리가 되도록 `$...$` 구문을 `\$begin:math:text$...\\$end:math:text$`로 변경
+            return text.replace(/\$([^$]+)\$/g, '\\($1\\)');
+        }
+    </script>
+</body>
+</html>

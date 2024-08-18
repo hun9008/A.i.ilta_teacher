@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC</title>
+</head>
+<body>
+    <h1>PC Side</h1>
+    <video id="pcVideo" autoplay playsinline style="width: 300px; height: 300px;"></video>
+    <button id="openPc">Open PC WebSocket</button>
+    <button id="sendAll">Send All Request</button>
+    <div id="responseContainer"></div>
+
+    <script>
+        let pcSocket = null;
+        let videoElement = document.getElementById('pcVideo');
+        let canvas = document.createElement('canvas');
+        let context = canvas.getContext('2d');
+
+        document.getElementById("openPc").addEventListener("click", async () => {
+            // Start capturing video from camera
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+            } catch (error) {
+                console.error("Error accessing camera: ", error);
+            }
+
+            // Open WebSocket connection
+            pcSocket = new WebSocket("ws://localhost:8000/ws");
+            pcSocket.onopen = () => {
+                console.log("PC WebSocket opened");
+                sendInitialFrame(); // 웹소켓 연결 후 첫 번째 비디오 프레임을 즉시 전송
+                sendVideoFrames();  // 이후 1초마다 프레임 전송
+            };
+
+            pcSocket.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+
+                if (message.type === "rtc-frame") {
+                    const video = document.getElementById("pcVideo");
+                    const imageBlob = b64toBlob(message.payload, 'image/jpeg');
+                    const imageUrl = URL.createObjectURL(imageBlob);
+                    video.src = imageUrl;
+                } else if (message.type === "ocr-request") {
+                    document.getElementById("responseContainer").innerText = JSON.stringify(message.payload);
+                }
+            };
+        });
+
+        document.getElementById("sendAll").addEventListener("click", () => {
+            if (pcSocket) {
+                const frameData = captureFrameAsBase64();
+                pcSocket.send(JSON.stringify({
+                    type: "all",
+                    device: "pc",
+                    u_id: "user_1",
+                    payload: frameData
+                }));
+            }
+        });
+
+        function sendInitialFrame() {
+            const frameData = captureFrameAsBase64();
+            pcSocket.send(JSON.stringify({
+                type: "video",
+                device: "pc",
+                u_id: "user_1",
+                payload: frameData
+            }));
+        }
+
+        function sendVideoFrames() {
+            if (pcSocket) {
+                setInterval(() => {
+                    const frameData = captureFrameAsBase64();
+                    pcSocket.send(JSON.stringify({
+                        type: "video",
+                        device: "pc",
+                        u_id: "user_1",
+                        payload: frameData
+                    }));
+                }, 1000);  // 1초마다 이미지 전송
+            }
+        }
+
+        function captureFrameAsBase64() {
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            const base64Data = dataUrl.split(',')[1];  // 'data:image/jpeg;base64,' 부분을 제거하고 순수한 Base64 데이터만 반환
+            return base64Data;
+        }
+
+        function b64toBlob(b64Data, contentType) {
+            const sliceSize = 512;
+            const byteCharacters = atob(b64Data);
+            const byteArrays = [];
+
+            for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+                const byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+
+                const byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+
+            return new Blob(byteArrays, {type: contentType});
+        }
+    </script>
+</body>
+</html>

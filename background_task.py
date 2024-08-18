@@ -4,6 +4,7 @@ import random
 import time
 import threading
 import string
+from decimal import Decimal
 
 # MySQL 연결 설정
 def get_db_connection():
@@ -30,10 +31,12 @@ def generate_random_competition(difficulty):
         problem_set.append({
             'q_id': question['q_id'],
             'question_text': question['question_text'],
-            'question_difficulty': question['question_difficulty']
+            'question_difficulty': question['question_difficulty'],
+            'question_success_rate': float(question['question_success_rate']) if isinstance(question['question_success_rate'], Decimal) else question['question_success_rate'],
         })
         answer_set.append({
             'q_id': question['q_id'],
+            'answer_text': question['answer_text'],
             'answer': question['answer']
         })
 
@@ -50,29 +53,29 @@ def generate_random_competition(difficulty):
 
     print(f"New competition generated for difficulty {difficulty} and saved to the database.")
 
-# def start_background_task():
-#     while True:
-#         current_time = time.strftime("%H:%M")
-#         if current_time == "17:30":
-#             print("Generating new competition sets...")
-            
-#             for difficulty in [1, 2, 3]:
-#                 generate_random_competition(difficulty)
-            
-#             print("New competitions generated.")
-#             time.sleep(60) 
-        
-#         time.sleep(30) 
-
 def start_background_task():
     while True:
-        print("Generating new competition sets...")
+        current_time = time.strftime("%H:%M")
+        if current_time == "17:30":
+            print("Generating new competition sets...")
+            
+            for difficulty in [1, 2, 3]:
+                generate_random_competition(difficulty)
+            
+            print("New competitions generated.")
+            time.sleep(60) 
         
-        for difficulty in [1, 2, 3]:
-            generate_random_competition(difficulty)
+        time.sleep(30) 
+
+# def start_background_task():
+#     while True:
+#         print("Generating new competition sets...")
         
-        print("New competitions generated.")
-        time.sleep(60)
+#         for difficulty in [1, 2, 3]:
+#             generate_random_competition(difficulty)
+        
+#         print("New competitions generated.")
+#         time.sleep(60)
 
 def start_task():
     threading.Thread(target=start_background_task, daemon=True).start()
