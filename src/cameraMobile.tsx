@@ -65,9 +65,7 @@ function MobileCameraPage() {
   }, [lastResponse]);
 
   const videoConstraints = {
-    facingMode: 'environment',
-    width: { ideal: 1280 },
-    height: { ideal: 720 },
+    facingMode: 'environment'
   };
 
   return (
@@ -78,11 +76,8 @@ function MobileCameraPage() {
       <Webcam
         audio={false}
         ref={webcamRef}
-        screenshotFormat="image/jpeg"
+        screenshotFormat="image/png"
         videoConstraints={videoConstraints}
-        width={1280}
-        height={720}
-        className="w-full h-64 mb-10 p-4 bg-white rounded-xl animate-border-glow"
       />
       <div className="flex space-x-4">
         {!isCapturing ? (
