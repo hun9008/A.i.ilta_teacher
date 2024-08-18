@@ -3,7 +3,7 @@ import { useWebSocket } from './WebSocketContext';
 const wsUrl = import.meta.env.VITE_SOCKET_URL;
 
 function PCControlPage() {
-  const { sendMessage, isConnected, imageData, ocrResponse } = useWebSocket();
+  const { sendMessage, isConnected, imageData } = useWebSocket();
   const u_id = localStorage.getItem('u_id');
 
   const handleCaptureRequest = () => {
@@ -34,14 +34,14 @@ function PCControlPage() {
         <p>No image data received</p>
       )}
       <button onClick={handleCaptureRequest}>Capture Image from Mobile</button>
-      {ocrResponse ? (
+      {/* {ocrResponse ? (
         <img
           src={`data:image/png;base64,${ocrResponse}`}
           alt="Received from WebSocket"
         />
       ) : (
         <p>No image data received</p>
-      )}
+      )} */}
     </div>
   );
 }

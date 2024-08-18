@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useEffect,
+} from 'react';
+declare var cv: any;
 
 interface WebSocketContextType {
   getSocket: (url: string) => WebSocket | null;
@@ -6,9 +13,9 @@ interface WebSocketContextType {
   connectWebSocket: (url: string) => void;
   disconnectWebSocket: (url: string) => void;
   isConnected: (url: string) => boolean;
-  lastResponse: string | null; // 마지막 응답 메시지
+  lastResponse: string | null;
   imageData: string | null;
-  ocrResponse: string | null; // 마지막 응답 메시지
+  // ocrResponse: string | null;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -23,8 +30,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     [key: string]: boolean;
   }>({});
   const [imageData, setImageData] = useState<string | null>(null);
-  const [lastResponse, setLastResponse] = useState<string>('');
-  const [ocrResponse, setOcrResponse] = useState<string | null>(null); // 마지막 응답 상태
+  const [lastResponse, setLastResponse] = useState<string | null>(null);
+  // const [ocrResponse, setOcrResponse] = useState<string | null>(null);
+  const u_id = localStorage.getItem('u_id');
 
   const connectWebSocket = (url: string) => {
     if (socketRefs.current[url]) return; // Prevent re-connecting if already connected
@@ -51,16 +59,15 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     socket.onmessage = (event) => {
       const parsedData = JSON.parse(event.data);
+
       if (parsedData.type === 'rtc-frame') {
-        setImageData(parsedData.payload); // 이미지 데이터를 상태에 저장
+        setImageData(parsedData.payload);
       }
       if (parsedData.type === 'response' && parsedData.message === 'Hello!') {
-        setLastResponse(parsedData.message); // 서버에서 온 응답을 상태에 저장
-        console.log('message', parsedData.message);
+        setLastResponse(parsedData.message);
       }
       if (parsedData.type === 'ocr-request') {
-        setOcrResponse(parsedData.payload);
-        console.log('ocr done');
+        console.log('OCR done');
       }
     };
   };
@@ -86,7 +93,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     const socket = socketRefs.current[url];
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(message));
-      console.log('메시지 보내짐', message);
+      console.log('Message sent:', message);
     } else {
       console.error(
         `WebSocket for ${url} is not connected or ready to send messages`
@@ -102,6 +109,88 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     return connectedStates[url] || false;
   };
 
+  const handleResponseFromServer = (url: string, imageData: string) => {
+    if (imageData) {
+      const canvas = document.createElement('canvas');
+      const img = new Image();
+      img.src = `data:image/png;base64,${imageData}`;
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+
+        if (ctx) {
+          // Draw the image onto the canvas
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          // Create the source and destination matrices
+          const src = cv.matFromImageData(
+            ctx.getImageData(0, 0, canvas.width, canvas.height)
+          );
+          const gray = new cv.Mat();
+          const dst = new cv.Mat();
+
+          try {
+            // Convert the image to grayscale
+            cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+
+            // Apply adaptive thresholding
+            cv.adaptiveThreshold(
+              gray, // Source image (grayscale)
+              dst, // Destination image
+              255, // Max value
+              cv.ADAPTIVE_THRESH_GAUSSIAN_C, // Adaptive method
+              cv.THRESH_BINARY, // Threshold type
+              11, // Block size
+              2 // Constant C
+            );
+
+            // Show the processed image on the canvas
+            // cv.imshow(canvas, dst);
+
+            // Convert the processed image back to a Data URL
+            const processedImageData = canvas.toDataURL('image/png');
+            const imageDataBase64 = processedImageData.split(',')[1];
+
+            // Send the processed image back to the server
+            const message = {
+              u_id: u_id,
+              type: 'all',
+              device: 'mobile',
+              payload: imageDataBase64,
+            };
+
+            sendMessage(url, message);
+            console.log('Processed image sent:', message);
+          } catch (error) {
+            console.error('Error during image processing:', error);
+          } finally {
+            // Clean up memory
+            src.delete();
+            gray.delete();
+            dst.delete();
+          }
+        }
+      };
+
+      img.onerror = (error) => {
+        console.error('Error loading image:', error);
+      };
+    } else {
+      console.error('No image data available to process.');
+    }
+  };
+
+  useEffect(() => {
+    console.log('Effect triggered with lastResponse:', lastResponse);
+
+    if (lastResponse === 'Hello!' && imageData) {
+      handleResponseFromServer(Object.keys(socketRefs.current)[0], imageData);
+      setLastResponse(null); // Reset lastResponse to prevent repeated processing
+    }
+  }, [lastResponse, imageData]);
+
   return (
     <WebSocketContext.Provider
       value={{
@@ -110,20 +199,12 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
         connectWebSocket,
         disconnectWebSocket,
         isConnected,
-        lastResponse, // lastResponse 상태를 다른 컴포넌트에 제공
+        lastResponse,
         imageData,
-        ocrResponse,
+        // ocrResponse,
       }}
     >
       {children}
-      {/*imageData && (
-        <div>
-          <img
-            src={`data:image/png;base64,${imageData}`}
-            alt="Received from WebSocket"
-          />
-        </div>
-      )*/}
     </WebSocketContext.Provider>
   );
 };
