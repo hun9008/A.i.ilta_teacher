@@ -80,6 +80,8 @@ function MobileCameraPage() {
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         videoConstraints={videoConstraints}
+        width={1280}
+        height={720}
         className="w-full h-64 mb-10 p-4 bg-white rounded-xl animate-border-glow"
       />
       <div className="flex space-x-4">
