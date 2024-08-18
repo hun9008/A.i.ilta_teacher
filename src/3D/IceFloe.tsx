@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useFrame } from '@react-three/fiber'
+//import { useFrame } from '@react-three/fiber'
 import { useGLTF, Outlines } from '@react-three/drei'
 import * as THREE from 'three'
 
