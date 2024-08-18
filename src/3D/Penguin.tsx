@@ -19,7 +19,7 @@ const Penguin: React.FC<{
   useEffect(() => {
     if (groupRef.current) {
       groupRef.current.position.set(...position)
-      groupRef.current.rotation.y =- Math.PI*2
+      //groupRef.current.rotation.y =- Math.PI*2
     }
   }, [position])
 
@@ -34,9 +34,9 @@ const Penguin: React.FC<{
         jumpProgress.current += delta * 2 // Adjust this value to change jump speed
         const t = Math.sin(jumpProgress.current * Math.PI)
         
-        currentPosition.current.lerp(targetPosition.current, 0.1)
+        currentPosition.current.lerp(targetPosition.current, 0.13)
         groupRef.current.position.copy(currentPosition.current)
-        groupRef.current.position.y += Math.sin(t * Math.PI) * 0.5 // Adjust this value to change jump height
+        groupRef.current.position.y += Math.sin(t * Math.PI) * 0.6 // Adjust this value to change jump height
 
         if (jumpProgress.current >= 1) {
           isJumping.current = false
