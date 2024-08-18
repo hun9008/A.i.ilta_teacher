@@ -23,7 +23,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     [key: string]: boolean;
   }>({});
   const [imageData, setImageData] = useState<string | null>(null);
-  const [lastResponse, setLastResponse] = useState<string | null>(null); // 마지막 응답 상태
+  const [lastResponse, setLastResponse] = useState<string>('');
   const [ocrResponse, setOcrResponse] = useState<string | null>(null); // 마지막 응답 상태
 
   const connectWebSocket = (url: string) => {
