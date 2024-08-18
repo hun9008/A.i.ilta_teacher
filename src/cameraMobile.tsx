@@ -246,14 +246,9 @@ function MobileCameraPage() {
         let gray = new cv.Mat();
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
 
-        // Apply GaussianBlur to reduce noise
-        let blurred = new cv.Mat();
-        cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
-
         // Apply adaptive thresholding
         let binary = new cv.Mat();
         cv.adaptiveThreshold(
-          blurred,
           binary,
           255,
           cv.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -273,7 +268,6 @@ function MobileCameraPage() {
         // Cleanup memory to avoid leaks
         src.delete();
         gray.delete();
-        blurred.delete();
         binary.delete();
         morphed.delete();
         kernel.delete();
@@ -332,7 +326,7 @@ function MobileCameraPage() {
   useEffect(() => {
     if (lastResponse) {
       console.log('Received lastResponse:', lastResponse);
-      if (lastResponse === 'response') {
+      if (lastResponse === 'Hello!') {
         handleResponseFromServer();
       }
     }
