@@ -54,8 +54,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
       if (parsedData.type === 'rtc-frame') {
         setImageData(parsedData.payload); // 이미지 데이터를 상태에 저장
       }
-      if (parsedData.type === 'response' && parsedData.message === 'Hello!') {
-        setLastResponse(parsedData.message); // 서버에서 온 응답을 상태에 저장
+      if (parsedData.type === 'response') {
+        setLastResponse(parsedData.type); // 서버에서 온 응답을 상태에 저장
         console.log('hi');
       }
       if (parsedData.type === 'ocr-request') {
