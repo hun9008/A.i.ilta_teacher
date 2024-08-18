@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Outlines } from '@react-three/drei'
+import { useGLTF, Outlines } from '@react-three/drei'
 import * as THREE from 'three'
 
 interface IceFloeProps {
@@ -11,18 +11,26 @@ interface IceFloeProps {
 
 const IceFloe: React.FC<IceFloeProps> = ({ position, onPointerOver, onClick }) => {
   const [hovered, setHovered] = useState(false)
-  const meshRef = useRef<THREE.Mesh>(null!)
+  const groupRef = useRef<THREE.Group>(null!)
+  const { scene } = useGLTF('/iceberg.glb')
 
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += 0.001
-      meshRef.current.rotation.z += 0.001
+  useEffect(() => {
+    if (groupRef.current) {
+      // Randomly choose between rotating around x or z axis
+      const rotationAxis = Math.random() < 0.5 ? 'x' : 'z'
+      
+      // Apply rotation
+      if (rotationAxis === 'x') {
+        groupRef.current.rotation.x = Math.PI
+      } else {
+        groupRef.current.rotation.z = Math.PI
+      }
     }
-  })
+  }, [])
 
   return (
-    <mesh
-      ref={meshRef}
+    <group
+      ref={groupRef}
       position={position}
       onPointerOver={() => {
         setHovered(true)
@@ -37,12 +45,7 @@ const IceFloe: React.FC<IceFloeProps> = ({ position, onPointerOver, onClick }) =
         }
       }}
     >
-      <icosahedronGeometry args={[0.5, 1]} />
-      <meshStandardMaterial
-        color={hovered ? 'lightblue' : 'white'}
-        roughness={0.1}
-        metalness={0.2}
-      />
+      <primitive object={scene.clone()} />
       {hovered && (
         <Outlines
           screenspace
@@ -56,8 +59,47 @@ const IceFloe: React.FC<IceFloeProps> = ({ position, onPointerOver, onClick }) =
           thickness={0.1}
         />
       )}
-    </mesh>
+    </group>
   )
 }
 
 export default IceFloe
+
+{/* 기존 mesh 코드 (주석 처리)
+  <mesh
+    ref={meshRef}
+    position={position}
+    onPointerOver={() => {
+      setHovered(true)
+      if (onPointerOver) {
+        onPointerOver()
+      }
+    }}
+    onPointerOut={() => setHovered(false)}
+    onClick={() => {
+      if (onClick) {
+        onClick()
+      }
+    }}
+  >
+    <icosahedronGeometry args={[0.5, 1]} />
+    <meshStandardMaterial
+      color={hovered ? 'lightblue' : 'white'}
+      roughness={0.1}
+      metalness={0.2}
+    />
+    {hovered && (
+      <Outlines
+        screenspace
+        toneMapped={false}
+        polygonOffset
+        polygonOffsetFactor={100}
+        transparent
+        opacity={1}
+        color="white"
+        angle={Math.PI}
+        thickness={0.1}
+      />
+    )}
+  </mesh>
+*/}

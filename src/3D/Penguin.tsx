@@ -14,13 +14,12 @@ const Penguin: React.FC<{
   const jumpProgress = useRef(0)
   
   // GLTF 모델 로드
-  const { scene } = useGLTF('/penguin.glb')
+  const { scene } = useGLTF('/mini_penguin.glb')
 
   useEffect(() => {
     if (groupRef.current) {
       groupRef.current.position.set(...position)
-      groupRef.current.scale.set(0.25, 0.25, 0.25)
-      groupRef.current.rotation.y =+ Math.PI / 2
+      groupRef.current.rotation.y =- Math.PI*2
     }
   }, [position])
 
@@ -50,11 +49,11 @@ const Penguin: React.FC<{
       if (!currentPosition.current.equals(targetPosition.current)) {
         const direction = new THREE.Vector3().subVectors(targetPosition.current, currentPosition.current)
         const angle = Math.atan2(direction.x, direction.z)
-        groupRef.current.rotation.y = angle + Math.PI / 2
+        groupRef.current.rotation.y = angle - Math.PI / 2
       }
 
       // Add subtle swaying motion
-      groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 2) * 0.05
+      groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 2) * 0.1
     }
   })
 
