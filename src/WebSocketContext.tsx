@@ -56,7 +56,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       if (parsedData.type === 'response' && parsedData.message === 'Hello!') {
         setLastResponse(parsedData.message); // 서버에서 온 응답을 상태에 저장
-        // console.log(parsedData.message);
+        console.log('message', parsedData.message);
       }
       if (parsedData.type === 'ocr-request') {
         setOcrResponse(parsedData.payload);

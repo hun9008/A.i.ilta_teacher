@@ -195,6 +195,7 @@ function MobileCameraPage() {
   const { connectWebSocket, disconnectWebSocket, sendMessage, lastResponse } =
     useWebSocket();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  console.log('lastResponse in MobileCameraPage:', lastResponse);
 
   const startStreaming = () => {
     const constraints = { video: { facingMode: 'environment' } };
@@ -324,6 +325,8 @@ function MobileCameraPage() {
   }, [isStreaming]);
 
   useEffect(() => {
+    console.log('useEffect triggered with lastResponse:', lastResponse);
+
     if (lastResponse) {
       console.log('Received lastResponse:', lastResponse);
       if (lastResponse === 'Hello!') {
