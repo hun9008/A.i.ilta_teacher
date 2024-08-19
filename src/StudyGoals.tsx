@@ -48,12 +48,13 @@ function StudyGoals() {
     const totalMinutes = hoursInMinutes + parseInt(minutes || '0', 10);
     return totalMinutes;
   };
-
+  const u_id = localStorage.getItem('u_id');
   const sendTimeToServer = async () => {
     const studyTime = convertToMinutes(time.goal2Hours, time.goal2Minutes);
     const breakTime = convertToMinutes(time.goal3Hours, time.goal3Minutes);
 
     const payload = {
+      u_id: u_id,
       study_time: studyTime,
       break_time: breakTime,
     };

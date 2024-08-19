@@ -31,6 +31,10 @@ function SignIn() {
       localStorage.setItem('email', email);
       console.log(data);
       localStorage.setItem('u_id', data.u_id);
+      localStorage.setItem('badge_details', data.badge_details);
+      localStorage.setItem('progress_unit', data.progress_unit);
+      localStorage.setItem('weekly_reports', data.weekly_reports);
+      localStorage.setItem('z_log', data.z_log);
 
       navigate('/main');
     } catch (error: any) {
@@ -50,7 +54,7 @@ function SignIn() {
           email,
           parent_email: parentEmail,
           phone_num: phoneNum,
-          birth_day: birthDay,
+          birthday: birthDay,
           password,
         }),
       });
@@ -67,20 +71,6 @@ function SignIn() {
       console.error('회원가입 에러:', error);
       alert(error.message || '회원가입 중 문제가 발생했습니다.');
     }
-  };
-  const formatPhoneNumber = (value: string) => {
-    // 숫자만 추출
-    const onlyNums = value.replace(/\D/g, '');
-    if (onlyNums.length <= 3) return onlyNums;
-    if (onlyNums.length <= 7)
-      return `${onlyNums.slice(0, 3)}-${onlyNums.slice(3)}`;
-    return `${onlyNums.slice(0, 3)}-${onlyNums.slice(3, 7)}-${onlyNums.slice(
-      7,
-      11
-    )}`;
-  };
-  const handlePhoneNumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhoneNum(formatPhoneNumber(e.target.value));
   };
 
   const handleFindPassword = async () => {
@@ -203,8 +193,9 @@ function SignIn() {
                         id="phoneNum"
                         name="phoneNum"
                         placeholder="000-0000-0000"
+                        pattern="\d{3}-\d{4}-\d{4}"
                         value={phoneNum}
-                        onChange={handlePhoneNumChange}
+                        onChange={(e) => setPhoneNum(e.target.value)}
                       />
                     </div>
                   </div>

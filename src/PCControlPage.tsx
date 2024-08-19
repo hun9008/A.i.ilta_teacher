@@ -52,7 +52,7 @@ import ProblemImg from './assets/problem_img.png';
 const wsUrl = import.meta.env.VITE_SOCKET_URL;
 
 const PCControlPage: React.FC = () => {
-  const { sendMessage, isConnected, imageData, ocrResponse } = useWebSocket();
+  const { sendMessage, isConnected, imageData } = useWebSocket();
   const u_id = localStorage.getItem('u_id');
 
   const convertImageToBase64 = async (imageUrl: string): Promise<string> => {
@@ -103,7 +103,6 @@ const PCControlPage: React.FC = () => {
         <p>No image data received</p>
       )}
       <button onClick={handleCaptureRequest}>Capture Image from Mobile</button>
-      {ocrResponse ? <div>{ocrResponse}</div> : <p>No OCR response received</p>}
     </div>
   );
 };
