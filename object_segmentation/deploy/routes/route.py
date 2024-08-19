@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 import time
 from models.cv_ocr import problem_crop
+from models.cv_hand_loc import prob_loc_crop
 from models.ocr_input import OCRInput, Determinent
 import boto3
 from botocore.exceptions import NoCredentialsError
@@ -85,6 +86,8 @@ def detect_hand_ocr_text(img):
     # print('len : ', len(texts[0].description))
 
     return texts[0].description
+
+
 
 async def fetch_openai(client, prompt_type):
     message = [{
@@ -303,6 +306,24 @@ async def hand_ocr(input: Determinent):
     }
 
     return JSONResponse(content=output_json)
+
+## which problem is user solving
+@router.post("/hand_prob_loc")
+async def detect_hand_prob_loc(input: OCRInput):
+    start = time.time()
+    encoded_imgs = []
+    image = decode_image(input.image)
+    problem_crop(image)
     
-
-
+    prob_loc_r, prob_loc_l = prob_loc_crop(image)
+    print("--------------hand-----------------")
+    for loc in prob_loc_r:
+        print(loc)
+    print("--------------handend--------------")
+    
+    output_json = {
+        "prob_loc_l": prob_loc_l,
+        "prob_loc_r": prob_loc_r,
+    }
+    
+    return JSONResponse(content=output_json)
