@@ -144,7 +144,7 @@ async def login(login: LoginRequest):
             "phone_num" : user_in_db[0][5],
             "birthday" : user_in_db[0][6],
             "avg_focusing_level" : user_in_db[0][8],
-            "school" : user_in_db[0][9],
+            "school" : user_in_db[0][10],
             "progress_unit" : progress_unit,
             "z_log" : z_log,
             "weekly_reports" : weekly_reports,
