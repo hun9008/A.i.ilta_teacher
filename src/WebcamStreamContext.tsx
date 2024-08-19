@@ -57,7 +57,7 @@ export const WebcamStreamProvider: React.FC<{ children: React.ReactNode }> = ({ 
         <Webcam
           audio={false}
           ref={webcamRef}
-          screenshotFormat="image/jpeg"
+          screenshotFormat="image/png"
           videoConstraints={{ facingMode: 'user' }}
         />
       </div>
