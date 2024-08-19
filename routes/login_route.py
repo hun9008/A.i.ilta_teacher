@@ -18,7 +18,7 @@ async def register(user: SignUpRequest):
     connection = create_connection()
     
     # user_in_db = await users_collection.find_one({"email": user.email})
-    load_user = "SELECT * FROM user WHERE email = '{}'".format(user.email)
+    load_user = "SELECT * FROM user WHERE email = '{}';".format(user.email)
     user_in_db = read_query(connection, load_user)
 
     if user_in_db:
@@ -41,8 +41,8 @@ async def register(user: SignUpRequest):
     # user_in_db = UserInDB(**user.dict(), hashed_password=hashed_password)
     # await users_collection.insert_one(user_in_db.dict())
     insert_user = """
-    INSERT INTO user (u_id, name, nickname, email, parent_email, phone_num, birth_day, hashed_password) 
-    VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')
+    INSERT INTO user (u_id, name, nickname, email, parent_email, phone_num, birthday, password) 
+    VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}');
     """.format(
         u_id,
         user.name, 
@@ -50,7 +50,7 @@ async def register(user: SignUpRequest):
         user.email, 
         user.parent_email, 
         user.phone_num, 
-        user.birth_day, 
+        user.birthday, 
         hashed_password
     )
     
@@ -70,8 +70,15 @@ async def login(login: LoginRequest):
     connection = create_connection()
 
     # user_in_db = await users_collection.find_one({"u_email": login.email})
-    load_user = "SELECT * FROM user WHERE email = '{}'".format(login.email)
+    load_user = "SELECT * FROM user WHERE email = '{}';".format(login.email)
     user_in_db = read_query(connection, load_user)
+    
+    print("user_in_db :", user_in_db)
+    
+    if user_in_db:
+        print("user_in_db 테이블 데이터:")
+        for user in user_in_db:
+            print(user)
 
     if not user_in_db:
         raise HTTPException(status_code=400, detail="Invalid email")
@@ -81,7 +88,7 @@ async def login(login: LoginRequest):
     print("DB closed in /login\n")
     connection.close()
     
-    return {"message" : "Login successful", "u_id": str(user_in_db[0])} # 형식 변경 필요성 ?
+    return {"message" : "Login successful", "u_id": str(user_in_db[0])} # 형식 변경 필요
 
 @route.get("/user_all")
 async def get_all_users():
@@ -93,11 +100,12 @@ async def get_all_users():
     # async for user in users_collection.find():
     #     user['_id'] = str(user['_id'])
     #     users.append(user)
-    users = read_query(connection, "SELECT * FROM user") # user 맞나? entity 이름 그대로 가져오면 되는지 궁금
+    users = read_query(connection, "SELECT * FROM user;")
     
     if users:
         for user in users:
             # convert u_id format to string
+            user = list(user)
             user[0] = str(user[0]) # 형식 변경 필요성 ?
         
     print("DB closed in /user_all\n")
@@ -112,14 +120,14 @@ async def delete_user(email: EmailStr):
     connection = create_connection()
 
     # user_in_db = await users_collection.find_one({"email": email})
-    load_user = "SELECT * FROM user WHERE email = '{}'".format(email)
+    load_user = "SELECT * FROM user WHERE email = '{}';".format(email)
     user_in_db = read_query(connection, load_user)
     
     if not user_in_db:
         raise HTTPException(status_code=404, detail="User not found")
     
     # await users_collection.delete_one({"email":email})
-    delete_user = "DELETE FROM users WHERE email = '{}'".format(email)
+    delete_user = "DELETE FROM users WHERE email = '{}';".format(email)
     execute_query(connection, delete_user)
     
     print("DB closed in /user_delete\n")

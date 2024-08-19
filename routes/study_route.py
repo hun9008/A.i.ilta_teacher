@@ -29,7 +29,7 @@ async def set_time(settime:SetTime):
     # DB : init_state
     insert_settime = """
     INSERT INTO init_state (u_id, s_id, start_date, study_time, break_time) 
-    VALUES ('{}', '{}', '{}', '{}', '{}')
+    VALUES ('{}', '{}', '{}', '{}', '{}');
     """.format(
         u_id, 
         s_id, 
@@ -42,7 +42,7 @@ async def set_time(settime:SetTime):
     # DB : study
     insert_study = """
     INSERT INTO study (u_id, s_id, start_time) 
-    VALUES ('{}', '{}', '{}')
+    VALUES ('{}', '{}', '{}');
     """.format(
         u_id, 
         s_id, 
@@ -82,7 +82,7 @@ async def real_time(realtime:RealTime):
     # DB : end_state
     insert_realtime = """
     INSERT INTO init_state (u_id, s_id, end_date, focusing_level, r_study_time, r_break_time) 
-    VALUES ('{}', '{}', '{}', '{}', '{}')
+    VALUES ('{}', '{}', '{}', '{}', '{}');
     """.format(
         u_id, 
         s_id, 
@@ -97,7 +97,7 @@ async def real_time(realtime:RealTime):
     update_study = """
     UPDATE study
     SET end_time = '{}'
-    WHERE s_id = '{}'
+    WHERE s_id = '{}';
     """.format(
         end_date, 
         s_id
