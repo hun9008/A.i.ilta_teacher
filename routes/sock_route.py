@@ -153,8 +153,10 @@ async def perform_ocr(frame_data):
     print("Performing OCR")
     url = "http://model.maitutor.site/problems_solver"
     payload = {'image': frame_data}
-    print(payload)
+    # print(payload)
     headers = {'Content-Type': 'application/json'}  # JSON 형식임을 명시
     response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)  # JSON 형식으로 전송
+    # print("response : ", response)
+    # print("type : ", type(response))
     return response.json()
     # return "Dummy OCR result"
