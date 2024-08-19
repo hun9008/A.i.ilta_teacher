@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from './WebSocketContext';
 import { useLocation } from 'react-router-dom';
 
@@ -19,10 +19,13 @@ function MobileCameraPage() {
   const startCapturing = useCallback(async () => {
     setIsCapturing(true);
     connectWebSocket(wsUrl);
-    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 4096 },
+          height: { ideal: 2160 }
+        },
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -48,9 +51,8 @@ function MobileCameraPage() {
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageSrc = canvas.toDataURL('image/png');
+        const imageSrc = canvas.toDataURL('image/png', 1.0);  // Use maximum quality
         setCapturedImage(imageSrc);
-
         const imageData = imageSrc.split(',')[1];
         const message = {
           u_id: u_id,
@@ -65,11 +67,9 @@ function MobileCameraPage() {
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
-
     if (isCapturing) {
       intervalId = setInterval(captureImage, 1000);
     }
-
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
