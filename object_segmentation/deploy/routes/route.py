@@ -7,8 +7,9 @@ from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 import time
 from models.cv_ocr import problem_crop
-from models.cv_hand_loc import prob_loc_crop
-from models.ocr_input import OCRInput, Determinent
+from models.cv_hand_loc import prob_loc_crop, visualize_problem_locations, visualize_hand_area
+from models.tip_loc import hand_loc
+from models.ocr_input import OCRInput, Determinent, ProbAreas_HandImg
 import boto3
 from botocore.exceptions import NoCredentialsError
 import requests
@@ -16,7 +17,6 @@ from openai import OpenAI
 import asyncio
 import anthropic
 import difflib
-# import deepl
 
 router = APIRouter()
 
@@ -307,22 +307,71 @@ async def hand_ocr(input: Determinent):
     return JSONResponse(content=output_json)
 
 ## which problem is user solving
-@router.post("/hand_prob_loc")
-async def detect_hand_prob_loc(input: OCRInput):
-    start = time.time()
-    encoded_imgs = []
-    image = decode_image(input.image)
-    problem_crop(image)
+@router.post("/prob_areas_which_prob")
+async def define_prob_areas(input: ProbAreas_HandImg):
+    image_clean = decode_image(input.image_clean)
+    image_hand = decode_image(input.image_hand)
+    problem_crop(image_clean)
     
-    prob_loc_r, prob_loc_l = prob_loc_crop(image)
-    print("--------------hand-----------------")
+    prob_loc_l, prob_loc_r = prob_loc_crop(image_clean)
+    
+    image_show_clean = image_clean
+    image_show_hand = image_hand
+    
+    prob_loc_l.sort(key=lambda x: x[1])
+    prob_loc_r.sort(key=lambda x: x[1])
+    
+    real_loc_r = []
+    tot_loc = []
+    left_prob_count = 0
+    right_prob_count = 0
+    for loc in prob_loc_l:
+        print("left", loc)
+        tot_loc.append(loc)
+        left_prob_count += 1
     for loc in prob_loc_r:
-        print(loc)
-    print("--------------handend--------------")
+        loc = (loc[0]+image_show_clean.shape[1]//2,loc[1], loc[2], loc[3])
+        print("right", loc)
+        real_loc_r.append(loc)
+        tot_loc.append(loc)
+        right_prob_count += 1
+        
+    prob_areas = []
+    if left_prob_count > 1:
+        for i in range (left_prob_count - 1):
+            tmp = prob_loc_l[i]
+            tmp_next = prob_loc_l[i+1]
+            prob_area = (tmp[0], tmp[1], image_show_clean.shape[1]//2-tmp[0]-3, tmp_next[1]-tmp[1]-3)
+            prob_areas.append(prob_area)
+        tmp = prob_loc_l[left_prob_count - 1]
+        prob_areas.append((tmp[0], tmp[1], image_show_clean.shape[1]//2-tmp[0], image_show_clean.shape[0]-tmp[1]-3))
+    else:
+        prob_areas.append((prob_loc_l[0], prob_loc_l[1], image_show_clean.shape[1]//2-prob_loc_l[0]-3, image_show_clean.shape[0]-prob_loc_l[1]-3))
+
+    if right_prob_count > 1:
+        for i in range (right_prob_count - 1):
+            tmp = real_loc_r[i]
+            tmp_next = real_loc_r[i+1]
+            prob_area = (tmp[0], tmp[1], image_show_clean.shape[1]-tmp[0]-3, tmp_next[1]-tmp[1]-3)
+            prob_areas.append(prob_area)
+        tmp = real_loc_r[right_prob_count - 1]
+        prob_areas.append((tmp[0], tmp[1], image_show_clean.shape[1]-tmp[0], image_show_clean.shape[0]-tmp[1]-3))
+    else:
+        prob_areas.append((real_loc_r[0], real_loc_r[1], image_show_clean.shape[1]-real_loc_r[0]-3, image_show_clean.shape[0]-real_loc_r[1]-3))
+
+    visualize_problem_locations(image_show_clean[:,], prob_areas)
+    
+    tl, br = hand_loc(image_hand)
+    hand_area = []
+    hand_area.append(tl)
+    hand_area.append(br)
+    visualize_hand_area(image_show_hand[:,], hand_area)
+
+    prob_num = 1
     
     output_json = {
-        "prob_loc_l": prob_loc_l,
-        "prob_loc_r": prob_loc_r,
+        "prob_area": prob_areas,
+        "prob_num": prob_num,
     }
     
     return JSONResponse(content=output_json)
