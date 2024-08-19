@@ -122,8 +122,8 @@ def visualize_problem_locations(image, problem_locations):
     plt.show()
     
 def visualize_hand_area(image, hand_locations):
-    cv2.rectangle(image, hand_locations[0], hand_locations[1], (0, 255, 255), 2)
-    cv2.putText(image, f"({hand_locations[0][0]},{hand_locations[0][1]})", (hand_locations[0][0], hand_locations[0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+    cv2.rectangle(image, (hand_locations[0], hand_locations[1]), (hand_locations[0]+hand_locations[2], hand_locations[1]+hand_locations[3]), (0, 255, 255), 2)
+    cv2.putText(image, f"({hand_locations[0]},{hand_locations[1]})", (hand_locations[0], hand_locations[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
     
     plt.figure(figsize=(10, 10))
     plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))

@@ -363,12 +363,21 @@ async def define_prob_areas(input: ProbAreas_HandImg):
     visualize_problem_locations(image_show_clean[:,], prob_areas)
     
     tl, br = hand_loc(image_hand)
-    hand_area = []
-    hand_area.append(tl)
-    hand_area.append(br)
-    visualize_hand_area(image_show_hand[:,], hand_area)
+    hand_area_loc = (tl[0], tl[1], br[0]-tl[0], br[1]-tl[1])
+    visualize_hand_area(image_show_hand[:,], hand_area_loc)
 
-    prob_num = 1
+    #determine which prob_area the hand_are_loc is located
+    hand_x, hand_y, hand_w, hand_h = hand_area_loc
+
+    prob_num = None
+    for i, (prob_x, prob_y, prob_w, prob_h) in enumerate(prob_areas):
+        if (hand_x >= prob_x and hand_x + hand_w <= prob_x + prob_w and
+            hand_y >= prob_y and hand_y + hand_h <= prob_y + prob_h):
+            prob_num = i
+            break
+
+    if prob_num is None:
+        prob_num = -1
     
     output_json = {
         "prob_area": prob_areas,
