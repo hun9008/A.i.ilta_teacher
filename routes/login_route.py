@@ -41,7 +41,7 @@ async def register(user: SignUpRequest):
     # user_in_db = UserInDB(**user.dict(), hashed_password=hashed_password)
     # await users_collection.insert_one(user_in_db.dict())
     insert_user = """
-    INSERT INTO users (u_id, name, nickname, email, parent_email, phone_num, birth_day, hashed_password) 
+    INSERT INTO user (u_id, name, nickname, email, parent_email, phone_num, birth_day, hashed_password) 
     VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')
     """.format(
         u_id,
