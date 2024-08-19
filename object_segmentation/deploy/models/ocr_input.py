@@ -6,3 +6,7 @@ class OCRInput(BaseModel):
 class Determinent(BaseModel):
     image: str
     solution : str
+    
+class ProbAreas_HandImg(BaseModel):
+    image_clean : str
+    image_hand : str

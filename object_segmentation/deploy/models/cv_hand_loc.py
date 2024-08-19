@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import os
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from PIL import Image
 
 problem_idx = 0
@@ -25,10 +25,6 @@ def preprocess_image(page):
             cv2.drawContours(binary, [c], -1, (0, 0, 0), thickness=cv2.FILLED)  
 
     processed_image = cv2.bitwise_not(binary)
-
-    # plt.imshow(processed_image, cmap='gray')
-    # plt.axis('off')
-    # plt.show()
 
     return processed_image
 
@@ -95,7 +91,6 @@ def prob_loc_contour(page_rl, output_dir, type, origin):
         if w > 100 and h > 50:  
             problem_locations.append((x, y, w, h))
     
-    print("problem_locations: ", len(problem_locations))
     return problem_locations
 
 def prob_loc_crop(image):
@@ -103,9 +98,9 @@ def prob_loc_crop(image):
 
     right, left = imtrim(durty_image)
     origin_right, origin_left = imtrim(image)
-    print("all shape:", image.shape)
-    print("right shape: ", right.shape)
-    print("left shape: ", left.shape)
+    # print("all shape:", image.shape)
+    # print("right shape: ", right.shape)
+    # print("left shape: ", left.shape)
 
     if right is None or left is None:
         print("Error: Image trimming failed.")
@@ -114,4 +109,23 @@ def prob_loc_crop(image):
     output_dir = './temp'
     os.makedirs(output_dir, exist_ok=True)
 
-    return prob_loc_contour(right, output_dir, 'right', origin_right), prob_loc_contour(left, output_dir, 'left', origin_left)
+    return prob_loc_contour(left, output_dir, 'left', origin_left), prob_loc_contour(right, output_dir, 'right', origin_right)
+
+def visualize_problem_locations(image, problem_locations):
+    for (x, y, w, h) in problem_locations:
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.putText(image, f"({x},{y})", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+
+    plt.figure(figsize=(10, 10))
+    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.axis('off')
+    plt.show()
+    
+def visualize_hand_area(image, hand_locations):
+    cv2.rectangle(image, hand_locations[0], hand_locations[1], (0, 255, 255), 2)
+    cv2.putText(image, f"({hand_locations[0][0]},{hand_locations[0][1]})", (hand_locations[0][0], hand_locations[0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+    
+    plt.figure(figsize=(10, 10))
+    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.axis('off')
+    plt.show()
