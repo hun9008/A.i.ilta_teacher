@@ -9,6 +9,9 @@ from utils.login_utils import get_password_hash, verify_password, generate_rando
 import re
 from datetime import datetime
 
+import os
+import base64
+
 route = APIRouter()
 
 @route.post("/register") 
@@ -73,7 +76,10 @@ async def login(login: LoginRequest):
     load_user = "SELECT * FROM user WHERE email = '{}';".format(login.email)
     user_in_db = read_query(connection, load_user)
     
-    print("user_in_db :", user_in_db)
+    # print("user_in_db :", user_in_db)
+    # print('len : ' , len(user_in_db))
+    # print('my : ', user_in_db[0][7])
+    u_hashed_password = user_in_db[0][7]
     
     if user_in_db:
         print("user_in_db 테이블 데이터:")
@@ -82,7 +88,7 @@ async def login(login: LoginRequest):
 
     if not user_in_db:
         raise HTTPException(status_code=400, detail="Invalid email")
-    if not verify_password(login.password, user_in_db["hashed_password"]):
+    if not verify_password(login.password, u_hashed_password):
         raise HTTPException(status_code=400, detail="Invalid password")
     
     print("DB closed in /login\n")
@@ -139,4 +145,52 @@ async def delete_user(email: EmailStr):
 async def get_info():
     connection = create_connection()
 
+@route.get("/all_badges")
+async def get_all_badges():
+    connection = create_connection()
+
+    sql = """ SELECT * FROM badges where b_id = 'badge01';
+"""
+    response = read_query(connection, sql)
+
+    response_with_encoded_images = []
+    for row in response:
+        row_list = list(row)  # 튜플을 리스트로 변환
+        if row_list[1]:  # badge_logo 컬럼이 존재할 때만 처리
+            try:
+                # Base64 인코딩 시도를 안전하게 수행
+                row_list[1] = base64.b64encode(row_list[1]).decode('utf-8')
+            except Exception as e:
+                print(f"Encoding error: {e}")  # 에러 로그 출력
+                row_list[1] = None  # 문제가 있을 경우 None으로 설정
+        response_with_encoded_images.append(tuple(row_list))
     
+    # print(response)
+    connection.close()
+
+    return {"message": "All badges returned successfully", "data": response_with_encoded_images}
+
+@route.post('/save_badge')
+async def save_badge():
+    
+    connection = create_connection()
+    cursor = connection.cursor()
+
+    file_path = os.path.join(os.path.dirname(__file__), 'badges/badge01.webp')
+    binary_data = open(file_path, 'rb').read()
+
+    sql_update_query = """
+        UPDATE badges
+        SET badge_logo = %s
+        WHERE b_id = %s
+    """
+    badge_data = (binary_data, 'badge01')
+
+    # 데이터 업데이트 실행
+    response = cursor.execute(sql_update_query, badge_data)
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+    return {"message": "Badge saved successfully"}
