@@ -6,10 +6,13 @@ import os
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 import time
+from models.class_quest_cate import category_inference
 from models.cv_ocr import problem_crop
-from models.cv_hand_loc import prob_loc_crop, visualize_problem_locations, visualize_hand_area
-from models.tip_loc import hand_loc
-from models.ocr_input import OCRInput, Determinent, ProbAreas_HandImg
+from object_segmentation.deploy.models.cv_prob_area import prob_loc_crop, visualize_problem_locations
+from object_segmentation.deploy.models.cv_hand_loc import hand_loc, visualize_hand_area
+from object_segmentation.deploy.models.input_ocr import OCRInput, Determinent
+from object_segmentation.deploy.models.input_hand import ProbAreas_HandImg
+from object_segmentation.deploy.models.input_prob import ClassInput
 import boto3
 from botocore.exceptions import NoCredentialsError
 import requests
@@ -458,12 +461,27 @@ async def define_prob_areas(input: ProbAreas_HandImg):
     if prob_num is None:
         prob_num = -1
     
-    output_json = {
+    output = {
         "prob_area": prob_areas,
         "prob_num": prob_num,
     }
     
-    return JSONResponse(content=output_json)
+    return JSONResponse(content=output)
+
+@router.post("/class_inference")
+async def class_inference(input: ClassInput):
+    question = input.question
+    
+    predicted_class = category_inference(question)
+    
+    #Update DB
+    
+    output = {
+        "predicted_category" : predicted_class,
+    }
+    
+    return JSONResponse(content = output)
+    
 
 @router.get("/test")
 async def test():

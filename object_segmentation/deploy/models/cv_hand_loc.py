@@ -1,126 +1,48 @@
-import numpy as np
 import cv2
 import os
-import matplotlib.pyplot as plt
-from PIL import Image
+import numpy as np
+import matplotlib as plt
+from cv_which_prob.unified_detector import Fingertips
+from cv_which_prob.hand_detector.detector import YOLO
 
-problem_idx = 0
+base_dir = os.path.dirname(os.path.abspath(__file__))
+yolo_path = os.path.join('cv_which_prob/weights/yolo.h5')
+fingertip_path = os.path.join('cv_which_prob/weights/fingertip.h5')
 
-def preprocess_image(page):
+hand = YOLO(weights=yolo_path, threshold=0.8)
+fingertips = Fingertips(weights=fingertip_path)
 
-    gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
-    _, binary = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
+def hand_loc(image):
 
-    # 구조적 요소 커널을 생성하여 세로 선 강조
-    vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, page.shape[0] // 30))
+    # hand detection
+    tl, br = hand.detect(image=image)
+
+    if tl and br is not None:
+        cropped_image = image[tl[1]:br[1], tl[0]: br[0]]
+        height, width, _ = cropped_image.shape
+
+        # gesture classification and fingertips regression
+        prob, pos = fingertips.classify(image=cropped_image)
+        pos = np.mean(pos, 0)
+
+        # post-processing
+        prob = np.asarray([(p >= 0.5) * 1.0 for p in prob])
+        for i in range(0, len(pos), 2):
+            pos[i] = pos[i] * width + tl[0]
+            pos[i + 1] = pos[i + 1] * height + tl[1]
+
+        # drawing
+        index = 0
+        color = [(15, 15, 240), (15, 240, 155), (240, 155, 15), (240, 15, 155), (240, 15, 240)]
+        image = cv2.rectangle(image, (tl[0], tl[1]), (br[0], br[1]), (235, 26, 158), 2)
+        for c, p in enumerate(prob):
+            if p > 0.5:
+                image = cv2.circle(image, (int(pos[index]), int(pos[index + 1])), radius=12,
+                                   color=color[c], thickness=-2)
+            index = index + 2
     
-    # 모폴로지 연산을 통해 세로 선 강조
-    detected_lines = cv2.morphologyEx(binary, cv2.MORPH_OPEN, vertical_kernel, iterations=2)
+    return tl, br
 
-    # 세로 구분선 제거
-    cnts = cv2.findContours(detected_lines, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
-    for c in cnts:
-        x, y, w, h = cv2.boundingRect(c)
-        if h > page.shape[0] // 2:  # 세로 선이 이미지의 절반 이상을 잇는 경우
-            cv2.drawContours(binary, [c], -1, (0, 0, 0), thickness=cv2.FILLED)  
-
-    processed_image = cv2.bitwise_not(binary)
-
-    return processed_image
-
-def imtrim(page):
-    if page is None:
-        print("Error: Input page is None.")
-        return None, None
-    
-    # top_trim = 100  
-    # bottom_trim = 50  
-    # page = page[top_trim:-bottom_trim, :]
-    
-    if len(page.shape) == 2:
-        h, w = page.shape
-    else:
-        h, w, _ = page.shape
-    
-    print(f"Image size after trimming: {h}x{w}")
-
-    half_width = w // 2  
-    
-    x_left = 0  
-    w_left = half_width 
-    
-    x_right = half_width  
-    w_right = w - half_width
-    left = page[:, x_left:x_left + w_left]  
-    right = page[:, x_right:]
-
-    print(f"Left image shape: {left.shape}")
-    print(f"Right image shape: {right.shape}")
-
-    return right, left
-
-def prob_loc_contour(page_rl, output_dir, type, origin):
-    global problem_idx
-
-    if page_rl is None:
-        print("Error: page_rl is None.")
-        return
-
-    imgray = page_rl
-
-    blur = cv2.GaussianBlur(imgray, ksize=(3, 3), sigmaX=0)
-    thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-
-    edge = cv2.Canny(thresh, 100, 200)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 50)) 
-    closed = cv2.morphologyEx(edge, cv2.MORPH_CLOSE, kernel)
-
-    contours, hierarchy = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    contoured_image = page_rl.copy()
-    cv2.drawContours(contoured_image, contours, -1, (0, 255, 0), 2) 
-
-    cv2.imwrite(f"{output_dir}/_{type}_contoured_image.png", contoured_image)
-
-    problem_locations = []
-
-    cnt = 0
-    print("contours len, type: ", len(contours), " ",type)
-    for i, c in enumerate(contours):
-        x, y, w, h = cv2.boundingRect(c)
-        if w > 100 and h > 50:  
-            problem_locations.append((x, y, w, h))
-    
-    return problem_locations
-
-def prob_loc_crop(image):
-    durty_image = preprocess_image(image)
-
-    right, left = imtrim(durty_image)
-    origin_right, origin_left = imtrim(image)
-    # print("all shape:", image.shape)
-    # print("right shape: ", right.shape)
-    # print("left shape: ", left.shape)
-
-    if right is None or left is None:
-        print("Error: Image trimming failed.")
-        return
-
-    output_dir = './temp'
-    os.makedirs(output_dir, exist_ok=True)
-
-    return prob_loc_contour(left, output_dir, 'left', origin_left), prob_loc_contour(right, output_dir, 'right', origin_right)
-
-def visualize_problem_locations(image, problem_locations):
-    for (x, y, w, h) in problem_locations:
-        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.putText(image, f"({x},{y})", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-
-    plt.figure(figsize=(10, 10))
-    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    plt.axis('off')
-    plt.show()
-    
 def visualize_hand_area(image, hand_locations):
     cv2.rectangle(image, (hand_locations[0], hand_locations[1]), (hand_locations[0]+hand_locations[2], hand_locations[1]+hand_locations[3]), (0, 255, 255), 2)
     cv2.putText(image, f"({hand_locations[0]},{hand_locations[1]})", (hand_locations[0], hand_locations[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
