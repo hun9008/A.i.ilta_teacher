@@ -126,3 +126,9 @@ async def delete_user(email: EmailStr):
     connection.close()
     
     return {"message": "User deleted successfully"}
+
+@route.get("/info")
+async def get_info():
+    connection = create_connection()
+
+    
