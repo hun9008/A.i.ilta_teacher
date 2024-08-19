@@ -8,7 +8,7 @@ class SignUpRequest(BaseModel):
     email: str
     parent_email: str
     phone_num: str 
-    birth_day: date
+    birthday: date
     password: str
 
 class LoginRequest(BaseModel):
