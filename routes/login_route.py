@@ -45,7 +45,7 @@ async def register(user: SignUpRequest):
     # user_in_db = UserInDB(**user.dict(), hashed_password=hashed_password)
     # await users_collection.insert_one(user_in_db.dict())
     insert_user = """
-    INSERT INTO user (u_id, name, nickname, email, parent_email, phone_num, birthday, password) 
+    INSERT INTO user (u_id, name, nickname, email, parent_email, phone_num, birthday, password, school) 
     VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}');
     """.format(
         u_id,
@@ -55,7 +55,8 @@ async def register(user: SignUpRequest):
         user.parent_email, 
         user.phone_num, 
         user.birthday, 
-        hashed_password
+        hashed_password,
+        user.school
     )
     
     user_in_db = execute_query(connection, insert_user)
@@ -136,6 +137,14 @@ async def login(login: LoginRequest):
     connection.close()
     
     return {"message" : "Login successful", "u_id": str(user_in_db[0][0]),
+            "name" : user_in_db[0][1],
+            "nickname" : user_in_db[0][2],
+            "email" : user_in_db[0][3],
+            "parent_email" : user_in_db[0][4],
+            "phone_num" : user_in_db[0][5],
+            "birthday" : user_in_db[0][6],
+            "avg_focusing_level" : user_in_db[0][8],
+            "school" : user_in_db[0][9],
             "progress_unit" : progress_unit,
             "z_log" : z_log,
             "weekly_reports" : weekly_reports,

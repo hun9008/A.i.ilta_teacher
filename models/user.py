@@ -10,6 +10,7 @@ class SignUpRequest(BaseModel):
     phone_num: str 
     birthday: date
     password: str
+    school: str
 
 class LoginRequest(BaseModel):
     email: str
