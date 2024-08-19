@@ -16,6 +16,9 @@ from openai import OpenAI
 import asyncio
 import anthropic
 import difflib
+import subprocess
+import json
+import re
 # import deepl
 
 router = APIRouter()
@@ -87,7 +90,21 @@ def detect_hand_ocr_text(img):
 
     return texts[0].description
 
+def query_model(question):
+    result = subprocess.run(
+        ["ollama", "run", "llama3.1:latest", question],
+        capture_output=True,
+        text=True
+    )
 
+    output = result.stdout.strip()
+
+    if not output:
+        print("Warning: Model output is empty.")
+        return "EMPTY_RESPONSE"  # 빈 응답에 대한 처리
+
+    #print(f"Model output: {output}")  # 모델 출력 확인
+    return output
 
 async def fetch_openai(client, prompt_type):
     message = [{
@@ -144,25 +161,38 @@ async def fetch_ocr_claude(client, encoded_img, prompt_type):
 
     return response.content[0].text
 
-# async def fetch_ans_mistral(prompt_type: str):
+async def fetch_ans_llama31(prompt_type: str):
 
-#     return
+    loop = asyncio.get_event_loop()
 
-# def calculate_similarity(solution, answer):
-#     return difflib.SequenceMatcher(None, solution, answer).ratio()
+    result = await loop.run_in_executor(
+        None,
+        lambda: subprocess.run(
+            ["ollama", "run", "llama3.1:latest", prompt_type],
+            capture_output=True,
+            text=True
+        )
+    )
+    
+    output = result.stdout.strip()
+    return output
 
-# async def retry_solution(client, ocr, mistral_answer, retry_count=2):
-#     for _ in range(retry_count):
-#         prompt_with_mistral = (
-#             f"정답은 '{mistral_answer}' 야. "
-#             f"하지만, 이미지를 보고 이 수학문제의 풀이를 다시 한글로 알려줘. "
-#             f"step 1 : , step2 : , ..., answer: 로 알려줘. 문제: {ocr}"
-#         )
-#         new_solution = await fetch_openai(client, prompt_with_mistral)
-#         similarity = calculate_similarity(new_solution, mistral_answer)
-#         if similarity >= 0.8:
-#             return new_solution
-#     return new_solution
+def calculate_similarity(solution, answer):
+    return difflib.SequenceMatcher(None, solution, answer).ratio()
+
+async def retry_solution(client, ocr, mistral_answer, retry_count=2):
+    print("retrying solution")
+    for _ in range(retry_count):
+        prompt_with_mistral = (
+            f"정답은 '{mistral_answer}' 야. "
+            f"하지만, 이미지를 보고 이 수학문제의 풀이를 다시 한글로 알려줘. "
+            f"step 1 : , step2 : , ..., answer: 로 알려줘. 문제: {ocr}"
+        )
+        new_solution = await fetch_openai(client, prompt_with_mistral)
+        similarity = calculate_similarity(new_solution, mistral_answer)
+        if similarity >= 0.8:
+            return new_solution
+    return new_solution
 
 
 @router.post("/problems_solver")
@@ -205,30 +235,78 @@ async def problems_ocr(input: OCRInput):
         for ocr in sorted_ocrs
     ]
     solution_tasks = [
-        fetch_openai(client, f"이미지를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ..., answer: 로 알려줘. {ocr}")
+        fetch_openai(client, f"아래 text를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ... 그리고 마지막 문장에는 (정답: answer)을 적어줘. \n text : {ocr}")
         for ocr in sorted_ocrs
     ]
 
-    # mistral_tasks = [
-    #     fetch_ans_mistral(f"prompt {ocr}")
-    #     for ocr in sorted_ocrs
-    # ]
+    llama_tasks = [
+        fetch_ans_llama31(f"다음 문제를 풀고 정답만 (answer:정답)의 형태로 알려줘. {ocr}")
+        for ocr in sorted_ocrs
+    ]
 
     concepts= await asyncio.gather(*concept_tasks)
     solutions= await asyncio.gather(*solution_tasks)
-    # answers= await asyncio.gather(*mistral_tasks)
+    answers= await asyncio.gather(*llama_tasks)
 
-    # final_solutions = [None] * len(sorted_ocrs)  
+    final_solutions = [None] * len(sorted_ocrs)  
 
-    # for index, (solution, answer, ocr) in enumerate(zip(solutions, answers, sorted_ocrs)):
-    #     similarity = calculate_similarity(solution, answer)
-    #     if similarity < 0.8:
-    #         # 유사도가 80% 미만이면 솔루션 재시도
-    #         final_solution = await retry_solution(client, ocr, answer)
-    #     else:
-    #         final_solution = solution
+    symbol_to_number = {
+        '①': '1', '②': '2', '③': '3', '④': '4', '⑤': '5',
+        '⑥': '6', '⑦': '7', '⑧': '8', '⑨': '9', '⑩': '10'
+    }
 
-    #     final_solutions[index] = final_solution
+    for index, (solution, answer, ocr) in enumerate(zip(solutions, answers, sorted_ocrs)):
+
+        # 기호를 숫자로 변환
+        for symbol, number in symbol_to_number.items():
+            solution = solution.replace(symbol, number)
+            answer = answer.replace(symbol, number)
+
+        print("sol : ", solution)
+        print("ans : ", answer)
+
+        # solution에서 마지막 answer : 부분 추출
+        sol_ans = ''
+        if "정답:" in solution:
+            print("일단 정답 존재.")
+            try:
+                # 마지막 "정답:" 이후의 텍스트를 추출
+                last_answer_index = solution.rfind("정답:")
+                answer_part = solution[last_answer_index + len("정답:"):].strip()
+                answer_only = re.sub(r'\\\(|\\\)', '', answer_part.split(')')[0]).strip()
+                sol_ans = answer_only
+            except IndexError:
+                print("정답이 포함된 부분을 찾지 못했습니다.")
+        
+        llama_ans = ''
+        # answer_parts = answer.split('answer:')
+        # if len(answer_parts) > 1 and answer_parts[1]:
+        #     numbers = re.findall(r'\d+', answer_parts[1])
+        #     if numbers:  # Ensure that numbers were found
+        #         extracted_number = numbers[0]
+        #         llama_ans = extracted_number
+        if "answer:" in answer:
+            # "answer:" 이후의 수식을 추출
+            answer_part = answer.split('answer:')[1].strip()
+            # \(와 \)를 제거한 뒤, 괄호, 공백 등 불필요한 문자 제거
+            llama_ans = re.sub(r'\\\(|\\\)|[^\w\s><=\-+*/.]', '', answer_part).strip()
+        else:
+            llama_ans = answer
+
+
+        print("sol ans : ", sol_ans)
+        print("llama_answer : ", llama_ans)
+
+        similarity = calculate_similarity(sol_ans, llama_ans)
+        if similarity < 0.8:
+            # 유사도가 80% 미만이면 솔루션 재시도
+            print("retrying solution")
+            # final_solution = await retry_solution(client, ocr, answer)
+            final_solution = solution
+        else:
+            final_solution = solution
+
+        final_solutions[index] = final_solution
 
     # temp directory cleanup
     for filename in os.listdir(image_path):
@@ -327,3 +405,10 @@ async def detect_hand_prob_loc(input: OCRInput):
     }
     
     return JSONResponse(content=output_json)
+
+@router.get("/test")
+async def test():
+
+    model_answer = query_model('다음 문제를 풀고 정답만 {"answer":"정답"}의 형태를 알려줘. 일차방정식 x+5 = 3(x-1)의 해는? (x = ?)').strip()
+
+    return JSONResponse(content={"model_answer": model_answer})
