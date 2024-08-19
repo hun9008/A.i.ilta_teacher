@@ -6,6 +6,10 @@ function SignIn() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
+  const [nickname, setNickname] = useState<string>('');
+  const [parentEmail, setParentEmail] = useState<string>('');
+  const [phoneNum, setPhoneNum] = useState<string>('');
+  const [birthDay, setBirthDay] = useState<string>('2024-08-19');
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
   const [isForgotPassword, setIsForgotPassword] = useState<boolean>(false);
 
@@ -39,7 +43,15 @@ function SignIn() {
       const response = await fetch(`${baseUrl}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({
+          name,
+          nickname,
+          email,
+          parent_email: parentEmail,
+          phone_num: phoneNum,
+          birth_day: birthDay,
+          password,
+        }),
       });
 
       const result = await response.json();
@@ -117,6 +129,21 @@ function SignIn() {
                     </div>
                   </div>
                   <div className="input-container">
+                    <label className="input-label" htmlFor="nickname">
+                      닉네임
+                    </label>
+                    <div className="input">
+                      <input
+                        className="textinput"
+                        type="text"
+                        id="nickname"
+                        name="nickname"
+                        placeholder="닉네임을 입력하세요"
+                        onChange={(e) => setNickname(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="input-container">
                     <label className="input-label" htmlFor="email">
                       이메일
                     </label>
@@ -129,6 +156,51 @@ function SignIn() {
                         name="email"
                         placeholder="이메일을 입력하세요"
                         onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="input-container">
+                    <label className="input-label" htmlFor="parentEmail">
+                      부모님 이메일
+                    </label>
+                    <div className="input">
+                      <input
+                        className="textinput"
+                        type="email"
+                        id="parentEmail"
+                        name="parentEmail"
+                        placeholder="부모님 이메일을 입력하세요"
+                        onChange={(e) => setParentEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="input-container">
+                    <label className="input-label" htmlFor="phoneNum">
+                      전화번호
+                    </label>
+                    <div className="input">
+                      <input
+                        className="textinput"
+                        type="tel"
+                        id="phoneNum"
+                        name="phoneNum"
+                        placeholder="전화번호를 입력하세요"
+                        onChange={(e) => setPhoneNum(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="input-container">
+                    <label className="input-label" htmlFor="birthDay">
+                      생년월일
+                    </label>
+                    <div className="input">
+                      <input
+                        className="textinput"
+                        type="date"
+                        id="birthDay"
+                        name="birthDay"
+                        value={birthDay}
+                        onChange={(e) => setBirthDay(e.target.value)}
                       />
                     </div>
                   </div>
@@ -265,12 +337,6 @@ function SignIn() {
         </div>
       </div>
       <div style={{ transform: 'translateY(-40px)' }}>
-        <button
-          className="secondary-button"
-          onClick={() => navigate('/scanner')}
-        >
-          스캐너 페이지로 바로가기
-        </button>
         <button className="secondary-button" onClick={() => navigate('/main')}>
           MainPage로 바로가기
         </button>

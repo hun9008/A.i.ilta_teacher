@@ -7,6 +7,7 @@ interface AnimatedModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedFloe: number;
+  selectedProblem: string;
 }
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
@@ -18,6 +19,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   isOpen,
   onClose,
   selectedFloe,
+  selectedProblem,
 }) => {
   const { getSocket, sendMessage, connectWebSocket, isConnected } =
     useWebSocket();
@@ -145,9 +147,9 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   문제 {selectedFloe + 1}{' '}
                 </h1>
                 <h2 className="text-xl font-bold mb-4">
-                  "문제 OCR 텍스트 여기에 들어갑니다"
+                  {/* "문제 OCR 텍스트 여기에 들어갑니다" */}
+                  <p>{selectedProblem}</p>
                 </h2>
-                <p> 1.x 2.y 3.z </p>
               </div>
               <div className="bg-gray-100 rounded-lg p-5 pb-20 mb-10 flex-grow">
                 <h1 className="text-2xl font-bold mb-4">현재 내 풀이 </h1>

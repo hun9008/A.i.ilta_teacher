@@ -5,8 +5,11 @@ import { MessageCircle } from 'lucide-react';
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
 
 function StudyMain() {
-  const { getSocket, sendMessage, connectWebSocket, isConnected } = useWebSocket();
-  const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'bot' }[]>([]);
+  const { getSocket, sendMessage, connectWebSocket, isConnected } =
+    useWebSocket();
+  const [messages, setMessages] = useState<
+    { text: string; sender: 'user' | 'bot' }[]
+  >([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isChatVisible, setIsChatVisible] = useState(false);
 
@@ -18,7 +21,10 @@ function StudyMain() {
       socket.onmessage = (event: MessageEvent) => {
         const data = event.data;
         console.log('Received WebSocket message:', data);
-        setMessages((prevMessages) => [...prevMessages, { text: data, sender: 'bot' }]);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { text: data, sender: 'bot' },
+        ]);
       };
     }
   }, [getSocket, connectWebSocket, isConnected]);
@@ -35,7 +41,10 @@ function StudyMain() {
 
       sendMessage(chatSocketUrl, message);
 
-      setMessages((prevMessages) => [...prevMessages, { text: inputMessage, sender: 'user' }]);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { text: inputMessage, sender: 'user' },
+      ]);
       setInputMessage('');
     }
   };
@@ -46,7 +55,10 @@ function StudyMain() {
 
   return (
     <div className="flex h-screen">
-      <MessageCircle onClick={toggleChatVisibility} className="cursor-pointer" />
+      <MessageCircle
+        onClick={toggleChatVisibility}
+        className="cursor-pointer"
+      />
       {isChatVisible && (
         <div className="flex flex-col justify-between w-72 bg-gray-50 p-2.5 border-l border-gray-300 ml-auto">
           <div className="overflow-y-auto flex-grow mb-2.5">
@@ -71,7 +83,10 @@ function StudyMain() {
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               className="flex-grow p-1 rounded border border-gray-300"
             />
-            <button onClick={handleSendMessage} className="ml-2.5 px-2.5 py-1 rounded bg-blue-500 text-white border-none cursor-pointer">
+            <button
+              onClick={handleSendMessage}
+              className="ml-2.5 px-2.5 py-1 rounded bg-blue-500 text-white border-none cursor-pointer"
+            >
               Send
             </button>
           </div>

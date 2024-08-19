@@ -14,11 +14,8 @@ function MobileCameraPage() {
   const u_id = query.get('u_id');
   const webcamRef = useRef<Webcam>(null);
   const [isCapturing, setIsCapturing] = useState(false);
-  const { connectWebSocket, disconnectWebSocket, sendMessage, lastResponse } =
-    useWebSocket();
+  const { connectWebSocket, disconnectWebSocket, sendMessage } = useWebSocket();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-
-  console.log('lastResponse in MobileCameraPage:', lastResponse);
 
   const startCapturing = useCallback(() => {
     setIsCapturing(true);
@@ -59,10 +56,6 @@ function MobileCameraPage() {
       }
     };
   }, [isCapturing, captureImage]);
-
-  useEffect(() => {
-    console.log('useEffect triggered with lastResponse:', lastResponse);
-  }, [lastResponse]);
 
   const videoConstraints = {
     facingMode: 'environment',
