@@ -320,12 +320,14 @@ const MainPage: React.FC = () => {
   const calendarData = parseZLog(z_log);
 
   // 카테고리 쪼개기
-  const parsedData = progress_unit.split(',').reduce((acc, curr, index) => {
-    const i = Math.floor(index / 4);
-    if (!acc[i]) acc[i] = [];
-    acc[i].push(curr);
-    return acc;
-  }, [] as string[][]);
+  const parsedData = progress_unit
+    ? progress_unit.split(',').reduce((acc, curr, index) => {
+        const i = Math.floor(index / 4);
+        if (!acc[i]) acc[i] = [];
+        acc[i].push(curr);
+        return acc;
+      }, [] as string[][])
+    : [];
 
   const categories = parsedData.map((item) => item[0]);
   const myAccuracy = parsedData.map((item) => parseFloat(item[1]));
@@ -501,7 +503,7 @@ const MainPage: React.FC = () => {
           <CenterColumn>
             <ChartWrapper>
               <ChartTitle>집중력</ChartTitle>
-              {renderChart(barData, 'bar')}
+              {renderChart(barData, {}, 'bar')}{' '}
             </ChartWrapper>
           </CenterColumn>
           <RightColumn>
@@ -677,7 +679,9 @@ const ChartWrapper = styled.div`
   background-color: #f3f4f6;
   border-radius: 10px;
   padding: 20px;
-  height: 300px;
+  min-height: 350px;
+  display: flex;
+  flex-direction: column;
 `;
 
 const ChartTitle = styled.h3`

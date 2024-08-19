@@ -17,7 +17,9 @@ import { useWebSocket } from './WebSocketContext';
 function Game() {
   const [selectedProblem, setSelectedProblem] = useState<string>('');
   const { ocrResponse } = useWebSocket();
-
+  interface OcrResponse {
+    ocrs: string;
+  }
   // const ocrResponse = {
   //   concepts:
   //     '5.  Problem solving keywords:\n- Rational function inequality\n- Algebraic manipulation\n- Solution of inequalities\n- Linear equation\n- Variable elimination\n\n6. Problem solving keywords:\n- Rational inequality\n- Variable manipulation\n- Interval solution\n- Parameter solving\n- Simplification',
@@ -38,8 +40,10 @@ function Game() {
     return parsedProblems;
   };
 
-  const problemTexts = parseOcrProblems(ocrResponse.ocrs);
-
+  let problemTexts: { [key: number]: string } = {};
+  if (ocrResponse && typeof ocrResponse === 'object' && 'ocrs' in ocrResponse) {
+    problemTexts = parseOcrProblems((ocrResponse as OcrResponse).ocrs);
+  }
   const [penguinPosition, setPenguinPosition] = useState<THREE.Vector3>(
     new THREE.Vector3(0, 0.5, 0)
   );

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from './WebSocketContext';
 import { useLocation } from 'react-router-dom';
 
@@ -21,10 +21,10 @@ function MobileCameraPage() {
     connectWebSocket(wsUrl);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
+        video: {
           facingMode: 'environment',
           width: { ideal: 4096 },
-          height: { ideal: 2160 }
+          height: { ideal: 2160 },
         },
       });
       if (videoRef.current) {
@@ -39,7 +39,7 @@ function MobileCameraPage() {
     setIsCapturing(false);
     disconnectWebSocket(wsUrl);
     const stream = videoRef.current?.srcObject as MediaStream;
-    stream?.getTracks().forEach(track => track.stop());
+    stream?.getTracks().forEach((track) => track.stop());
   }, [disconnectWebSocket]);
 
   const captureImage = useCallback(() => {
@@ -51,7 +51,7 @@ function MobileCameraPage() {
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageSrc = canvas.toDataURL('image/png', 1.0);  // Use maximum quality
+        const imageSrc = canvas.toDataURL('image/png', 1.0); // Use maximum quality
         setCapturedImage(imageSrc);
         const imageData = imageSrc.split(',')[1];
         const message = {
@@ -82,7 +82,12 @@ function MobileCameraPage() {
       <h1 className="text-xl font-bold mb-6 mt-6 text-center">
         모바일 카메라 세팅을 시작하세요.
       </h1>
-      <video ref={videoRef} autoPlay playsInline className="border rounded-lg" />
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        className="border rounded-lg"
+      />
       <div className="flex space-x-4 mt-4">
         {!isCapturing ? (
           <button
