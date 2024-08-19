@@ -59,6 +59,11 @@
                 <option value="2">Teer 2</option>
                 <option value="3">Teer 3</option>
             </select>
+            <select id="termSelect">
+                <option value="1">Term 1</option>
+                <option value="2">Term 2</option>
+                <option value="3">Term 3</option>
+            </select>
             <button id="generateProblems">문제집 만들기</button>
             <button id="generateAnswers" style="display:none;">답지 만들기</button>
         </div>
@@ -70,12 +75,13 @@
     <script>
         document.getElementById('generateProblems').addEventListener('click', function() {
             const difficulty = document.getElementById('difficultySelect').value;
+            const term = document.getElementById('termSelect').value;
             fetch('http://localhost:8000/get_latest_competition', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ difficulty: parseInt(difficulty) })
+                body: JSON.stringify({ difficulty: parseInt(difficulty), term: parseInt(term) })
             })
             .then(response => response.json())
             .then(data => {
@@ -88,12 +94,13 @@
 
         document.getElementById('generateAnswers').addEventListener('click', function() {
             const difficulty = document.getElementById('difficultySelect').value;
+            const term = document.getElementById('termSelect').value;
             fetch('http://localhost:8000/get_latest_competition', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ difficulty: parseInt(difficulty) })
+                body: JSON.stringify({ difficulty: parseInt(difficulty), term: parseInt(term) })
             })
             .then(response => response.json())
             .then(data => {

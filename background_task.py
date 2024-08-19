@@ -17,7 +17,7 @@ def get_db_connection():
         collation='utf8mb4_unicode_ci'
     )
 
-def generate_random_competition(difficulty):
+def generate_random_competition(difficulty, term):
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
 
@@ -44,14 +44,14 @@ def generate_random_competition(difficulty):
     problem_set_json = json.dumps(problem_set, ensure_ascii=False)
     answer_set_json = json.dumps(answer_set, ensure_ascii=False)
 
-    insert_query = "INSERT INTO competition (c_id, problem_set_json, answer_set_json) VALUES (%s, %s, %s)"
-    cursor.execute(insert_query, (c_id, problem_set_json, answer_set_json))
+    insert_query = "INSERT INTO competition (c_id, problem_set_json, answer_set_json, difficulty, term) VALUES (%s, %s, %s, %s, %s)"
+    cursor.execute(insert_query, (c_id, problem_set_json, answer_set_json, difficulty, term))
     connection.commit()
 
     cursor.close()
     connection.close()
 
-    print(f"New competition generated for difficulty {difficulty} and saved to the database.")
+    print(f"New competition generated for difficulty {difficulty}, term {term} and saved to the database.")
 
 def start_background_task():
     while True:
@@ -60,22 +60,25 @@ def start_background_task():
             print("Generating new competition sets...")
             
             for difficulty in [1, 2, 3]:
-                generate_random_competition(difficulty)
+                for term in [1, 2, 3]:
+                    generate_random_competition(difficulty, term)
             
             print("New competitions generated.")
             time.sleep(60) 
         
-        time.sleep(30) 
+        time.sleep(30)
 
 # def start_background_task():
 #     while True:
 #         print("Generating new competition sets...")
         
 #         for difficulty in [1, 2, 3]:
-#             generate_random_competition(difficulty)
+#             for term in [1, 2, 3]:
+#                 generate_random_competition(difficulty, term)
         
 #         print("New competitions generated.")
 #         time.sleep(60)
 
 def start_task():
     threading.Thread(target=start_background_task, daemon=True).start()
+
