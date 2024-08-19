@@ -55,11 +55,15 @@ function CameraStreamPage(): React.JSX.Element {
           };
 
           // 메시지 전송
-          sendMessage(`${webSocketUrl}?u_id=${uId}`, message);
-          setLastMessageStatus('Message sent successfully');
+          const success = sendMessage(`${webSocketUrl}?u_id=${uId}`, message);
+          if (success) {
+            setLastMessageStatus('성공!');
+          } else {
+            setLastMessageStatus('Failed to send message');
+          }
         } catch (error) {
           console.error('Failed to capture or send image', error);
-          setLastMessageStatus('Failed to send message');
+          setLastMessageStatus('Failed to capture or send image');
         }
       }
     }, 1000); // 1초에 한 번씩 캡처 및 전송

@@ -78,15 +78,15 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     }, 1000);
   };
 
-  const sendMessage = (url: string, message: any) => {
+  const sendMessage = (url: string, message: any): boolean => {
     const socket = socketRefs.current[url];
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(message));
       console.log('Message sent:', message);
+      return true; // 메시지 전송 성공
     } else {
-      console.error(
-        `WebSocket for ${url} is not connected or ready to send messages`
-      );
+      console.error(`WebSocket for ${url} is not connected or ready to send messages`);
+      return false; // 메시지 전송 실패
     }
   };
 
