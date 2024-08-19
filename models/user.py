@@ -10,9 +10,6 @@ class SignUpRequest(BaseModel):
     phone_num: str 
     birth_day: date
     password: str
-    
-class UserInDB(User):
-    hashed_password: str
 
 class LoginRequest(BaseModel):
     email: str
@@ -34,6 +31,9 @@ class User(BaseModel):
     #study: List[StudySession]
     #unsolved_problem: List[UnsolvedProblem]
 # 2.2
+# 
+class UserInDB(User):
+    hashed_password: str
 class Stat(BaseModel):
     u_id: str
     operation_0: float
@@ -42,11 +42,7 @@ class Stat(BaseModel):
     geometry_3: float
     probability_4: float
     level: float       
-# 2.3    
-class StudySession(BaseModel):
-    s_id: str
-    init_state: InitState
-    end_state: EndState    
+# 2.3      
 # 2.4    
 class InitState(BaseModel):
     u_id: str
@@ -65,6 +61,10 @@ class EndState(BaseModel):
     r_study_time: int
     r_break_time: int    
 # 2.6
+class StudySession(BaseModel):
+    s_id: str
+    init_state: InitState
+    end_state: EndState  
 class InitProblem(BaseModel):
     s_id: str
     category: str

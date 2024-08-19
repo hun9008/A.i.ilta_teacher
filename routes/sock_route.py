@@ -152,9 +152,20 @@ async def handle_ws_video(frame_data, websocket, u_id, device):
 async def perform_ocr(frame_data):
     print("Performing OCR")
     url = "http://model.maitutor.site/problems_solver"
+    
+    print("frame_data : ", frame_data)
+
     payload = {'image': frame_data}
-    print(payload)
+    # print(payload)
     headers = {'Content-Type': 'application/json'}  # JSON 형식임을 명시
     response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)  # JSON 형식으로 전송
-    return response.json()
+    print("response : ", response)
+    print("type : ", type(response))
+    if response.status_code != 200:
+        raise ValueError(f"Server returned status code {response.status_code}: {response.text}")
+    
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        raise ValueError("Response is not in JSON format")
     # return "Dummy OCR result"
