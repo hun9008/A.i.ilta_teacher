@@ -11,6 +11,7 @@ from datetime import datetime
 
 import os
 import base64
+import json
 
 route = APIRouter()
 
@@ -80,7 +81,47 @@ async def login(login: LoginRequest):
     # print('len : ' , len(user_in_db))
     # print('my : ', user_in_db[0][7])
     u_hashed_password = user_in_db[0][7]
-    
+    u_id = user_in_db[0][0]
+
+    load_progress_unit = "SELECT conceptname, my_acc, top_acc, solved_num from progress_unit where u_id = '{}';".format(u_id)
+    progress_unit = read_query(connection, load_progress_unit)
+
+    load_z_log = "SELECT date, z_score FROM z_log WHERE u_id = '{}';".format(u_id)
+    z_log = read_query(connection, load_z_log)
+
+    load_weekly_reports = "SELECT solved_prob_this_week, solved_prob_last_week, study_time_this_week, study_time_last_week FROM weekly_reports WHERE u_id = '{}';".format(u_id)
+    weekly_reports = read_query(connection, load_weekly_reports)
+
+    load_badges = "SELECT b_id FROM user WHERE u_id = '{}';".format(u_id)
+    badges = read_query(connection, load_badges)
+    print(badges)
+
+    if badges and badges[0][0]:
+        b_id_json = badges[0][0]
+        b_id_list = json.loads(b_id_json)
+        badges_tuple = tuple(b_id_list)
+        
+        # badges 테이블에서 해당하는 뱃지 정보 조회
+        if len(badges_tuple) == 1:
+            badges_tuple = (badges_tuple[0],)  # 단일 요소 튜플 처리
+        
+        load_badge_details = "SELECT * FROM badges WHERE b_id IN {};".format(badges_tuple)
+        response = read_query(connection, load_badge_details)
+        response_with_encoded_images = []
+        for row in response:
+            row_list = list(row) 
+            if row_list[1]: 
+                try:
+                    row_list[1] = base64.b64encode(row_list[1]).decode('utf-8')
+                except Exception as e:
+                    print(f"Encoding error: {e}") 
+                    row_list[1] = None  
+            response_with_encoded_images.append(tuple(row_list))  
+        badge_details = response_with_encoded_images
+    else:
+        badge_details = []
+
+
     if user_in_db:
         print("user_in_db 테이블 데이터:")
         for user in user_in_db:
@@ -94,7 +135,12 @@ async def login(login: LoginRequest):
     print("DB closed in /login\n")
     connection.close()
     
-    return {"message" : "Login successful", "u_id": str(user_in_db[0])} # 형식 변경 필요
+    return {"message" : "Login successful", "u_id": str(user_in_db[0][0]),
+            "progress_unit" : progress_unit,
+            "z_log" : z_log,
+            "weekly_reports" : weekly_reports,
+            "badge_details" : badge_details
+            } # 형식 변경 필요
 
 @route.get("/user_all")
 async def get_all_users():
@@ -140,57 +186,3 @@ async def delete_user(email: EmailStr):
     connection.close()
     
     return {"message": "User deleted successfully"}
-
-@route.get("/info")
-async def get_info():
-    connection = create_connection()
-
-@route.get("/all_badges")
-async def get_all_badges():
-    connection = create_connection()
-
-    sql = """ SELECT * FROM badges where b_id = 'badge01';
-"""
-    response = read_query(connection, sql)
-
-    response_with_encoded_images = []
-    for row in response:
-        row_list = list(row)  # 튜플을 리스트로 변환
-        if row_list[1]:  # badge_logo 컬럼이 존재할 때만 처리
-            try:
-                # Base64 인코딩 시도를 안전하게 수행
-                row_list[1] = base64.b64encode(row_list[1]).decode('utf-8')
-            except Exception as e:
-                print(f"Encoding error: {e}")  # 에러 로그 출력
-                row_list[1] = None  # 문제가 있을 경우 None으로 설정
-        response_with_encoded_images.append(tuple(row_list))
-    
-    # print(response)
-    connection.close()
-
-    return {"message": "All badges returned successfully", "data": response_with_encoded_images}
-
-@route.post('/save_badge')
-async def save_badge():
-    
-    connection = create_connection()
-    cursor = connection.cursor()
-
-    file_path = os.path.join(os.path.dirname(__file__), 'badges/badge01.webp')
-    binary_data = open(file_path, 'rb').read()
-
-    sql_update_query = """
-        UPDATE badges
-        SET badge_logo = %s
-        WHERE b_id = %s
-    """
-    badge_data = (binary_data, 'badge01')
-
-    # 데이터 업데이트 실행
-    response = cursor.execute(sql_update_query, badge_data)
-    connection.commit()
-
-    cursor.close()
-    connection.close()
-
-    return {"message": "Badge saved successfully"}
