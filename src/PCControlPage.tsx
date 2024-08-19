@@ -96,7 +96,7 @@ const PCControlPage: React.FC = () => {
       <h1>PC Control Page</h1>
       {imageData ? (
         <img
-          src={`data:image/png;base64,${imageData}`}
+          src={`data:image/jpeg;base64,${imageData}`}
           alt="Received from WebSocket"
         />
       ) : (

@@ -14,6 +14,7 @@ const StudyMain = lazy(() => import('./StudyMain'));
 const SettingPage = lazy(() => import('./SettingPage'));
 const PCControlPage = lazy(() => import('./PCControlPage'));
 const Game = lazy(() => import('./Game'));
+const ImageCropTest = lazy(() => import('./imageCropTest'));
 
 import './css/index.css';
 import './css/tailwind.css';
@@ -32,6 +33,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/signin" element={<SignIn />} />
               <Route path="/camera-mobile" element={<CameraMobilePage />} />
               <Route path="/main" element={<MainPage />} />
+              <Route path="/imageCropTest" element={<ImageCropTest/>} />
 
               <Route
                 path="/*"

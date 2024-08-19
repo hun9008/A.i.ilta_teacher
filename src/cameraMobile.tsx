@@ -69,7 +69,7 @@ function MobileCameraPage() {
       <Webcam
         audio={false}
         ref={webcamRef}
-        screenshotFormat="image/png"
+        screenshotFormat="image/jpeg"
         videoConstraints={videoConstraints}
       />
       <div className="flex space-x-4">
