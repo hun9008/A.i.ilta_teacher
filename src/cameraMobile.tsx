@@ -28,7 +28,7 @@ function MobileCameraPage() {
   }, [disconnectWebSocket]);
 
   const captureImage = useCallback(() => {
-    const imageSrc = webcamRef.current?.getScreenshot();
+    const imageSrc = webcamRef.current?.getScreenshot({ width: 1920, height: 1080 });
     if (imageSrc) {
       setCapturedImage(imageSrc);
       const imageData = imageSrc.split(',')[1];
@@ -69,7 +69,7 @@ function MobileCameraPage() {
       <Webcam
         audio={false}
         ref={webcamRef}
-        screenshotFormat="image/jpeg"
+        screenshotFormat="image/png"
         videoConstraints={videoConstraints}
       />
       <div className="flex space-x-4">
