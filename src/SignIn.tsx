@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './css/SignIn.css';
+import { Cake, Phone, PersonStanding, CircleUserRound } from 'lucide-react';
 
 function SignIn() {
   const [email, setEmail] = useState<string>('');
@@ -9,7 +10,7 @@ function SignIn() {
   const [nickname, setNickname] = useState<string>('');
   const [parentEmail, setParentEmail] = useState<string>('');
   const [phoneNum, setPhoneNum] = useState<string>('');
-  const [birthDay, setBirthDay] = useState<string>('2024-08-19');
+  const [birthDay, setBirthDay] = useState<string>('');
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
   const [isForgotPassword, setIsForgotPassword] = useState<boolean>(false);
 
@@ -67,6 +68,20 @@ function SignIn() {
       alert(error.message || '회원가입 중 문제가 발생했습니다.');
     }
   };
+  const formatPhoneNumber = (value: string) => {
+    // 숫자만 추출
+    const onlyNums = value.replace(/\D/g, '');
+    if (onlyNums.length <= 3) return onlyNums;
+    if (onlyNums.length <= 7)
+      return `${onlyNums.slice(0, 3)}-${onlyNums.slice(3)}`;
+    return `${onlyNums.slice(0, 3)}-${onlyNums.slice(3, 7)}-${onlyNums.slice(
+      7,
+      11
+    )}`;
+  };
+  const handlePhoneNumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNum(formatPhoneNumber(e.target.value));
+  };
 
   const handleFindPassword = async () => {
     try {
@@ -117,7 +132,7 @@ function SignIn() {
                       이름
                     </label>
                     <div className="input">
-                      <div className="name-image" />
+                      <CircleUserRound className="icon" size={20} />
                       <input
                         className="textinput"
                         type="text"
@@ -133,6 +148,7 @@ function SignIn() {
                       닉네임
                     </label>
                     <div className="input">
+                      <CircleUserRound className="icon" size={20} />
                       <input
                         className="textinput"
                         type="text"
@@ -164,6 +180,7 @@ function SignIn() {
                       부모님 이메일
                     </label>
                     <div className="input">
+                      <div className="email-image" />
                       <input
                         className="textinput"
                         type="email"
@@ -179,13 +196,15 @@ function SignIn() {
                       전화번호
                     </label>
                     <div className="input">
+                      <Phone className="icon" size={20} />
                       <input
                         className="textinput"
                         type="tel"
                         id="phoneNum"
                         name="phoneNum"
-                        placeholder="전화번호를 입력하세요"
-                        onChange={(e) => setPhoneNum(e.target.value)}
+                        placeholder="000-0000-0000"
+                        value={phoneNum}
+                        onChange={handlePhoneNumChange}
                       />
                     </div>
                   </div>
@@ -194,6 +213,7 @@ function SignIn() {
                       생년월일
                     </label>
                     <div className="input">
+                      <Cake className="icon" size={20} />
                       <input
                         className="textinput"
                         type="date"
@@ -238,6 +258,7 @@ function SignIn() {
                       이름
                     </label>
                     <div className="input">
+                      <PersonStanding className="icon" size={20} />
                       <input
                         className="textinput"
                         type="text"
@@ -337,6 +358,12 @@ function SignIn() {
         </div>
       </div>
       <div style={{ transform: 'translateY(-40px)' }}>
+        <button
+          className="secondary-button"
+          onClick={() => navigate('/scanner')}
+        >
+          스캐너 페이지로 바로가기
+        </button>
         <button className="secondary-button" onClick={() => navigate('/main')}>
           MainPage로 바로가기
         </button>

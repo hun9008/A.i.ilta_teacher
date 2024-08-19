@@ -199,6 +199,7 @@ function Game() {
         onStudyStop={handleStudyStop}
         onBreakStart={handleBreakStart}
         onBreakStop={handleBreakStop}
+        selectedProblem={selectedProblem}
       />
       <AnimatePresence>
         {showModal && (
