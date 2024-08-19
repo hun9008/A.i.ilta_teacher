@@ -1,62 +1,37 @@
+// App.tsx
 import React from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, View, Text} from 'react-native';
-import {useCameraPermission, useCameraDevice, Camera} from 'react-native-vision-camera';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import MainPage from './MainPage';
+import CameraStreamPage from './CameraStreamPage';
+import {WebSocketProvider} from './WebSocketContext';
+
+export type RootStackParamList = {
+  Main: undefined;
+  CameraStream: {qrCode: any};
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function App(): React.JSX.Element {
-  const {hasPermission, requestPermission} = useCameraPermission();
-  const device = useCameraDevice('back');
-
-  React.useEffect(() => {
-    if (!hasPermission) {
-      requestPermission();
-    }
-  }, [hasPermission, requestPermission]);
-
-  if (!hasPermission) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" />
-        <View style={styles.permissionContainer}>
-          <Text>Camera permission is required.</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (!device) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" />
-        <View style={styles.permissionContainer}>
-          <Text>No camera device found.</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <Camera
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive={true}
-      />
-    </SafeAreaView>
+    <WebSocketProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Main">
+          <Stack.Screen
+            name="Main"
+            component={MainPage}
+            options={{title: 'Camera'}}
+          />
+          <Stack.Screen
+            name="CameraStream"
+            component={CameraStreamPage}
+            options={{title: 'Scanned QR Code'}}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </WebSocketProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  permissionContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex: 1,
-  },
-});
 
 export default App;
