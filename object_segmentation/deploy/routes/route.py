@@ -189,12 +189,13 @@ async def problems_ocr(input: OCRInput):
     ocrs = await asyncio.gather(*ocr_tasks)
 
 
-    if any('*' in ocr for ocr in ocrs):
-        sorted_ocrs = sorted(ocrs, key=lambda x: int(x.split('*')[1]))
-        print("sort ocrs")
-    else:
-        sorted_ocrs = ocrs
-        print("this is not problem set")
+    # if any('*' in ocr for ocr in ocrs):
+    #     sorted_ocrs = sorted(ocrs, key=lambda x: int(x.split('*')[1]))
+    #     print("sort ocrs")
+    # else:
+    #     sorted_ocrs = ocrs
+    #     print("this is not problem set")
+    sorted_ocrs = ocrs
     
     concept_tasks = [
         fetch_openai(client, f"이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
