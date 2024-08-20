@@ -10,6 +10,7 @@ WORKDIR /app
 COPY . /app/
 
 RUN pip install --upgrade pip
+RUN pip install mediapipe
 RUN pip install tensorflow
 # RUN curl -fsSL https://ollama.com/install.sh | bash
 RUN pip install --no-cache-dir -r requirements.txt

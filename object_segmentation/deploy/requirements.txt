@@ -46,7 +46,7 @@ markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 matplotlib==3.9.2
 mdurl==0.1.2
-mediapipe==0.10.14
+# mediapipe==0.10.14
 ml-dtypes==0.4.0
 namex==0.0.8
 numpy==1.26.4
@@ -58,7 +58,7 @@ optree==0.12.1
 packaging==24.1
 pillow==10.4.0
 proto-plus==1.24.0
-protobuf==4.25.4
+# protobuf==4.25.4
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
 pycparser==2.22
@@ -81,7 +81,7 @@ sounddevice==0.5.0
 starlette==0.38.2
 tensorboard==2.17.1
 tensorboard-data-server==0.7.2
-tensorflow==2.17.0
+# tensorflow==2.17.0
 termcolor==2.4.0
 tokenizers==0.20.0
 tqdm==4.66.5
