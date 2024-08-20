@@ -10,11 +10,9 @@ import time
 from models.cv_ocr import problem_crop
 from models.cv_prob_area import prob_loc_crop, visualize_problem_locations
 from models.cv_hand_loc import hand_loc, visualize_hand_area
-from models.cv_face_focus import is_focus
 from models.input_ocr import OCRInput, Determinent
 from models.input_hand import ProbAreas_HandImg
 # from models.input_prob import ClassInput
-from models.input_face import FaceImg
 import boto3
 from botocore.exceptions import NoCredentialsError
 import requests
@@ -181,13 +179,6 @@ async def fetch_ans_llama31(prompt_type: str):
     )
     
     output = result.stdout.strip()
-    return output
-
-def check_if_focus(encoded_img):
-    
-    image = decode_image(encoded_img)
-    output = is_focus(image)
-
     return output
     
 
@@ -489,17 +480,6 @@ async def define_prob_areas(input: ProbAreas_HandImg):
 #     }
     
 #     return JSONResponse(content = output)
-
-@router.post("/face_tracker")
-async def face_tracker(input: FaceImg):    
-    is_focus = check_if_focus(input.image)
-    
-    output = {
-        "is_focus": is_focus,
-    }
-    
-    return JSONResponse(content=output)
-    
 
 @router.get("/test")
 async def test():

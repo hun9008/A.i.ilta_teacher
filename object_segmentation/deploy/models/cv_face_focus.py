@@ -46,6 +46,9 @@ EYES_BLINK_FRAME_COUNTER = 0
 # BLINK_THRESHOLD: Eye aspect ratio threshold below which a blink is registered.
 BLINK_THRESHOLD = 0.51
 
+# EYES_BLINK_FRAME_COUNTER: Counter for consecutive frames with detected potential blinks.
+EYES_BLINK_FRAME_COUNTER = 0
+
 # EYE_AR_CONSEC_FRAMES: Number of consecutive frames below the threshold required to confirm a blink.
 EYE_AR_CONSEC_FRAMES = 2
 
@@ -91,13 +94,7 @@ LOG_FOLDER = "logs"  # Folder to store log files
 SHOW_BLINK_COUNT_ON_SCREEN = True  # Toggle to show the blink count on the video feed
 TOTAL_FOCUS = 0
 TOTAL_BLINKS = 0  # Tracks the total number of blinks detected
-EYES_BLINK_FRAME_COUNTER = (
-    0  # Counts the number of consecutive frames with a potential blink
-)
 BLINK_THRESHOLD = 0.51  # Threshold for the eye aspect ratio to trigger a blink
-EYE_AR_CONSEC_FRAMES = (
-    2  # Number of consecutive frames below the threshold to confirm a blink
-)
 
 # Iris and eye corners landmarks indices
 LEFT_IRIS = [474, 475, 476, 477]
@@ -308,19 +305,15 @@ def is_focus(decoded_img):
         # if angle cross the values then
         threshold_angle = 5
         # See where the user's head tilting
-        lookat=""
-        is_focus=0
         if angle_y < -threshold_angle:
-            face_looks = "Right"
+            is_focus=0
         elif angle_y > threshold_angle:
-            face_looks = "Left"
+            is_focus=0
         elif angle_x < -(threshold_angle-3):
-            lookat = f"You are in {face_looks}"
             is_focus=1
         elif angle_x > threshold_angle:
-            face_looks = "Up"
+            is_focus=0
         else:
-            lookat = f"You are looking {face_looks}"
             is_focus=1
         
         result = is_focus
@@ -329,16 +322,16 @@ def is_focus(decoded_img):
         eyes_aspect_ratio = blinking_ratio(mesh_points_3D)
         # checking if ear less then or equal to required threshold if yes then
         # count the number of frame frame while eyes are closed.
-        if eyes_aspect_ratio <= BLINK_THRESHOLD:
-            EYES_BLINK_FRAME_COUNTER += 1
-        # else check if eyes are closed is greater EYE_AR_CONSEC_FRAMES frame then
-        # count the this as a blink
-        # make frame counter equal to zero
+        # if eyes_aspect_ratio <= BLINK_THRESHOLD:
+        #     EYES_BLINK_FRAME_COUNTER += 1
+        # # else check if eyes are closed is greater EYE_AR_CONSEC_FRAMES frame then
+        # # count the this as a blink
+        # # make frame counter equal to zero
 
-        else:
-            if EYES_BLINK_FRAME_COUNTER > EYE_AR_CONSEC_FRAMES:
-                TOTAL_BLINKS += 1
-            EYES_BLINK_FRAME_COUNTER = 0
+        # else:
+        #     if EYES_BLINK_FRAME_COUNTER > EYE_AR_CONSEC_FRAMES:
+        #         TOTAL_BLINKS += 1
+        #     EYES_BLINK_FRAME_COUNTER = 0
 
         # Logging data
         if LOG_DATA:
