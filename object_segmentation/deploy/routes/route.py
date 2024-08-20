@@ -231,7 +231,7 @@ async def problems_ocr(input: OCRInput):
     ocrs = await asyncio.gather(*ocr_tasks)
     
     concept_tasks = [
-        fetch_openai(client, f"이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
+        fetch_openai(client, f"이후 보내는 텍스트를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
         for ocr in ocrs
     ]
     solution_tasks = [
