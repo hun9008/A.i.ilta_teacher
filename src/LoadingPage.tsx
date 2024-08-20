@@ -47,7 +47,7 @@ const LoadingPage: React.FC = () => {
       <SpinnerWrapper>
         <LoadingSpinner />
       </SpinnerWrapper>
-      <LoadingText>Loading...</LoadingText>
+      <LoadingText>로딩 중...</LoadingText>
     </LoadingContainer>
   );
 };

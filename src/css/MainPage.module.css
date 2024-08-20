@@ -29,6 +29,9 @@
   left: 0;
   top: 0;
 }
+.competitionContainer {
+  padding: 20px;
+}
 
 .competitionSection {
   margin: 20px 0;
@@ -46,13 +49,34 @@
   padding: 15px;
 }
 
-.competitionInfo {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
+.competitionTable {
+  width: 100%;
+  border-collapse: collapse;
 }
 
+.competitionTable th,
+.competitionTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.competitionTable th {
+  background-color: #f1f1f1;
+  font-weight: bold;
+}
+
+.competitionInfo {
+  background-color: #f9f9f9;
+}
+
+.competitionInfo:last-child td {
+  border-bottom: none;
+}
+
+.competitionInfo td {
+  padding: 10px 0;
+}
 .competitionButton {
   background-color: #7c3aed;
   color: white;
@@ -61,6 +85,20 @@
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
+}
+.enterButton {
+  padding: 8px 15px;
+  background-color: #cccccc;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: not-allowed;
+  font-size: 14px;
+}
+
+.enterButtonActive {
+  background-color: #007bff;
+  cursor: pointer;
 }
 
 .iconWrapper {
@@ -261,4 +299,82 @@
 .placeholderText {
   font-size: 24px;
   color: #ccc;
+}
+
+.problemSection {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.problemText {
+  margin-bottom: 15px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.answerSection {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.answerSection label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.answerInput {
+  flex-grow: 1;
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.questionBox {
+  background-color: #f0f0f0;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.answerBox {
+  background-color: #e6f3ff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.answerRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.answerLabel {
+  font-weight: bold;
+  margin-right: 10px;
+  min-width: 80px;
+}
+
+.answerText,
+.studentAnswer {
+  margin-right: 20px;
+}
+
+.explanationBox {
+  background-color: #fff;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.explanationBox h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
 }

@@ -20,6 +20,9 @@ const ImageCropTest = lazy(() => import('./imageCropTest'));
 const Dashboard = lazy(() => import('./Dashboard'));
 const Report = lazy(() => import('./Report'));
 const Competition = lazy(() => import('./Competition'));
+const ProblemSetGenerator = lazy(() => import('./ProblemSetGenerator'));
+const DifficultySelectPage = lazy(() => import('./DifficultySelect'));
+const AnswerPage = lazy(() => import('./AnswerPage'));
 
 import './css/index.css';
 import './css/tailwind.css';
@@ -39,6 +42,18 @@ createRoot(document.getElementById('root')!).render(
                 <Route index element={<Dashboard />} />
                 <Route path="report" element={<Report />} />
                 <Route path="competition" element={<Competition />} />
+                <Route
+                  path="/main/competition/difficulty-select"
+                  element={<DifficultySelectPage />}
+                />
+                <Route
+                  path="competition/problem-set"
+                  element={<ProblemSetGenerator />}
+                />
+                <Route
+                  path="competition/answer-page"
+                  element={<AnswerPage />}
+                />
               </Route>
               <Route path="/imageCropTest" element={<ImageCropTest />} />
 
