@@ -277,67 +277,67 @@ async def problems_ocr(input: OCRInput):
 
     concepts= await asyncio.gather(*concept_tasks)
     solutions= await asyncio.gather(*solution_tasks)
-    answers= await asyncio.gather(*llama_tasks)
+    # answers= await asyncio.gather(*llama_tasks)
 
-    final_solutions = [None] * len(ocrs)  
+    # final_solutions = [None] * len(ocrs)  
 
-    symbol_to_number = {
-        '①': '1', '②': '2', '③': '3', '④': '4', '⑤': '5',
-        '⑥': '6', '⑦': '7', '⑧': '8', '⑨': '9', '⑩': '10'
-    }
+    # symbol_to_number = {
+    #     '①': '1', '②': '2', '③': '3', '④': '4', '⑤': '5',
+    #     '⑥': '6', '⑦': '7', '⑧': '8', '⑨': '9', '⑩': '10'
+    # }
 
-    for index, (solution, answer, ocr) in enumerate(zip(solutions, answers, ocrs)):
+    # for index, (solution, answer, ocr) in enumerate(zip(solutions, answers, ocrs)):
 
-        # 기호를 숫자로 변환
-        for symbol, number in symbol_to_number.items():
-            solution = solution.replace(symbol, number)
-            answer = answer.replace(symbol, number)
+    #     # 기호를 숫자로 변환
+    #     for symbol, number in symbol_to_number.items():
+    #         solution = solution.replace(symbol, number)
+    #         answer = answer.replace(symbol, number)
 
-        print("sol : ", solution)
-        print("ans : ", answer)
+    #     print("sol : ", solution)
+    #     print("ans : ", answer)
 
-        # solution에서 마지막 answer : 부분 추출
-        sol_ans = ''
-        if "정답:" in solution:
-            print("일단 정답 존재.")
-            try:
-                # 마지막 "정답:" 이후의 텍스트를 추출
-                last_answer_index = solution.rfind("정답:")
-                answer_part = solution[last_answer_index + len("정답:"):].strip()
-                answer_only = re.sub(r'\\\(|\\\)', '', answer_part.split(')')[0]).strip()
-                sol_ans = answer_only
-            except IndexError:
-                print("정답이 포함된 부분을 찾지 못했습니다.")
+    #     # solution에서 마지막 answer : 부분 추출
+    #     sol_ans = ''
+    #     if "정답:" in solution:
+    #         print("일단 정답 존재.")
+    #         try:
+    #             # 마지막 "정답:" 이후의 텍스트를 추출
+    #             last_answer_index = solution.rfind("정답:")
+    #             answer_part = solution[last_answer_index + len("정답:"):].strip()
+    #             answer_only = re.sub(r'\\\(|\\\)', '', answer_part.split(')')[0]).strip()
+    #             sol_ans = answer_only
+    #         except IndexError:
+    #             print("정답이 포함된 부분을 찾지 못했습니다.")
         
-        llama_ans = ''
-        # answer_parts = answer.split('answer:')
-        # if len(answer_parts) > 1 and answer_parts[1]:
-        #     numbers = re.findall(r'\d+', answer_parts[1])
-        #     if numbers:  # Ensure that numbers were found
-        #         extracted_number = numbers[0]
-        #         llama_ans = extracted_number
-        if "answer:" in answer:
-            # "answer:" 이후의 수식을 추출
-            answer_part = answer.split('answer:')[1].strip()
-            # \(와 \)를 제거한 뒤, 괄호, 공백 등 불필요한 문자 제거
-            llama_ans = re.sub(r'\\\(|\\\)|[^\w\s><=\-+*/.]', '', answer_part).strip()
-        else:
-            llama_ans = answer
+    #     llama_ans = ''
+    #     # answer_parts = answer.split('answer:')
+    #     # if len(answer_parts) > 1 and answer_parts[1]:
+    #     #     numbers = re.findall(r'\d+', answer_parts[1])
+    #     #     if numbers:  # Ensure that numbers were found
+    #     #         extracted_number = numbers[0]
+    #     #         llama_ans = extracted_number
+    #     if "answer:" in answer:
+    #         # "answer:" 이후의 수식을 추출
+    #         answer_part = answer.split('answer:')[1].strip()
+    #         # \(와 \)를 제거한 뒤, 괄호, 공백 등 불필요한 문자 제거
+    #         llama_ans = re.sub(r'\\\(|\\\)|[^\w\s><=\-+*/.]', '', answer_part).strip()
+    #     else:
+    #         llama_ans = answer
 
 
-        print("sol ans : ", sol_ans)
-        print("llama_answer : ", llama_ans)
+    #     print("sol ans : ", sol_ans)
+    #     print("llama_answer : ", llama_ans)
 
-        similarity = calculate_similarity(sol_ans, llama_ans)
-        if similarity < 0.8:
-            # 유사도가 80% 미만이면 솔루션 재시도
-            print("retrying solution")
-            # final_solution = await retry_solution(client, ocr, answer)
-            final_solution = solution
-        else:
-            final_solution = solution
+    #     similarity = calculate_similarity(sol_ans, llama_ans)
+    #     if similarity < 0.8:
+    #         # 유사도가 80% 미만이면 솔루션 재시도
+    #         print("retrying solution")
+    #         # final_solution = await retry_solution(client, ocr, answer)
+    #         final_solution = solution
+    #     else:
+    #         final_solution = solution
 
-        final_solutions[index] = final_solution
+    #     final_solutions[index] = final_solution
 
     # temp directory cleanup
     for filename in os.listdir(image_path):
