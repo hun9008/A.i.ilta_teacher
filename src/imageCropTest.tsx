@@ -26,11 +26,12 @@ const ImageCropTest: React.FC = () => {
         canvas.width = img.width;
         canvas.height = img.height;
         ctx?.drawImage(img, 0, 0);
-
-        // Create the edit canvas with reduced size
-        setScale(300/img.width);
-        editCanvas.width = img.width * scale;
-        editCanvas.height = img.height * scale;
+  
+        const calculatedScale = 300 / img.width;
+        setScale(calculatedScale);
+  
+        editCanvas.width = img.width * calculatedScale;
+        editCanvas.height = img.height * calculatedScale;
         editCtx?.drawImage(img, 0, 0, editCanvas.width, editCanvas.height);
       };
       img.src = image;
@@ -68,9 +69,11 @@ const ImageCropTest: React.FC = () => {
   };
 
   const redrawEditCanvas = () => {
+
     const canvas = editCanvasRef.current;
     if (!canvas || !image) return;
 
+    console.log("2");
     const ctx = canvas.getContext('2d');
     const img = new Image();
     img.onload = () => {
@@ -124,19 +127,35 @@ const ImageCropTest: React.FC = () => {
     let approx = new window.cv.Mat();
     window.cv.approxPolyDP(maxContour, approx, 0.02 * window.cv.arcLength(maxContour, true), true);
 
+    let newPoints;
     if (approx.rows === 4) {
-      setPoints(Array.from({ length: 4 }, (_, i) => ({
+      newPoints = Array.from({ length: 4 }, (_, i) => ({
         x: approx.data32S[i * 2] * scale,
         y: approx.data32S[i * 2 + 1] * scale
-      })));
-      redrawEditCanvas();
+      }));
+    } else {
+      const width = canvas.width * scale;
+      const height = canvas.height * scale;
+      newPoints = [
+        { x: 0, y: 0 },                // 좌상단 (lt)
+        { x: width, y: 0 },            // 우상단 (rt)
+        { x: width, y: height },       // 우하단 (rb)
+        { x: 0, y: height }            // 좌하단 (lb)
+      ];
     }
-
+    setPoints(newPoints);
     [src, dst, gray, contours, hierarchy, approx].forEach(mat => mat.delete());
   };
 
+  useEffect(() => {
+    console.log("포인트가 업데이트 되었습니다:", points);
+    redrawEditCanvas();
+  }, [points]);
+
   const cropImage = () => {
     if (!canvasRef.current || points.length !== 4 || !window.cv) return;
+
+    console.log(points);
   
     const canvas = canvasRef.current;
     let src = window.cv.imread(canvas);
