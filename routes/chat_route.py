@@ -54,10 +54,10 @@ async def decide_user_wrong(websocket: WebSocket):
         problem_index = 0
         solution = solutions[problem_index]
         
-        # hand_ocr = await perform_handwrite_ocr(frame_data, solution)
-        hand_ocr = {
-            "determinants": "solve_delay"
-        }
+        hand_ocr = await perform_handwrite_ocr(frame_data, solution)
+        # hand_ocr = {
+        #     "determinants": "solve_delay"
+        # }
         
         user_vars.user_status = hand_ocr.get("determinants")
         print("user_status : ", user_vars.user_status)
