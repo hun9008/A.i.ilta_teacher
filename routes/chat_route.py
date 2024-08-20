@@ -62,19 +62,19 @@ async def decide_user_wrong(websocket: WebSocket):
         user_vars.user_status = hand_ocr.get("determinants")
         print("user_status : ", user_vars.user_status)
         
-async def perform_handwrite_ocr(frame_data, solution):
+# async def perform_handwrite_ocr(frame_data, solution):
     
-    print("test) Decide user status by handwrite OCR")
+#     print("test) Decide user status by handwrite OCR")
     
-    url = "http://model.maitutor.site/hand_ocr"
+#     url = "http://model.maitutor.site/hand_ocr"
     
-    payload = {
-        "image": frame_data,
-        "solution": solution 
-    }
-    headers = {'Content-Type': 'application/json'} 
-    response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)
-    return response.json()
+#     payload = {
+#         "image": frame_data,
+#         "solution": solution 
+#     }
+#     headers = {'Content-Type': 'application/json'} 
+#     response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)
+#     return response.json()
      
 @route.websocket("/ws/chat")
 async def websocket_endpoint(websocket: WebSocket):
@@ -94,7 +94,7 @@ async def websocket_endpoint(websocket: WebSocket):
             if chat_request.status == "open":
                 connections.append(websocket)
 
-                await websocket.send_text("WebSocket connection opened.")
+                # await websocket.send_text("WebSocket connection opened.")
                 response = await process_message(chat_request)
                 await websocket.send_text(response)
             else:
