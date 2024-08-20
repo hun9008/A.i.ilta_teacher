@@ -21,10 +21,11 @@ git clone https://github.com/MahmudulAlam/Unified-Gesture-and-Fingertip-Detectio
 
 object_segmentation/deploy/cv_which_prob/weights
 download yolo.h5
-```
 
-## face_route repo
-```
-pip install --upgrade
-pip version 24.2 is needed
+object_segmentation/deploy/cv_which_prob/hand_detector/detector.py
+modify import lines
+from cv_which_prob.hand_detector.solo.solo_net import model as solo_model
+from cv_which_prob.hand_detector.yolo.darknet import model as yolo_model
+from cv_which_prob.hand_detector.solo.preprocess.solo_flag import Flag as soloFlag
+from cv_which_prob.hand_detector.yolo.preprocess.yolo_flag import Flag as yoloFlag
 ```
