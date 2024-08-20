@@ -95,6 +95,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 connections.append(websocket)
 
                 await websocket.send_text("WebSocket connection opened.")
+                response = await process_message(chat_request)
+                await websocket.send_text(response)
             else:
                 print("test) WebSocket connection not opened or already open")
             # 메시지 처리
@@ -128,7 +130,7 @@ async def process_message(chat: ChatRequest):
     print("test) OCR : "+ ocr)
     print("test) PREV_CHAT : "+ prev_chat)
     
-    user_vars.user_status = "solve_delay"
+    # user_vars.user_status = ""
     if user_vars.user_status == "solve_delay":
         
         #print("test) user_status is always solve_delay in test.")
