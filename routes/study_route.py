@@ -81,7 +81,7 @@ async def real_time(realtime:RealTime):
     
     # DB : end_state
     insert_realtime = """
-    INSERT INTO init_state (u_id, s_id, end_date, focusing_level, r_study_time, r_break_time) 
+    INSERT INTO end_state (u_id, s_id, end_date, focusing_level, r_study_time, r_break_time) 
     VALUES ('{}', '{}', '{}', '{}', '{}');
     """.format(
         u_id, 
