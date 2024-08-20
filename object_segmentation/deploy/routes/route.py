@@ -174,7 +174,7 @@ async def fetch_ans_llama31(prompt_type: str):
     result = await loop.run_in_executor(
         None,
         lambda: subprocess.run(
-            ["ollama", "run", "llama3.1:latest", prompt_type],
+            ["ollama", "run", "llama3.1", prompt_type],
             capture_output=True,
             text=True
         )
