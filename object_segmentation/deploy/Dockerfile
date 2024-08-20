@@ -11,6 +11,7 @@ COPY . /app/
 
 RUN pip install --upgrade pip
 RUN pip install tensorflow
+RUN curl -fsSL https://ollama.com/install.sh | bash
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8008
