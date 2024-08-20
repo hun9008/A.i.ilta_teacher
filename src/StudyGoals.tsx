@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 function StudyGoals() {
   const baseUrl = import.meta.env.VITE_BASE_URL;
-  const navigate = useNavigate();
   const [goals, setGoals] = useState({
     goal1: false,
     goal2: false,
@@ -78,7 +76,6 @@ function StudyGoals() {
       // Save times to localStorage
       localStorage.setItem('studyTime', studyTime.toString());
       localStorage.setItem('breakTime', breakTime.toString());
-      navigate('/game');
     } catch (error) {
       console.error('Error sending time to server:', error);
     }

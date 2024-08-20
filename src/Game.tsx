@@ -20,15 +20,9 @@ function Game() {
   interface OcrResponse {
     ocrs: string;
   }
-  // const ocrResponse = {
-  //   concepts:
-  //     '5.  Problem solving keywords:\n- Rational function inequality\n- Algebraic manipulation\n- Solution of inequalities\n- Linear equation\n- Variable elimination\n\n6. Problem solving keywords:\n- Rational inequality\n- Variable manipulation\n- Interval solution\n- Parameter solving\n- Simplification',
-  //   solutions:
-  //     '문제 *5*와 *6*을 해결하는 과정을 단계별로 설명하겠습니다.\n\n### 문제 *5* \n#### 연립부등식 \\((x-15)/(2x-2) \\leq x+3\\) 의 해가 부등식 \\(6x + 5 = 8y\\)에서 x, y 수 중의 값을 구하십시오.\n\n**Step 1:** 주어진 부등식 \\((x-15)/(2x-2) \\leq x+3\\)을 해결하기 위해 같은 분모를 가지도록 정리합니다.\n\\[ \\frac{x-15}{2x-2} - x - 3 \\leq 0 \\]\n\\[ \\frac{x-15 - (x+3)(2x-2)}{2x-2} \\leq 0 \\]\n\\[ \\frac{-2x^2 - 4x + 21}{2x-2} \\leq 0 \\]\n\n**Step 2:** 분모를 보정하고 조건을 충족시키는 \\(x\\)의 값을 찾습니다.\n\\[ -2x^2 - 4x + 21 = 0 \\]\n\\[ 2x^2 + 4x - 21 = 0 \\]\n\\[ (2x - 3)(x + 7) = 0 \\]\n\\[ x = \\frac{3}{2}, -7 \\]\n\n**Step 3:** 부호 분석을 통하여 부등식을 만족시키는 \\(x\\) 값의 범위를 판별합니다.\n해에 해당하는 부분은 부호가 음수이기 때문에, \\( 2x-2 \\neq 0 \\) 이므로 \\(x \\neq 1\\) 일 때,\n\\[ -7 < x < \\frac{3}{2} \\]\n\n**Step 4:** \\(6x + 5 = 8y\\) 부등식에 \\(x\\)의 해를 대입하여 \\(y\\)의 값을 구합니다. 이 값을 통해 실제 \\(x\\), \\(y\\) 값을 얻어냅니다.\n다만, 부등식의 해가 구체적인 값을 요구하므로 추가 계산 없이 특정 조건을 만족하는 \\(x\\), \\(y\\) 값은 명확하지 않습니다.\n이 문제는 추가 정보나 수정이 필요할 수 있습니다.\n\n### 문제 *6*\n#### 연립부등식 \\((x+a)/(2x+4) > 5\\) 의 해가 \\(5<x<5\\)일 때, \\(a\\)의 값은?\n\n**Step 1:** 주어진 부등식을 정리합니다.\n\\[ \\frac{x+a}{2x+4} > 5 \\]\n\\[ x + a > 10x + 20 \\]\n\\[ a > 9x + 20 \\]\n\n**Step 2:** \\(5 < x < 5\\)는 해가 존재하지 않는 표현입니다. 이는 아마도 인쇄 오류 또는 문제의 제시 오류일 수 있습니다. 이것을 \\(x = 5\\)로 가정하면,\n\\[ a > 9(5) + 20 \\]\n\\[ a > 45 + 20 \\]\n\\[ a > 65 \\]\n\n이때 제시된 선택지 중에서는 적합한 \\(a\\)의 값이 없습니다. 문제 자체에 오류가 있거나 누락된 정보가 있을 가능성이 큽니다.',
-  //   ocrs: '*5* 연립부등식 (x-15)/(2x-2)≤x+3 의 해가 부등식 6x+5=8y 에서 x, y수 중의 값을 구하시오.\n\n*6* 연립부등식 (x+a)/(2x+4)>5 의 해가 5<x<5일 때, a의 값은?\n①1     ②2     ③3\n④4     ⑤5',
-  // };
 
   const parseOcrProblems = (ocrs: string) => {
+    ocrs = JSON.stringify(ocrs);
     const problems = ocrs.split(/\*([0-9]+)\*/).slice(1);
     const parsedProblems: { [key: number]: string } = {};
 

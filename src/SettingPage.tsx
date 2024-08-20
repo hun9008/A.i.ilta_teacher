@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-//import { useWebcamStream } from './WebcamStreamContext.tsx';
+import { useWebSocket } from './WebSocketContext';
 import QrPage from './QrPage';
 import CameraPage from './camera.tsx';
 import PCControlPage from './PCControlPage.tsx';
 import StudyGoals from './StudyGoals.tsx';
+import LoadingPage from './LoadingPage';
 
 interface Step {
   id: string;
@@ -23,8 +24,9 @@ const steps: Step[] = [
 function SettingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
-  //const { isStreaming } = useWebcamStream();
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { ocrResponse } = useWebSocket();
 
   const updateCompletedSteps = (stepIndex: number) => {
     const newCompleted: Record<string, boolean> = {};
@@ -52,6 +54,21 @@ function SettingPage() {
     }
   };
 
+  const goToGamePage = () => {
+    if (!ocrResponse) {
+      setIsLoading(true); // OCR Response를 기다리는 동안 로딩 상태로 설정
+    } else {
+      navigate('/StudyMain');
+    }
+  };
+
+  useEffect(() => {
+    if (isLoading && ocrResponse) {
+      setIsLoading(false);
+      navigate('/StudyMain');
+    }
+  }, [ocrResponse, isLoading, navigate]);
+
   const renderStepContent = (step: Step) => {
     switch (step.id) {
       case 'webcam':
@@ -70,6 +87,10 @@ function SettingPage() {
         return null;
     }
   };
+
+  if (isLoading) {
+    return <LoadingPage />; // OCR 데이터를 기다리는 동안 로딩 화면을 표시
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -121,12 +142,7 @@ function SettingPage() {
           이전
         </button>
         <button
-          onClick={
-            currentStep === steps.length - 1
-              ? () => navigate('/StudyMain')
-              : nextStep
-          }
-          //disabled={steps[currentStep].id === 'webcam' && !isStreaming}
+          onClick={currentStep === steps.length - 1 ? goToGamePage : nextStep}
           className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500 disabled:bg-gray-300"
         >
           {currentStep === steps.length - 1 ? '완료' : '다음'}
