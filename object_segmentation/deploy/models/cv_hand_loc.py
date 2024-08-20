@@ -1,7 +1,7 @@
 import cv2
 import os
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from cv_which_prob.hand_detector.detector import YOLO
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
