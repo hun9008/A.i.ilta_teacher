@@ -10,9 +10,11 @@ import time
 from models.cv_ocr import problem_crop
 from models.cv_prob_area import prob_loc_crop, visualize_problem_locations
 from models.cv_hand_loc import hand_loc, visualize_hand_area
+from models.cv_face_focus import is_focus
 from models.input_ocr import OCRInput, Determinent
 from models.input_hand import ProbAreas_HandImg
-from models.input_prob import ClassInput
+# from models.input_prob import ClassInput
+from models.input_face import FaceImg
 import boto3
 from botocore.exceptions import NoCredentialsError
 import requests
@@ -181,6 +183,14 @@ async def fetch_ans_llama31(prompt_type: str):
     output = result.stdout.strip()
     return output
 
+def check_if_focus(encoded_img):
+    
+    image = decode_image(encoded_img)
+    output = is_focus(image)
+
+    return output
+    
+
 def calculate_similarity(solution, answer):
     return difflib.SequenceMatcher(None, solution, answer).ratio()
 
@@ -198,30 +208,6 @@ async def retry_solution(client, ocr, mistral_answer, retry_count=2):
             return new_solution
     return new_solution
 
-def show_encoded_images(encoded_imgs):
-    """
-    base64로 인코딩된 이미지 리스트를 디코딩하여 화면에 표시하는 함수
-    
-    Parameters:
-    encoded_imgs (list of str): base64로 인코딩된 이미지 데이터 리스트
-    """
-    for idx, encoded_img in enumerate(encoded_imgs):
-        # base64 문자열을 디코딩하여 바이너리 데이터로 변환
-        img_data = base64.b64decode(encoded_img)
-
-        # numpy 배열로 변환 후 이미지를 읽음
-        np_img = np.frombuffer(img_data, dtype=np.uint8)
-        img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
-
-        # 이미지 표시
-        if img is not None:
-            cv2.imshow(f"Image {idx + 1}", img)
-            cv2.waitKey(0)  # 사용자가 키를 누를 때까지 기다림
-            cv2.destroyAllWindows()  # 창을 닫음
-        else:
-            print(f"Failed to decode and load image {idx + 1}")
-
-
 @router.post("/problems_solver")
 async def problems_ocr(input: OCRInput):
     start = time.time()
@@ -234,7 +220,6 @@ async def problems_ocr(input: OCRInput):
     # image_urls = []
 
     def sort_key(filename):
-        # 파일명에서 숫자 부분만 추출하여 정렬 기준으로 사용
         return int(''.join(filter(str.isdigit, filename)))
     
     filenames = sorted([f for f in os.listdir(image_path) if not f.startswith('_')], key=sort_key)
@@ -242,8 +227,6 @@ async def problems_ocr(input: OCRInput):
     for filename in filenames:
         with open(os.path.join(image_path, filename), "rb") as image_file:
             encoded_imgs.append(base64.b64encode(image_file.read()).decode())
-
-    # show_encoded_images(encoded_imgs)
     
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
@@ -255,11 +238,6 @@ async def problems_ocr(input: OCRInput):
     ]
 
     ocrs = await asyncio.gather(*ocr_tasks)
-    
-    # print("-----------------************------------------")
-    # for ocr in sorted_ocrs:
-    #     print(ocr)
-    # print("-----------------************------------------")
     
     concept_tasks = [
         fetch_openai(client, f"이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
@@ -498,19 +476,29 @@ async def define_prob_areas(input: ProbAreas_HandImg):
     
     return JSONResponse(content=output)
 
-@router.post("/class_inference")
-async def class_inference(input: ClassInput):
-    question = input.question
+# @router.post("/class_inference")
+# async def class_inference(input: ClassInput):
+#     question = input.question
     
-    predicted_class = "NOT YET" #category_inference(question)
+#     predicted_class = "NOT YET" #category_inference(question)
     
-    #Update DB
+#     #Update DB
+    
+#     output = {
+#         "predicted_category" : predicted_class,
+#     }
+    
+#     return JSONResponse(content = output)
+
+@router.post("/face_tracker")
+async def face_tracker(input: FaceImg):    
+    is_focus = check_if_focus(input.image)
     
     output = {
-        "predicted_category" : predicted_class,
+        "is_focus": is_focus,
     }
     
-    return JSONResponse(content = output)
+    return JSONResponse(content=output)
     
 
 @router.get("/test")
