@@ -26,7 +26,16 @@ async def set_time(settime:SetTime):
     
     start_date = datetime.now()
     
-    # DB : init_state
+    insert_study = """
+    INSERT INTO study (u_id, s_id, start_time) 
+    VALUES ('{}', '{}', '{}');
+    """.format(
+        u_id, 
+        s_id, 
+        start_date
+    )
+    user_initstudy = execute_query(connection, insert_study)
+
     insert_settime = """
     INSERT INTO init_state (u_id, s_id, start_date, study_time, break_time) 
     VALUES ('{}', '{}', '{}', '{}', '{}');
@@ -39,16 +48,6 @@ async def set_time(settime:SetTime):
     )
     user_settime = execute_query(connection, insert_settime)
     
-    # DB : study
-    insert_study = """
-    INSERT INTO study (u_id, s_id, start_time) 
-    VALUES ('{}', '{}', '{}');
-    """.format(
-        u_id, 
-        s_id, 
-        start_date
-    )
-    user_initstudy = execute_query(connection, insert_study)
     
     # init user status
     user_vars.user_status = "doing"

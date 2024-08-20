@@ -97,6 +97,21 @@ async def login(login: LoginRequest):
     badges = read_query(connection, load_badges)
     print(badges)
 
+    load_user_studies = "SELECT * FROM study WHERE u_id = '{}';".format(u_id)
+    user_studies = read_query(connection, load_user_studies)
+
+    net_studies = []
+
+    for study in user_studies:
+        if study['end_time'] is not None:
+            net_studies.append(study)
+    
+    not_focusing_list = []
+    for study in net_studies:
+        load_not_focusing_time = "SELECT * FROM not_focusing_time WHERE (u_id = '{}' and s_id = '{}');".format(u_id, study['s_id'])
+        not_focusing_time = read_query(connection, load_not_focusing_time)
+        not_focusing_list.append(not_focusing_time)
+
     if badges and badges[0][0]:
         b_id_json = badges[0][0]
         b_id_list = json.loads(b_id_json)
@@ -148,7 +163,8 @@ async def login(login: LoginRequest):
             "progress_unit" : progress_unit,
             "z_log" : z_log,
             "weekly_reports" : weekly_reports,
-            "badge_details" : badge_details
+            "badge_details" : badge_details,
+            "not_focusing_list" : not_focusing_list
             } # 형식 변경 필요
 
 @route.get("/user_all")

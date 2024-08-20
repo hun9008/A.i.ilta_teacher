@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 20px;
+        }
+        #input-container {
+            display: flex;
+        }
+        #input-container input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #input-container button {
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>WebSocket Test</h1>
+
+<div id="messages"></div>
+
+<div id="input-container">
+    <input type="text" id="input" placeholder="Type your message...">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    let websocket;
+
+    function initializeWebSocket() {
+        websocket = new WebSocket("ws://localhost:8000/ws/chat");
+
+        websocket.onopen = function(event) {
+            document.getElementById("messages").innerHTML += "<p><strong>Connection opened:</strong> " + event.timeStamp + "</p>";
+            const openMessage = {
+                u_id: "user123", 
+                text: "",
+                status: "open"
+            };
+            websocket.send(JSON.stringify(openMessage));
+        };
+
+        websocket.onmessage = function(event) {
+            document.getElementById("messages").innerHTML += "<p><strong>Server:</strong> " + event.data + "</p>";
+        };
+
+        websocket.onclose = function(event) {
+            document.getElementById("messages").innerHTML += "<p><strong>Connection closed:</strong> " + event.timeStamp + "</p>";
+        };
+
+        websocket.onerror = function(event) {
+            document.getElementById("messages").innerHTML += "<p><strong>Error:</strong> " + event.data + "</p>";
+        };
+    }
+
+    function sendMessage() {
+        const inputField = document.getElementById("input");
+        const message = inputField.value;
+        if (message) {
+            const chatMessage = {
+                u_id: "user123", 
+                text: message,
+                status: "message" // Indicate it's a message status
+            };
+            websocket.send(JSON.stringify(chatMessage));
+            document.getElementById("messages").innerHTML += "<p><strong>You:</strong> " + message + "</p>";
+            inputField.value = ""; // Clear the input field after sending
+        }
+    }
+
+    window.onload = initializeWebSocket;
+</script>
+
+</body>
+</html>

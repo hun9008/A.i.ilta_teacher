@@ -12,6 +12,8 @@ from utils.problem import concepts, solutions, ocrs
 from utils.chat_utils import prompt_delay, prompt_wrong
 from fastapi import WebSocket, WebSocketDisconnect
 from config import user_vars
+import base64
+import requests
 
 route = APIRouter()
 
@@ -25,56 +27,60 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 connections = []
 
 # (assume) define user_status
-# user_vars.user_status = "solve_delay"
+user_vars.user_status = "solve_delay"
 user_context = {}  # 사용자의 상태와 관련된 데이터를 저장
 
-# async def decide_user_wrong(websocket: WebSocket):
-#     await asyncio.sleep(10)
-#     while True:
+async def decide_user_wrong(websocket: WebSocket):
+    await asyncio.sleep(10)
+    while True:
         
-#         await asyncio.sleep(15)  
+        await asyncio.sleep(15)  
         
-#         # directory path
-#         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-#         storage_dir = os.path.join(root_dir, "local_storage/mobile")
+        # directory path
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+        storage_dir = os.path.join(root_dir, "local_storage/mobile")
         
-#         file_list = glob.glob(os.path.join(storage_dir, '*.jpg'))
-#         if not file_list:
-#             continue  # 혹시 이미지가 없는 경우
+        file_list = glob.glob(os.path.join(storage_dir, '*.jpg'))
+        if not file_list:
+            continue  # 혹시 이미지가 없는 경우
 
-#         latest_img = max(file_list, key=os.path.getctime)
+        latest_img = max(file_list, key=os.path.getctime)
         
-#         # encoding 
-#         with open(latest_img, "rb") as target_img:
-#             frame_data = base64.b64encode(target_img.read()).decode('utf-8')
+        # encoding 
+        with open(latest_img, "rb") as target_img:
+            frame_data = base64.b64encode(target_img.read()).decode('utf-8')
         
-#         # (assume) 지금 어떤 문제 풀고 있는지 알아내기
-#         problem_index = 0
-#         solution = solutions[problem_index]
+        # (assume) 지금 어떤 문제 풀고 있는지 알아내기
+        problem_index = 0
+        solution = solutions[problem_index]
         
-#         hand_ocr = await perform_handwrite_ocr(frame_data, solution)
+        # hand_ocr = await perform_handwrite_ocr(frame_data, solution)
+        hand_ocr = {
+            "determinants": "solve_delay"
+        }
         
-#         user_vars.user_status = hand_ocr.get("determinants")
+        user_vars.user_status = hand_ocr.get("determinants")
+        print("user_status : ", user_vars.user_status)
         
-# async def perform_handwrite_ocr(frame_data, solution):
+async def perform_handwrite_ocr(frame_data, solution):
     
-#     print("test) Decide user status by handwrite OCR")
+    print("test) Decide user status by handwrite OCR")
     
-#     url = "http://model.maitutor.site/hand_ocr"
+    url = "http://model.maitutor.site/hand_ocr"
     
-#     payload = {
-#         "image": frame_data,
-#         "solution": solution 
-#     }
-#     headers = {'Content-Type': 'application/json'} 
-#     response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)
-#     return response.json()
+    payload = {
+        "image": frame_data,
+        "solution": solution 
+    }
+    headers = {'Content-Type': 'application/json'} 
+    response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)
+    return response.json()
      
 @route.websocket("/ws/chat")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 
-    # background_task = asyncio.create_task(decide_user_wrong(websocket))
+    background_task = asyncio.create_task(decide_user_wrong(websocket))
 
     try:
         while True:
@@ -87,6 +93,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # status가 "open"일 경우에만 웹소켓을 열어 연결 목록에 추가
             if chat_request.status == "open":
                 connections.append(websocket)
+
                 await websocket.send_text("WebSocket connection opened.")
             else:
                 print("test) WebSocket connection not opened or already open")
@@ -110,6 +117,7 @@ async def process_message(chat: ChatRequest):
     
     # (assume) 지금 어떤 문제 풀고 있는지 알아내기
     problem_index = 0
+    print("len(ocrs) : ", len(ocrs))
     ocr = ocrs[problem_index]
     
     if user_id not in user_context:
@@ -120,6 +128,7 @@ async def process_message(chat: ChatRequest):
     print("test) OCR : "+ ocr)
     print("test) PREV_CHAT : "+ prev_chat)
     
+    user_vars.user_status = "solve_delay"
     if user_vars.user_status == "solve_delay":
         
         #print("test) user_status is always solve_delay in test.")
