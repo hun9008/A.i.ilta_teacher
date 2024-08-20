@@ -71,6 +71,8 @@ async def submit_competition(user_submit: SubmitCompetition):
         success_rate_list = [problem['question_success_rate'] for problem in problem_set]
         problem_weights = [1 / success_rate for success_rate in success_rate_list]
 
+        possible_max_score = sum(problem_weights) * 10
+
         def normalize_answer(answer):
             answer = re.sub(r'\\\(|\\\)|\$|\\', '', answer)
             answer = answer.replace(' ', '')
@@ -83,6 +85,8 @@ async def submit_competition(user_submit: SubmitCompetition):
             
             if correct_answer == user_answer:
                 score += problem_weights[i] * 10
+
+        score = int(score / possible_max_score * 100) * 0.6
         
     score_set_query = """
         UPDATE user

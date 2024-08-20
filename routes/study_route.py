@@ -25,7 +25,7 @@ async def set_time(settime:SetTime):
     break_time = settime.break_time
     
     start_date = datetime.now()
-    
+
     insert_study = """
     INSERT INTO study (u_id, s_id, start_time) 
     VALUES ('{}', '{}', '{}');
@@ -103,6 +103,30 @@ async def real_time(realtime:RealTime):
     )
     user_endstudy = execute_query(connection, update_study)
     
+    base_score = 80
+    bonus_score = 20
+
+    load_not_focusing = "SELECT sum(not_f_time_t) FROM not_focusing_time WHERE (u_id = '{}' AND s_id = '{}');".format(u_id, s_id)
+    not_focusing = read_query(connection, load_not_focusing)
+    not_focusing_time = not_focusing[0][0] / 60
+    print("not_focusing_time : ", not_focusing_time)
+
+    if not_focusing_time > 0:
+        bonus_score -= not_focusing_time
+        if bonus_score < 0:
+            bonus_score = 0
+
+    score = (base_score + bonus_score) * 0.4
+
+    update_score = """
+    UPDATE user
+    SET score = score + '{}'
+    WHERE u_id = '{}';
+    """.format(
+        score, 
+        u_id
+    )
+
     # response for test
     response = "Successfully store REAL time."
     
