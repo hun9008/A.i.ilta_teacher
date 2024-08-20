@@ -12,6 +12,7 @@ const ImageCropTest: React.FC = () => {
   const [points, setPoints] = useState<{ x: number; y: number }[]>([]);
   const [draggingPointIndex, setDraggingPointIndex] = useState<number | null>(null);
   const [scale, setScale] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const editCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -42,7 +43,10 @@ const ImageCropTest: React.FC = () => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => setImage(e.target?.result as string);
+      reader.onload = (e) => {
+        setImage(e.target?.result as string);
+        setShowPopup(true);
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -69,11 +73,9 @@ const ImageCropTest: React.FC = () => {
   };
 
   const redrawEditCanvas = () => {
-
     const canvas = editCanvasRef.current;
     if (!canvas || !image) return;
 
-    console.log("2");
     const ctx = canvas.getContext('2d');
     const img = new Image();
     img.onload = () => {
@@ -137,10 +139,10 @@ const ImageCropTest: React.FC = () => {
       const width = canvas.width * scale;
       const height = canvas.height * scale;
       newPoints = [
-        { x: 0, y: 0 },                // 좌상단 (lt)
-        { x: width, y: 0 },            // 우상단 (rt)
-        { x: width, y: height },       // 우하단 (rb)
-        { x: 0, y: height }            // 좌하단 (lb)
+        { x: 0, y: 0 },
+        { x: width, y: 0 },
+        { x: width, y: height },
+        { x: 0, y: height }
       ];
     }
     setPoints(newPoints);
@@ -148,14 +150,11 @@ const ImageCropTest: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log("포인트가 업데이트 되었습니다:", points);
     redrawEditCanvas();
   }, [points]);
 
   const cropImage = () => {
     if (!canvasRef.current || points.length !== 4 || !window.cv) return;
-
-    console.log(points);
   
     const canvas = canvasRef.current;
     let src = window.cv.imread(canvas);
@@ -183,19 +182,35 @@ const ImageCropTest: React.FC = () => {
     setCroppedImage(tempCanvas.toDataURL());
   
     [src, dst, srcTri, dstTri, M].forEach(mat => mat.delete());
+    setShowPopup(false);
   };
 
   return (
     <div>
       <input type="file" accept="image/*" onChange={handleImageUpload} />
       {image && (
-        <>
-          <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
-            <canvas 
-              ref={canvasRef} 
-            />
-          </div>
-          <div>
+        <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
+          <canvas ref={canvasRef} />
+        </div>
+      )}
+      {showPopup && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '10px'
+          }}>
             <canvas 
               ref={editCanvasRef}
               style={{ cursor: draggingPointIndex !== null ? 'grabbing' : 'grab' }}
@@ -203,16 +218,18 @@ const ImageCropTest: React.FC = () => {
               onMouseMove={handleCanvasInteraction} 
               onMouseUp={handleCanvasInteraction}
             />
+            <div>
+              <button onClick={detectCorners}>Detect Corners</button>
+              <button onClick={cropImage} disabled={points.length !== 4}>Crop Image</button>
+            </div>
           </div>
-          <button onClick={detectCorners}>Detect Corners</button>
-          <button onClick={cropImage} disabled={points.length !== 4}>Crop Image</button>
-        </>
+        </div>
       )}
       {croppedImage && (
-        <>
+        <div>
           <h3>Cropped Image:</h3>
-          <img src={croppedImage} alt="Cropped" style={{ maxWidth: '100%' }} />
-        </>
+          <img src={croppedImage} alt="Cropped" style={{ maxWidth: '50%' }} />
+        </div>
       )}
     </div>
   );
