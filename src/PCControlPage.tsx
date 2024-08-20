@@ -47,25 +47,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from './WebSocketContext';
-import ProblemImg from './assets/problem_img.png';
 
 const wsUrl = import.meta.env.VITE_SOCKET_URL;
 
 const PCControlPage: React.FC = () => {
   const { sendMessage, isConnected, imageData } = useWebSocket();
   const u_id = localStorage.getItem('u_id');
-  
-  const convertImageToBase64 = async (imageUrl: string): Promise<string> => {
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
 
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
 
   const handleCaptureRequest = async () => {
     // 캡처 버튼이 눌렸을 때 현재의 imageData를 고정

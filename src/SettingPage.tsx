@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useWebcamStream } from './WebcamStreamContext.tsx';
+//import { useWebcamStream } from './WebcamStreamContext.tsx';
 import QrPage from './QrPage';
 import CameraPage from './camera.tsx';
 import PCControlPage from './PCControlPage.tsx';
@@ -23,7 +23,7 @@ const steps: Step[] = [
 function SettingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
-  const { isStreaming } = useWebcamStream();
+  //const { isStreaming } = useWebcamStream();
   const navigate = useNavigate();
 
   const updateCompletedSteps = (stepIndex: number) => {
