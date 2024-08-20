@@ -106,11 +106,22 @@ async def login(login: LoginRequest):
         if study[3] is not None:
             net_studies.append(study)
     
-    not_focusing_list = []
+    not_focusing_json_list = []
     for study in net_studies:
         load_not_focusing_time = "SELECT * FROM not_focusing_time WHERE (u_id = '{}' and s_id = '{}');".format(u_id, study[1])
         not_focusing_time = read_query(connection, load_not_focusing_time)
-        not_focusing_list.append(not_focusing_time)
+        
+        load_not_focusing_time = "SELECT start_time, end_time FROM study WHERE (u_id = '{}' and s_id = '{}');".format(u_id, study[1])
+        study_time = read_query(connection, load_not_focusing_time)
+
+        not_focusing_json = {
+            "s_id": study[1],
+            "start_time": study_time[0][0],
+            "end_time": study_time[0][1],
+            "not_focusing_time": not_focusing_time
+        }
+
+        not_focusing_json_list.append(not_focusing_json)
 
     if badges and badges[0][0]:
         b_id_json = badges[0][0]
@@ -164,7 +175,7 @@ async def login(login: LoginRequest):
             "z_log" : z_log,
             "weekly_reports" : weekly_reports,
             "badge_details" : badge_details,
-            "not_focusing_list" : not_focusing_list
+            "not_focusing_list" : not_focusing_json_list
             } # 형식 변경 필요
 
 @route.get("/user_all")
