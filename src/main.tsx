@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { WebSocketProvider } from './WebSocketContext';
 import { WebcamStreamProvider } from './WebcamStreamContext';
+import LoadingPage from './LoadingPage';
 
 const SignIn = lazy(() => import('./SignIn'));
 const QrPage = lazy(() => import('./QrPage'));
@@ -16,24 +17,30 @@ const PCControlPage = lazy(() => import('./PCControlPage'));
 const Game = lazy(() => import('./Game'));
 const ImageCropTest = lazy(() => import('./imageCropTest'));
 
+const Dashboard = lazy(() => import('./Dashboard'));
+const Report = lazy(() => import('./Report'));
+const Competition = lazy(() => import('./Competition'));
+
 import './css/index.css';
 import './css/tailwind.css';
 import ErrorBoundary from './ErrorBoundary';
-
-const Loading = () => <div>Loading...</div>;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <WebSocketProvider>
       <Router>
         <ErrorBoundary>
-          <Suspense fallback={<Loading />}>
+          <Suspense fallback={<LoadingPage />}>
             <Routes>
               <Route path="/" element={<SignIn />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/camera-mobile" element={<CameraMobilePage />} />
-              <Route path="/main" element={<MainPage />} />
-              <Route path="/imageCropTest" element={<ImageCropTest/>} />
+              <Route path="/main" element={<MainPage />}>
+                <Route index element={<Dashboard />} />
+                <Route path="report" element={<Report />} />
+                <Route path="competition" element={<Competition />} />
+              </Route>
+              <Route path="/imageCropTest" element={<ImageCropTest />} />
 
               <Route
                 path="/*"

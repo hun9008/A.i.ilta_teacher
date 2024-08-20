@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './css/SignIn.css';
-import { Cake, Phone, PersonStanding, CircleUserRound } from 'lucide-react';
+import {
+  Cake,
+  Phone,
+  PersonStanding,
+  CircleUserRound,
+  School,
+} from 'lucide-react';
 
 function SignIn() {
   const [email, setEmail] = useState<string>('');
@@ -35,6 +41,12 @@ function SignIn() {
       localStorage.setItem('progress_unit', data.progress_unit);
       localStorage.setItem('weekly_reports', data.weekly_reports);
       localStorage.setItem('z_log', data.z_log);
+      localStorage.setItem('nickname', data.nickname);
+      localStorage.setItem('birthday', data.birthday);
+
+      localStorage.setItem('parent_email', data.parent_email);
+
+      localStorage.setItem('school', data.school);
 
       navigate('/main');
     } catch (error: any) {
@@ -162,6 +174,22 @@ function SignIn() {
                         name="email"
                         placeholder="이메일을 입력하세요"
                         onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="input-container">
+                    <label className="input-label" htmlFor="school">
+                      학교
+                    </label>
+                    <div className="input">
+                      <School className="icon" size={20} />
+                      <input
+                        className="textinput"
+                        type="text"
+                        id="school"
+                        name="school"
+                        placeholder="학교을 입력하세요"
+                        onChange={(e) => setName(e.target.value)}
                       />
                     </div>
                   </div>

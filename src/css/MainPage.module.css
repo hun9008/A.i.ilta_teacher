@@ -1,0 +1,264 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.dashboardContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+  background-color: #f3f4f6;
+  width: 60px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.competitionSection {
+  margin: 20px 0;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.competitionBox {
+  background-color: #f3f4f6;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.competitionInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.competitionButton {
+  background-color: #7c3aed;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.iconWrapper {
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: 20px;
+  margin-left: 60px;
+  overflow-y: auto;
+}
+
+.topSection {
+  display: flex;
+  justify-content: space-between;
+}
+
+.welcomeSection {
+  flex: 1;
+}
+
+.greeting {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.badgeSection {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.badgeWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.badgeCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.badgeCircle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.badgeCircleClickable {
+  cursor: pointer;
+}
+
+.badgeTitle {
+  margin-top: 5px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.rightSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.studyButton {
+  width: 100%;
+  background-color: #7c3aed;
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.calendarWrapper {
+  width: 100%;
+  height: 200px;
+}
+
+.chartSection {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.leftColumn,
+.centerColumn,
+.rightColumn {
+  width: 33%;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chartWrapper {
+  background-color: #f3f4f6;
+  border-radius: 10px;
+  padding: 20px;
+  min-height: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chartTitle {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.plusIcon {
+  font-size: 32px;
+  color: #888;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modalContent {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  position: relative;
+  width: 400px;
+  text-align: center;
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.badgeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.badgeCircleModal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.badgeImageWrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+
+.badgeImageWrapperEarned {
+  border-color: #ffd700;
+  background-color: #fffdf0;
+}
+
+.badgeImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholderText {
+  font-size: 24px;
+  color: #ccc;
+}
