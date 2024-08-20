@@ -96,7 +96,7 @@ def detect_hand_ocr_text(img):
 
 def query_model(question):
     result = subprocess.run(
-        ["ollama", "run", "llama3.1:latest", question],
+        ["ollama", "run", "llama3.1", question],
         capture_output=True,
         text=True
     )
