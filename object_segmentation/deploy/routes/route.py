@@ -361,7 +361,7 @@ async def hand_ocr(input: Determinent):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./keys/flyai-432701-9290e087cf34.json"
 
     ocr_result = detect_hand_ocr_text(input.image)
-
+    print("ocr_result : ", ocr_result)
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     solution = input.solution
@@ -382,6 +382,7 @@ async def hand_ocr(input: Determinent):
         "ocr_result": ocr_result,
         "determinants": determinent,
     }
+    print("output_json : ", output_json)
 
     return JSONResponse(content=output_json)
 
