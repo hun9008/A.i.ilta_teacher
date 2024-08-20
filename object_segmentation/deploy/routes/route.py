@@ -198,6 +198,29 @@ async def retry_solution(client, ocr, mistral_answer, retry_count=2):
             return new_solution
     return new_solution
 
+def show_encoded_images(encoded_imgs):
+    """
+    base64로 인코딩된 이미지 리스트를 디코딩하여 화면에 표시하는 함수
+    
+    Parameters:
+    encoded_imgs (list of str): base64로 인코딩된 이미지 데이터 리스트
+    """
+    for idx, encoded_img in enumerate(encoded_imgs):
+        # base64 문자열을 디코딩하여 바이너리 데이터로 변환
+        img_data = base64.b64decode(encoded_img)
+
+        # numpy 배열로 변환 후 이미지를 읽음
+        np_img = np.frombuffer(img_data, dtype=np.uint8)
+        img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+
+        # 이미지 표시
+        if img is not None:
+            cv2.imshow(f"Image {idx + 1}", img)
+            cv2.waitKey(0)  # 사용자가 키를 누를 때까지 기다림
+            cv2.destroyAllWindows()  # 창을 닫음
+        else:
+            print(f"Failed to decode and load image {idx + 1}")
+
 
 @router.post("/problems_solver")
 async def problems_ocr(input: OCRInput):
@@ -207,12 +230,20 @@ async def problems_ocr(input: OCRInput):
     problem_crop(image)
     
     image_path = './temp'
-    file_name = str(int(time.time())) + ".jpg"
-    image_urls = []
+    # file_name = str(int(time.time())) + ".jpg"
+    # image_urls = []
 
-    for filename in os.listdir(image_path):
-        if not filename.startswith('_'):
-            encoded_imgs.append(base64.b64encode(open(os.path.join(image_path, filename), "rb").read()).decode())
+    def sort_key(filename):
+        # 파일명에서 숫자 부분만 추출하여 정렬 기준으로 사용
+        return int(''.join(filter(str.isdigit, filename)))
+    
+    filenames = sorted([f for f in os.listdir(image_path) if not f.startswith('_')], key=sort_key)
+
+    for filename in filenames:
+        with open(os.path.join(image_path, filename), "rb") as image_file:
+            encoded_imgs.append(base64.b64encode(image_file.read()).decode())
+
+    # show_encoded_images(encoded_imgs)
     
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
@@ -224,41 +255,38 @@ async def problems_ocr(input: OCRInput):
     ]
 
     ocrs = await asyncio.gather(*ocr_tasks)
-
-    # if any('*' in ocr for ocr in ocrs):
-    #     sorted_ocrs = sorted(ocrs, key=lambda x: int(x.split('*')[1]))
-    #     print("sort ocrs")
-    # else:
-    #     sorted_ocrs = ocrs
-    #     print("this is not problem set")
-    sorted_ocrs = ocrs
+    
+    # print("-----------------************------------------")
+    # for ocr in sorted_ocrs:
+    #     print(ocr)
+    # print("-----------------************------------------")
     
     concept_tasks = [
         fetch_openai(client, f"이 이미지에를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
-        for ocr in sorted_ocrs
+        for ocr in ocrs
     ]
     solution_tasks = [
         fetch_openai(client, f"아래 text를 보고 이 수학문제의 풀이를 한글로 알려주는데, step 1 : , step2 : , ... 그리고 마지막 문장에는 (정답: answer)을 적어줘. \n text : {ocr}")
-        for ocr in sorted_ocrs
+        for ocr in ocrs
     ]
 
     llama_tasks = [
         fetch_ans_llama31(f"다음 문제를 풀고 정답만 (answer:정답)의 형태로 알려줘. {ocr}")
-        for ocr in sorted_ocrs
+        for ocr in ocrs
     ]
 
     concepts= await asyncio.gather(*concept_tasks)
     solutions= await asyncio.gather(*solution_tasks)
     answers= await asyncio.gather(*llama_tasks)
 
-    final_solutions = [None] * len(sorted_ocrs)  
+    final_solutions = [None] * len(ocrs)  
 
     symbol_to_number = {
         '①': '1', '②': '2', '③': '3', '④': '4', '⑤': '5',
         '⑥': '6', '⑦': '7', '⑧': '8', '⑨': '9', '⑩': '10'
     }
 
-    for index, (solution, answer, ocr) in enumerate(zip(solutions, answers, sorted_ocrs)):
+    for index, (solution, answer, ocr) in enumerate(zip(solutions, answers, ocrs)):
 
         # 기호를 숫자로 변환
         for symbol, number in symbol_to_number.items():
@@ -318,7 +346,7 @@ async def problems_ocr(input: OCRInput):
     output_json = {
         "concepts": concepts,
         "solutions": solutions,
-        "ocrs": sorted_ocrs,
+        "ocrs": ocrs,
     }
 
     return JSONResponse(content=output_json)
