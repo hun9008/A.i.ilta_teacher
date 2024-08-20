@@ -98,9 +98,6 @@ def prob_loc_crop(image):
 
     right, left = imtrim(durty_image)
     origin_right, origin_left = imtrim(image)
-    # print("all shape:", image.shape)
-    # print("right shape: ", right.shape)
-    # print("left shape: ", left.shape)
 
     if right is None or left is None:
         print("Error: Image trimming failed.")
@@ -116,15 +113,6 @@ def visualize_problem_locations(image, problem_locations):
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(image, f"({x},{y})", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-    plt.figure(figsize=(10, 10))
-    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    plt.axis('off')
-    plt.show()
-    
-def visualize_hand_area(image, hand_locations):
-    cv2.rectangle(image, (hand_locations[0], hand_locations[1]), (hand_locations[0]+hand_locations[2], hand_locations[1]+hand_locations[3]), (0, 255, 255), 2)
-    cv2.putText(image, f"({hand_locations[0]},{hand_locations[1]})", (hand_locations[0], hand_locations[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-    
     plt.figure(figsize=(10, 10))
     plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     plt.axis('off')

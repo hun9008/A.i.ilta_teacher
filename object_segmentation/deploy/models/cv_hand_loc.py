@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 import matplotlib as plt
-from cv_which_prob.unified_detector import Fingertips
+# from cv_which_prob.unified_detector import Fingertips
 from cv_which_prob.hand_detector.detector import YOLO
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -10,7 +10,7 @@ yolo_path = os.path.join('cv_which_prob/weights/yolo.h5')
 fingertip_path = os.path.join('cv_which_prob/weights/fingertip.h5')
 
 hand = YOLO(weights=yolo_path, threshold=0.8)
-fingertips = Fingertips(weights=fingertip_path)
+# fingertips = Fingertips(weights=fingertip_path)
 
 def hand_loc(image):
 
@@ -22,7 +22,7 @@ def hand_loc(image):
         height, width, _ = cropped_image.shape
 
         # gesture classification and fingertips regression
-        prob, pos = fingertips.classify(image=cropped_image)
+        # prob, pos = fingertips.classify(image=cropped_image)
         pos = np.mean(pos, 0)
 
         # post-processing

@@ -99,6 +99,9 @@ def contour(page_rl, output_dir, type, origin):
     print("problem_locations: ", len(problem_locations))
     padding = 10
     scale_factor = 2  # 해상도 확대 비율
+    
+    problem_locations.sort(key=lambda x: x[1])
+    
     for i in range(len(problem_locations)):
         x, y, w, h = problem_locations[i]
         img_trim = origin[y:y+h, x:x+w]
@@ -139,5 +142,5 @@ def problem_crop(image):
     output_dir = './temp'
     os.makedirs(output_dir, exist_ok=True)
 
-    contour(right, output_dir, 'right', origin_right)
     contour(left, output_dir, 'left', origin_left)
+    contour(right, output_dir, 'right', origin_right)

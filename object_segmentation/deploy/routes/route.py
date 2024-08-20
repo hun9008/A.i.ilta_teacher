@@ -6,13 +6,13 @@ import os
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 import time
-from models.class_quest_cate import category_inference
+# from models.class_quest_cate import category_inference
 from models.cv_ocr import problem_crop
-from object_segmentation.deploy.models.cv_prob_area import prob_loc_crop, visualize_problem_locations
-from object_segmentation.deploy.models.cv_hand_loc import hand_loc, visualize_hand_area
-from object_segmentation.deploy.models.input_ocr import OCRInput, Determinent
-from object_segmentation.deploy.models.input_hand import ProbAreas_HandImg
-from object_segmentation.deploy.models.input_prob import ClassInput
+from models.cv_prob_area import prob_loc_crop, visualize_problem_locations
+from models.cv_hand_loc import hand_loc, visualize_hand_area
+from models.input_ocr import OCRInput, Determinent
+from models.input_hand import ProbAreas_HandImg
+from models.input_prob import ClassInput
 import boto3
 from botocore.exceptions import NoCredentialsError
 import requests
@@ -225,7 +225,6 @@ async def problems_ocr(input: OCRInput):
 
     ocrs = await asyncio.gather(*ocr_tasks)
 
-
     # if any('*' in ocr for ocr in ocrs):
     #     sorted_ocrs = sorted(ocrs, key=lambda x: int(x.split('*')[1]))
     #     print("sort ocrs")
@@ -394,7 +393,6 @@ async def hand_ocr(input: Determinent):
 async def define_prob_areas(input: ProbAreas_HandImg):
     image_clean = decode_image(input.image_clean)
     image_hand = decode_image(input.image_hand)
-    problem_crop(image_clean)
     
     prob_loc_l, prob_loc_r = prob_loc_crop(image_clean)
     
@@ -461,6 +459,10 @@ async def define_prob_areas(input: ProbAreas_HandImg):
     if prob_num is None:
         prob_num = -1
     
+    image_path = './temp'
+    for filename in os.listdir(image_path):
+        os.remove(os.path.join(image_path, filename))
+    
     output = {
         "prob_area": prob_areas,
         "prob_num": prob_num,
@@ -472,7 +474,7 @@ async def define_prob_areas(input: ProbAreas_HandImg):
 async def class_inference(input: ClassInput):
     question = input.question
     
-    predicted_class = category_inference(question)
+    predicted_class = "NOT YET" #category_inference(question)
     
     #Update DB
     
