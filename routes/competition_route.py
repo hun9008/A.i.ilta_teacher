@@ -48,6 +48,34 @@ async def get_latest_competition(request: DifficultyRequest):
         "answer_set": json.loads(competition['answer_set_json'])
     }
 
+@route.post("/get_past_competition")
+async def get_past_competition(request: DifficultyRequest):
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    
+    query = """
+        SELECT * FROM competition
+        WHERE JSON_UNQUOTE(JSON_EXTRACT(problem_set_json, '$[0].question_difficulty')) = %s
+        ORDER BY created_at DESC
+        LIMIT 1, 1
+    """
+
+    cursor.execute(query, (request.difficulty,))
+    competition = cursor.fetchone()
+
+    if not competition:
+        raise HTTPException(status_code=404, detail="Competition not found for the given difficulty.")
+
+    cursor.close()
+    connection.close()    
+
+    return {
+        "c_id": competition['c_id'],
+        "problem_set": json.loads(competition['problem_set_json']),
+        "answer_set": json.loads(competition['answer_set_json'])
+    }
+
 @route.post("/submit_competition")
 async def submit_competition(user_submit: SubmitCompetition):
 
