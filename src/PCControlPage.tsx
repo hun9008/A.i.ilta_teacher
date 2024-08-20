@@ -82,6 +82,7 @@ const PCControlPage: React.FC = () => {
         type: 'all',
         device: 'mobile',
         payload: base64Image,
+        position: '',
       };
 
       sendMessage(wsUrl, message);

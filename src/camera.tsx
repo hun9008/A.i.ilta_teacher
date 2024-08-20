@@ -11,7 +11,7 @@ function CameraPage() {
   const [capturedImage] = useState<string | null>(null);
 
   const handleStartStreaming = () => {
-    startStreaming(wsUrl, u_id || '', 'video', 'pc');
+    startStreaming(wsUrl, u_id || '', 'video', 'pc', '');
   };
 
   const handleStopStreaming = () => {

@@ -3,7 +3,7 @@ import Webcam from 'react-webcam';
 import { useWebSocket } from './WebSocketContext';
 
 interface WebcamStreamContextType {
-  startStreaming: (wsUrl: string, u_id: string, type: string, device: string) => void;
+  startStreaming: (wsUrl: string, u_id: string, type: string, device: string, position: string) => void;
   stopStreaming: () => void;
   isStreaming: boolean;
 }
@@ -14,12 +14,12 @@ export const WebcamStreamProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [isStreaming, setIsStreaming] = useState(false);
   const webcamRef = useRef<Webcam>(null);
   const { connectWebSocket, disconnectWebSocket, sendMessage } = useWebSocket();
-  const streamingInfoRef = useRef<{ wsUrl: string; u_id: string; type: string; device: string } | null>(null);
+  const streamingInfoRef = useRef<{ wsUrl: string; u_id: string; type: string; device: string; position: string } | null>(null);
 
-  const startStreaming = useCallback((wsUrl: string, u_id: string, type: string, device: string) => {
+  const startStreaming = useCallback((wsUrl: string, u_id: string, type: string, device: string, position: string = "") => {
     setIsStreaming(true);
     connectWebSocket(wsUrl);
-    streamingInfoRef.current = { wsUrl, u_id, type, device };
+    streamingInfoRef.current = { wsUrl, u_id, type, device, position };
   }, [connectWebSocket]);
 
   const stopStreaming = useCallback(() => {
@@ -35,8 +35,8 @@ export const WebcamStreamProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
         const imageData = imageSrc.split(',')[1];
-        const { wsUrl, u_id, type, device } = streamingInfoRef.current;
-        const message = { u_id, type, device, payload: imageData };
+        const { wsUrl, u_id, type, device, position } = streamingInfoRef.current;
+        const message = { u_id, type, device, position, payload: imageData };
         sendMessage(wsUrl, message);
       }
     }

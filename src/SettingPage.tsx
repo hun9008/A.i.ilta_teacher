@@ -126,7 +126,7 @@ function SettingPage() {
               ? () => navigate('/StudyMain')
               : nextStep
           }
-          disabled={steps[currentStep].id === 'webcam' && !isStreaming}
+          //disabled={steps[currentStep].id === 'webcam' && !isStreaming}
           className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500 disabled:bg-gray-300"
         >
           {currentStep === steps.length - 1 ? '완료' : '다음'}
