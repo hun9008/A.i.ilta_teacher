@@ -514,9 +514,9 @@ async def class_inference(input: ClassInput):
     return JSONResponse(content = output)
     
 
-@router.get("/test")
-async def test():
+# @router.get("/test")
+# async def test():
 
-    model_answer = query_model('다음 문제를 풀고 정답만 {"answer":"정답"}의 형태를 알려줘. 일차방정식 x+5 = 3(x-1)의 해는? (x = ?)').strip()
+#     model_answer = query_model('다음 문제를 풀고 정답만 {"answer":"정답"}의 형태를 알려줘. 일차방정식 x+5 = 3(x-1)의 해는? (x = ?)').strip()
 
-    return JSONResponse(content={"model_answer": model_answer})
+#     return JSONResponse(content={"model_answer": model_answer})
