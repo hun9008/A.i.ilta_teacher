@@ -28,6 +28,7 @@ async def websocket_endpoint(websocket: WebSocket):
             device = message['device']
             type = message['type']
             u_id = message['u_id']
+            position = message['position']
 
             connection_key = f'{u_id}_{device}'
             connections[connection_key] = websocket
@@ -42,6 +43,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 if device == 'mobile':
                     await handle_ws_rtc(image, websocket, u_id, device)
                     await handle_ws_ocr(image, websocket, u_id, device)
+                    await handle_ws_position(position, websocket, u_id, device)
             elif type == 'hi':
                 response = {'type': 'response', 'message': 'Hello!'}
                 await websocket.send_json(response)
@@ -56,6 +58,17 @@ async def websocket_endpoint(websocket: WebSocket):
             connections.pop(connection_key, None)
         # else:
         #     print("connection_key not found in connections")
+
+async def handle_ws_position(position, websocket, u_id, device):
+    
+    mobile_key = f'{u_id}_mobile'
+    if mobile_key in connections:
+        mobile_websocket = connections[mobile_key]
+        response = {'type': 'position', 'payload': position}
+        await mobile_websocket.send_json(response)
+    else:
+        response = {'type': 'error', 'message': 'Mobile connection not found'}
+        await websocket.send_json(response)
 
 async def handle_ws_ocr(frame_data, websocket, u_id, device): 
     
