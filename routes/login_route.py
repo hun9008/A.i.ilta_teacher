@@ -103,12 +103,12 @@ async def login(login: LoginRequest):
     net_studies = []
 
     for study in user_studies:
-        if study['end_time'] is not None:
+        if study[3] is not None:
             net_studies.append(study)
     
     not_focusing_list = []
     for study in net_studies:
-        load_not_focusing_time = "SELECT * FROM not_focusing_time WHERE (u_id = '{}' and s_id = '{}');".format(u_id, study['s_id'])
+        load_not_focusing_time = "SELECT * FROM not_focusing_time WHERE (u_id = '{}' and s_id = '{}');".format(u_id, study[1])
         not_focusing_time = read_query(connection, load_not_focusing_time)
         not_focusing_list.append(not_focusing_time)
 
