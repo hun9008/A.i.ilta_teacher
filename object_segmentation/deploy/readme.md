@@ -22,3 +22,9 @@ git clone https://github.com/MahmudulAlam/Unified-Gesture-and-Fingertip-Detectio
 object_segmentation/deploy/cv_which_prob/weights
 download yolo.h5
 ```
+
+## face_route repo
+```
+pip install --upgrade
+pip version 24.2 is needed
+```
