@@ -9,6 +9,7 @@ interface AnimatedModalProps {
   selectedFloe: number;
   selectedProblem: string;
   selectedConcept: string;
+  chatOnly?: boolean;
 }
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
@@ -22,6 +23,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   selectedFloe,
   selectedProblem,
   selectedConcept,
+  chatOnly = false,
 }) => {
   const { getSocket, sendMessage, connectWebSocket, isConnected } =
     useWebSocket();
@@ -151,6 +153,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           className="flex w-full min-h-[66vh] h-fit max-h-[90vh] max-w-8xl"
           onClick={(e) => e.stopPropagation()}
         >
+          {!chatOnly && (
           <motion.div
             className="w-1/4 bg-blue-100 rounded-r-3xl p-5 mr-2"
             variants={panelVariants}
@@ -170,7 +173,9 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               <h3 className="text-lg font-semibold mb-4">{cleanedConcept}</h3>
             </div>
           </motion.div>
+          )}
 
+          {!chatOnly && (
           <motion.div
             className="w-1/2 bg-white rounded-3xl p-5"
             variants={centerVariants}
@@ -204,6 +209,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               </div>
             </div>
           </motion.div>
+          )}
 
           <motion.div
             className="w-1/4 bg-blue-100 rounded-l-3xl p-5 ml-2 flex flex-col"

@@ -384,6 +384,8 @@ function Game() {
   const [selectedProblem, setSelectedProblem] = useState<string>('');
   const [selectedConcept, setSelectedConcept] = useState<string>('');
   const { ocrResponse } = useWebSocket();
+  const [showChatModal, setShowChatModal] = useState<boolean>(false);
+
 
   interface OcrResponse {
     ocrs: string;
@@ -576,6 +578,8 @@ function Game() {
         setShowDebugInfo={setShowDebugInfo}
         showModal={showModal}
         setShowModal={setShowModal}
+        showChatModal={showChatModal}
+        setShowChatModal={setShowChatModal}
         selectedFloe={selectedFloe}
         studyTime={studyTime}
         breakTime={breakTime}
@@ -599,6 +603,18 @@ function Game() {
           />
         )}
       </AnimatePresence>
+      <AnimatePresence>
+        {showChatModal && (
+          <AnimatedModal
+            isOpen={showChatModal}
+            onClose={() => setShowChatModal(false)}
+            selectedFloe={selectedFloe}
+            selectedProblem={selectedProblem}
+            selectedConcept={selectedConcept}
+            chatOnly={true}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -619,6 +635,8 @@ interface UIProps {
   onBreakStop: () => void;
   selectedProblem: string;
   selectedConcept: string;
+  showChatModal: boolean;
+  setShowChatModal: (show: boolean) => void;
 }
 
 const UI: React.FC<UIProps> = ({
@@ -637,6 +655,8 @@ const UI: React.FC<UIProps> = ({
   onBreakStop,
   selectedProblem,
   selectedConcept,
+  showChatModal,
+  setShowChatModal,
 }) => (
   <>
     <div className="absolute top-0 left-0 p-4 text-white">
@@ -687,6 +707,12 @@ const UI: React.FC<UIProps> = ({
         onClick={() => setShowDebugInfo(!showDebugInfo)}
       >
         {showDebugInfo ? '디버그 정보 숨기기' : '디버그 정보 표시'}
+      </button>
+      <button
+        className="p-4 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors duration-200 flex items-center"
+        onClick={() => setShowChatModal(true)}
+      >
+        <span>채팅</span>
       </button>
       <button
         className="p-4 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200 flex"
