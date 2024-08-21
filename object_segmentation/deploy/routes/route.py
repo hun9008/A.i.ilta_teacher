@@ -94,6 +94,12 @@ def detect_hand_ocr_text(img):
 
     return texts[0].description
 
+def area_loc2ratio(image_size, x, y, w, h):
+    
+    output_loc2rat = ((x*100)/image_size[1], (y*100)/image_size[0], (w*100)/image_size[1], (h*100)/image_size[0])
+    
+    return output_loc2rat
+
 def query_model(question):
     result = subprocess.run(
         ["ollama", "run", "llama3.1", question],
@@ -438,22 +444,34 @@ async def define_prob_areas(input: ProbAreas_HandImg):
     else:
         prob_areas.append((real_loc_r[0], real_loc_r[1], image_show_clean.shape[1]-real_loc_r[0]-3, image_show_clean.shape[0]-real_loc_r[1]-3))
 
-    visualize_problem_locations(image_show_clean[:,], prob_areas)
+    # visualize_problem_locations(image_show_clean[:,], prob_areas)
     
     tl, br = hand_loc(image_hand)
     hand_area_loc = (tl[0], tl[1], br[0]-tl[0], br[1]-tl[1])
-    visualize_hand_area(image_show_hand[:,], hand_area_loc)
+    # visualize_hand_area(image_show_hand[:,], hand_area_loc)
+    
+    prob_loc_rats = []
+    image_clean_size = (image_clean.shape[0], image_clean.shape[1])
+    for (prob_x, prob_y, prob_w, prob_h) in prob_areas:
+        rat_x, rat_y, rat_w, rat_h = area_loc2ratio(image_clean_size, prob_x, prob_y, prob_w, prob_h)
+        prob_loc_rats.append((rat_x, rat_y, rat_w, rat_h))
 
     #determine which prob_area the hand_are_loc is located
-    hand_x, hand_y, hand_w, hand_h = hand_area_loc
+    handloc_x, handloc_y, handloc_w, handloc_h = hand_area_loc
+    
+    image_hand_size = (image_hand.shape[0], image_hand.shape[1])
+    hand_x, hand_y, hand_w, hand_h = area_loc2ratio(image_hand_size, handloc_x, handloc_y, handloc_w, handloc_h)
 
     prob_num = None
-    for i, (prob_x, prob_y, prob_w, prob_h) in enumerate(prob_areas):
-        if (hand_x >= prob_x and hand_x + hand_w <= prob_x + prob_w and
-            hand_y >= prob_y and hand_y + hand_h <= prob_y + prob_h):
+    for i, (prob_x, prob_y, prob_w, prob_h) in enumerate(prob_loc_rats):
+        print("prob area: ", i, "prob location rat", (prob_x, prob_y, prob_w, prob_h))
+        if (hand_x >= prob_x and hand_x <= prob_x + prob_w and
+            hand_y >= prob_y and hand_y <= prob_y + prob_h):
             prob_num = i
             break
-
+    
+    print("hand location", hand_area_loc)
+    print("hand location ratio", hand_x, hand_y, hand_w, hand_h)
     if prob_num is None:
         prob_num = -1
     
