@@ -37,6 +37,8 @@ const Dashboard: React.FC = () => {
   const progress_unit = localStorage.getItem('progress_unit');
   const badge_details = localStorage.getItem('badge_details');
   const nickname = localStorage.getItem('nickname');
+  const not_focusing_list = localStorage.getItem('not_focusing_list');
+
   const [competitionRange, setCompetitionRange] = useState('중등 수학 0');
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -340,16 +342,79 @@ const Dashboard: React.FC = () => {
   const top30Accuracy = parsedData.map((item) => parseFloat(item[2]));
   const problemsSolved = parsedData.map((item) => parseInt(item[3]));
 
-  const barData = {
-    labels: ['Focus 1', 'Focus 2', 'Focus 3'],
+  // 집중도 확인 부분
+  const parseNotFocusingList = (notFocusingList: string | null) => {
+    console.log('Original not_focusing_list:', not_focusing_list);
+
+    if (!notFocusingList) {
+      console.log('No not_focusing_list data');
+      return [];
+    }
+
+    const parsed = notFocusingList.split(',').map((item) => {
+      const [id, startTime, endTime, duration, sessionId] = item.split('|');
+      return {
+        id,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        duration: parseInt(duration),
+        sessionId,
+      };
+    });
+
+    console.log('Parsed not_focusing_list:', parsed);
+    return parsed;
+  };
+
+  const notFocusingData = parseNotFocusingList(not_focusing_list);
+
+  // 모든 세션에 대한 데이터 사용
+  const allSessions = [
+    ...new Set(notFocusingData.map((item) => item.sessionId)),
+  ];
+
+  const focusChartData = {
+    labels: allSessions.map((_, index) => `세션 ${index + 1}`),
     datasets: [
       {
-        type: 'bar' as const,
-        label: 'Focus Level',
-        data: [], // Empty data for example
-        backgroundColor: 'rgb(255, 99, 132)',
+        label: '집중하지 않은 시간 (분)',
+        data: allSessions.map((sessionId) =>
+          notFocusingData
+            .filter((item) => item.sessionId === sessionId)
+            .reduce((sum, item) => sum + item.duration, 0)
+        ),
+        backgroundColor: 'rgba(255, 99, 132, 0.6)',
       },
     ],
+  };
+
+  const focusChartOptions: ChartOptions<'bar'> = {
+    indexAxis: 'y', // 가로 방향 차트
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+        text: '모든 세션의 집중하지 않은 시간',
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: '시간 (분)',
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: '세션',
+        },
+      },
+    },
   };
 
   const categoryData: ChartData<'bar' | 'line', number[], string> = {
@@ -523,9 +588,18 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className={styles.centerColumn}>
-            <div className={styles.chartWrapper}>
+            <div
+              className={`${styles.chartWrapper} ${styles.focusChartWrapper}`}
+              style={
+                { '--session-count': allSessions.length } as React.CSSProperties
+              }
+            >
               <h3 className={styles.chartTitle}>집중력</h3>
-              <Chart type="bar" data={barData} />
+              <Chart
+                type="bar"
+                data={focusChartData}
+                options={focusChartOptions}
+              />
             </div>
           </div>
           <div className={styles.rightColumn}>

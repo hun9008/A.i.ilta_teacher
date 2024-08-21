@@ -43,6 +43,7 @@ function SignIn() {
       localStorage.setItem('z_log', data.z_log);
       localStorage.setItem('nickname', data.nickname);
       localStorage.setItem('birthday', data.birthday);
+      localStorage.setItem('not_focusing_list', data.not_focusing_list);
 
       localStorage.setItem('parent_email', data.parent_email);
 

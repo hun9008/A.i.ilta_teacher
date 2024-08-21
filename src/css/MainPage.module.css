@@ -378,3 +378,8 @@
   margin-top: 0;
   margin-bottom: 10px;
 }
+
+.focusChartWrapper {
+  height: calc(30px * var(--session-count) + 100px);
+  min-height: 350px;
+}

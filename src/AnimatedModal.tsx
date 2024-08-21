@@ -8,6 +8,7 @@ interface AnimatedModalProps {
   onClose: () => void;
   selectedFloe: number;
   selectedProblem: string;
+  selectedConcept: string;
 }
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
@@ -20,14 +21,28 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   onClose,
   selectedFloe,
   selectedProblem,
+  selectedConcept,
 }) => {
   const { getSocket, sendMessage, connectWebSocket, isConnected } =
     useWebSocket();
   const [messages, setMessages] = useState(globalMessages);
   const [inputMessage, setInputMessage] = useState('');
   const [socketReady, setSocketReady] = useState(false);
+  const [gradeInfo, setGradeInfo] = useState<string>('');
 
   useEffect(() => {
+    const birthday = localStorage.getItem('birthday');
+    if (birthday) {
+      const birthYear = new Date(birthday).getFullYear();
+      const currentYear = new Date().getFullYear();
+      const age = currentYear - birthYear;
+
+      if (age === 14) setGradeInfo('중등 수학 1');
+      else if (age === 15) setGradeInfo('중등 수학 2');
+      else if (age === 16) setGradeInfo('중등 수학 3');
+      else setGradeInfo('');
+    }
+
     if (!isConnected(chatSocketUrl)) {
       connectWebSocket(chatSocketUrl);
     }
@@ -111,15 +126,15 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     exit: { y: '100%' },
   };
   const cleanText = (text: string): string => {
-    // 불필요한 특수 문자 제거 및 정리
-    return text
-      .replace(/[*{}]/g, '') // *와 {} 제거
-      .replace(/\n/g, '<br />') // \n을 <br />로 변환하여 줄바꿈 적용
-      .replace(/\s*\n\s*/g, '<br />') // 연속된 줄바꿈을 단일 줄바꿈으로 변환
-      .replace(/\s+/g, ' ') // 여러 공백을 단일 공백으로 변환
-      .trim();
+    text = text.replace(/^\*\d+\*\s*/, '');
+    text = text.split(/①|②|③|④|⑤/)[0];
+    text = text.replace(/\\n/g, '<br />');
+    text = text.replace(/[*{}]/g, '').replace(/\s+/g, ' ').trim();
+
+    return text;
   };
   const cleanedProblem = cleanText(selectedProblem);
+  const cleanedConcept = cleanText(selectedConcept);
 
   return (
     <AnimatePresence>
@@ -147,11 +162,12 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           >
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">이 문제에 대한 정보</h1>
-              <h3 className="text-lg font-semibold mb-4">몇학년 몇학기</h3>
-              <h3 className="text-lg font-semibold mb-4">무슨 단원</h3>
-              <h3 className="text-lg font-semibold mb-4">무슨 유형</h3>
-              <h3 className="text-lg font-semibold mb-4">관련 개념들</h3>
-              <h3 className="text-lg font-semibold mb-4"></h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
+              </h3>
+
+              <h3 className="text-2xl font-bold mb-4">관련 개념들</h3>
+              <h3 className="text-lg font-semibold mb-4">{cleanedConcept}</h3>
             </div>
           </motion.div>
 
