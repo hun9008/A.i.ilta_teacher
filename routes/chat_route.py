@@ -8,13 +8,14 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from models.chat import ChatRequest
 
-from utils.problem import concepts, solutions, ocrs, origin_image
+from utils.problem import concepts, solutions, ocrs, origin_image, hand_image
 from utils.chat_utils import prompt_delay, prompt_wrong
 from fastapi import WebSocket, WebSocketDisconnect
 from config import user_vars
 import base64
 import requests
 import re
+import matplotlib.pyplot as plt
 
 route = APIRouter()
 
@@ -50,10 +51,23 @@ async def decide_user_wrong(websocket: WebSocket):
 
         latest_img = max(file_list, key=os.path.getctime)
         
-        # encoding 
+        # # encoding 
         with open(latest_img, "rb") as target_img:
-            frame_data = base64.b64encode(target_img.read()).decode('utf-8')
+            include_hand = base64.b64encode(target_img.read()).decode('utf-8')
         
+
+        # problem_detect_json = {
+        #     "image_clean" : origin_image[0],
+        #     "image_hand" : include_hand
+        # }
+
+        # url = "http://model.maitutor.site/prob_areas_which_prob"
+
+        # headers = {'Content-Type': 'application/json'}
+        # response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
+        # print("hand response : ", response.json())
+
+
         # (assume) 지금 어떤 문제 풀고 있는지 알아내기
         problem_index = 0
         solution = solutions[problem_index]
@@ -104,6 +118,7 @@ async def websocket_endpoint(websocket: WebSocket):
             connections.append(websocket)
 
             await websocket.send_text("문제를 풀어보자! 내가 잘못된 부분이 있으면 알려줄게.")
+            await websocket.send_text("status : " + user_vars.user_status)
             # response = await process_message(chat_request)
             # await websocket.send_text(response)
             
@@ -132,6 +147,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 if response:
                     await websocket.send_text(response)
+                    await websocket.send_text("status : " + user_vars.user_status)
 
             except asyncio.TimeoutError:
                 # sleep_time 동안 메시지가 없으면 다음 스텝 진행
@@ -142,9 +158,11 @@ async def websocket_endpoint(websocket: WebSocket):
                         break
                     elif response == '문제를 해결했어! 다른 문제를 풀어볼까?':
                         await websocket.send_text(response)
+                        await websocket.send_text("status : " + user_vars.user_status)
                         break
                     else:
                         await websocket.send_text(response)
+                        await websocket.send_text("status : " + user_vars.user_status)
 
             except WebSocketDisconnect:
                 print("WebSocket disconnected")
