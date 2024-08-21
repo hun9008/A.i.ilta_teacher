@@ -8,7 +8,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from models.chat import ChatRequest
 
-from utils.problem import concepts, solutions, ocrs, origin_image, hand_image
+from utils.problem import concepts, solutions, ocrs, origin_image
 from utils.chat_utils import prompt_delay, prompt_wrong
 from fastapi import WebSocket, WebSocketDisconnect
 from config import user_vars
@@ -48,6 +48,8 @@ async def decide_user_wrong(websocket: WebSocket):
         file_list = glob.glob(os.path.join(storage_dir, '*.jpg'))
         if not file_list:
             continue  # 혹시 이미지가 없는 경우
+        else:
+            print("file_list : ", file_list)
 
         latest_img = max(file_list, key=os.path.getctime)
         
