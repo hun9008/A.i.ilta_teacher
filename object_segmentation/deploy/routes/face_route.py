@@ -19,19 +19,16 @@ def decode_image(base64_str):
     image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
     return image
 
-def check_if_focus(encoded_img):
-    
-    image = decode_image(encoded_img)
-    output = is_focus(image)
-
-    return output
-
 @face_router.post("/face_tracker")
-async def face_tracker(input: FaceImg):    
-    is_focus = check_if_focus(input.image)
+async def face_tracker(input: FaceImg):
+    
+    img = decode_image(input.image)
+    time.sleep(0.5)
+    print(type(img))
+    is_focus_output = is_focus(img)
     
     output = {
-        "is_focus": is_focus,
+        "is_focus": is_focus_output,
     }
     
     return JSONResponse(content=output)

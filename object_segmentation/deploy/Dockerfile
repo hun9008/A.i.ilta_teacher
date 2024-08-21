@@ -14,7 +14,7 @@ WORKDIR /app
 COPY . /app/
 
 RUN pip install --upgrade pip
-RUN pip install mediapipe==0.10.14
+# RUN pip install mediapipe==0.10.14
 RUN pip install h5py==3.8.0
 RUN pip install tensorflow==2.17.0
 RUN pip install protobuf==4.25.4

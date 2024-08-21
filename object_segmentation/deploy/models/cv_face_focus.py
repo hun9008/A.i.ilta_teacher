@@ -85,13 +85,13 @@ initial_pitch, initial_yaw, initial_roll = None, None, None
 calibrated = False
 
 # User-configurable parameters
-PRINT_DATA = True  # Enable/disable data printing
-SHOW_ALL_FEATURES = True  # Show all facial landmarks if True
+PRINT_DATA = False  # Enable/disable data printing
+SHOW_ALL_FEATURES = False  # Show all facial landmarks if True
 LOG_ALL_FEATURES = True  # Log all facial landmarks if True
 LOG_FOLDER = "logs"  # Folder to store log files
 
 # eyes blinking variables
-SHOW_BLINK_COUNT_ON_SCREEN = True  # Toggle to show the blink count on the video feed
+SHOW_BLINK_COUNT_ON_SCREEN = False  # Toggle to show the blink count on the video feed
 TOTAL_FOCUS = 0
 TOTAL_BLINKS = 0  # Tracks the total number of blinks detected
 BLINK_THRESHOLD = 0.51  # Threshold for the eye aspect ratio to trigger a blink
@@ -232,9 +232,9 @@ mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
 )
 
 # Preparing for CSV logging
-csv_data = []
-if not os.path.exists(LOG_FOLDER):
-    os.makedirs(LOG_FOLDER)
+# csv_data = []
+# if not os.path.exists(LOG_FOLDER):
+#     os.makedirs(LOG_FOLDER)
 
 # Column names for CSV file
 column_names = [
@@ -250,6 +250,8 @@ def is_focus(decoded_img):
     rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
     img_h, img_w = frame.shape[:2]
     results = mp_face_mesh.process(rgb_frame)
+    
+    is_focus=2
     
     if results.multi_face_landmarks:
         mesh_points = np.array(
@@ -271,8 +273,8 @@ def is_focus(decoded_img):
         head_pose_points_2D = mesh_points[_indices_pose]
 
         # collect nose three dimension and two dimension points
-        nose_3D_point = np.multiply(head_pose_points_3D[0], [1, 1, 3000])
-        nose_2D_point = head_pose_points_2D[0]
+        # nose_3D_point = np.multiply(head_pose_points_3D[0], [1, 1, 3000])
+        # nose_2D_point = head_pose_points_2D[0]
 
         # create the camera matrix
         focal_length = 1 * img_w
@@ -305,6 +307,7 @@ def is_focus(decoded_img):
         # if angle cross the values then
         threshold_angle = 5
         # See where the user's head tilting
+        is_focus = 0
         if angle_y < -threshold_angle:
             is_focus=0
         elif angle_y > threshold_angle:
@@ -315,11 +318,9 @@ def is_focus(decoded_img):
             is_focus=0
         else:
             is_focus=1
-        
-        result = is_focus
 
         # getting the blinking ratio
-        eyes_aspect_ratio = blinking_ratio(mesh_points_3D)
+        # eyes_aspect_ratio = blinking_ratio(mesh_points_3D)
         # checking if ear less then or equal to required threshold if yes then
         # count the number of frame frame while eyes are closed.
         # if eyes_aspect_ratio <= BLINK_THRESHOLD:
@@ -334,20 +335,21 @@ def is_focus(decoded_img):
         #     EYES_BLINK_FRAME_COUNTER = 0
 
         # Logging data
-        if LOG_DATA:
-            timestamp = int(time.time() * 1000)  # Current timestamp in milliseconds
-            log_entry = [
-                timestamp,
-                TOTAL_BLINKS,
-                TOTAL_FOCUS
-            ]  # Include blink count in CSV
-            log_entry = [timestamp, TOTAL_BLINKS, TOTAL_FOCUS]  # Include blink count in CSV
+        # if LOG_DATA:
+        #     timestamp = int(time.time() * 1000)  # Current timestamp in milliseconds
+        #     log_entry = [
+        #         timestamp,
+        #         TOTAL_BLINKS,
+        #         TOTAL_FOCUS
+        #     ]  # Include blink count in CSV
+        #     log_entry = [timestamp, TOTAL_BLINKS, TOTAL_FOCUS]  # Include blink count in CSV
             
-            # Append head pose data if enabled
-            csv_data.append(log_entry)
+        #     # Append head pose data if enabled
+        #     csv_data.append(log_entry)
 
         # Sending data through socket
-        timestamp = int(time.time() * 1000)  # Current timestamp in milliseconds
+        # timestamp = int(time.time() * 1000)  # Current timestamp in milliseconds
         # Create a packet with mixed types (int64 for timestamp and int32 for the rest)
-    
-    return result
+        
+    time.sleep(0.5)
+    return is_focus
