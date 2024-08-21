@@ -275,7 +275,7 @@ const PCControlPage: React.FC = () => {
 
     let tempCanvas = document.createElement('canvas');
     window.cv.imshow(tempCanvas, dst);
-    setCroppedImage(tempCanvas.toDataURL());
+    setCroppedImage(tempCanvas.toDataURL('image/jpeg', 0.8));
 
     [src, dst, srcTri, dstTri, M].forEach((mat) => mat.delete());
 

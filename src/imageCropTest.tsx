@@ -34,6 +34,12 @@ const ImageCropTest: React.FC = () => {
         editCanvas.width = img.width * calculatedScale;
         editCanvas.height = img.height * calculatedScale;
         editCtx?.drawImage(img, 0, 0, editCanvas.width, editCanvas.height);
+
+        
+        console.log("1. 원본 이미지 크기:", img.width, img.height);
+      console.log("2. 캔버스 크기:", canvas.width, canvas.height);
+      console.log("3. EditCanvas 크기:", editCanvas.width, editCanvas.height);
+    
       };
       img.src = image;
     }
@@ -170,6 +176,8 @@ const ImageCropTest: React.FC = () => {
     const width = Math.max(Math.hypot(br.x - bl.x, br.y - bl.y), Math.hypot(tr.x - tl.x, tr.y - tl.y));
     const height = Math.max(Math.hypot(tr.x - br.x, tr.y - br.y), Math.hypot(tl.x - bl.x, tl.y - bl.y));
   
+    console.log("4. 크롭된 이미지 예상 크기:", width, height);
+
     let dstTri = window.cv.matFromArray(4, 1, window.cv.CV_32FC2, [0, 0, width - 1, 0, width - 1, height - 1, 0, height - 1]);
     let srcTri = window.cv.matFromArray(4, 1, window.cv.CV_32FC2, [tl.x, tl.y, tr.x, tr.y, br.x, br.y, bl.x, bl.y]);
   
@@ -179,8 +187,10 @@ const ImageCropTest: React.FC = () => {
   
     let tempCanvas = document.createElement('canvas');
     window.cv.imshow(tempCanvas, dst);
-    setCroppedImage(tempCanvas.toDataURL());
+    setCroppedImage(tempCanvas.toDataURL('image/jpeg', 0.8));
   
+    console.log("5. 최종 크롭된 이미지 크기:", tempCanvas.width, tempCanvas.height);
+
     [src, dst, srcTri, dstTri, M].forEach(mat => mat.delete());
     setShowPopup(false);
   };
