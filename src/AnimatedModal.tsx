@@ -11,7 +11,7 @@ interface AnimatedModalProps {
 }
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
-
+const u_id = localStorage.getItem('u_id');
 // 전역 상태로 메시지 관리
 let globalMessages: { text: string; sender: 'user' | 'bot' }[] = [];
 
@@ -25,6 +25,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     useWebSocket();
   const [messages, setMessages] = useState(globalMessages);
   const [inputMessage, setInputMessage] = useState('');
+  const [socketReady, setSocketReady] = useState(false);
 
   useEffect(() => {
     if (!isConnected(chatSocketUrl)) {
@@ -33,6 +34,17 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
 
     const socket = getSocket(chatSocketUrl);
     if (socket) {
+      socket.onopen = () => {
+        console.log('WebSocket connection opened');
+        setSocketReady(true);
+        // 연결이 열리면 서버에 준비 신호를 보냅니다
+        sendMessage(chatSocketUrl, {
+          u_id: u_id,
+          status: 'open',
+          text: 'hi',
+        });
+      };
+
       socket.onmessage = (event: MessageEvent) => {
         const data = event.data;
         console.log('Received WebSocket message:', data);
@@ -46,15 +58,15 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     }
 
     return () => {
-      // 컴포넌트가 언마운트될 때 웹소켓 연결을 유지
-      // 필요하다면 여기에 정리 로직을 추가할 수 있습니다.
+      if (socket) {
+        socket.onopen = null;
+        socket.onmessage = null;
+      }
     };
-  }, [getSocket, connectWebSocket, isConnected]);
+  }, [getSocket, connectWebSocket, isConnected, sendMessage]);
 
   const handleSendMessage = () => {
-    const u_id = localStorage.getItem('u_id');
-
-    if (inputMessage.trim()) {
+    if (inputMessage.trim() && socketReady) {
       const message = {
         u_id: u_id,
         status: 'chat',
@@ -98,6 +110,16 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     visible: { y: 0 },
     exit: { y: '100%' },
   };
+  const cleanText = (text: string): string => {
+    // 불필요한 특수 문자 제거 및 정리
+    return text
+      .replace(/[*{}]/g, '') // *와 {} 제거
+      .replace(/\n/g, '<br />') // \n을 <br />로 변환하여 줄바꿈 적용
+      .replace(/\s*\n\s*/g, '<br />') // 연속된 줄바꿈을 단일 줄바꿈으로 변환
+      .replace(/\s+/g, ' ') // 여러 공백을 단일 공백으로 변환
+      .trim();
+  };
+  const cleanedProblem = cleanText(selectedProblem);
 
   return (
     <AnimatePresence>
@@ -147,8 +169,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   문제 {selectedFloe + 1}{' '}
                 </h1>
                 <h2 className="text-xl font-bold mb-4">
-                  {/* "문제 OCR 텍스트 여기에 들어갑니다" */}
-                  <p>{selectedProblem}</p>
+                  <p dangerouslySetInnerHTML={{ __html: cleanedProblem }} />
                 </h2>
               </div>
               <div className="bg-gray-100 rounded-lg p-5 pb-20 mb-10 flex-grow">

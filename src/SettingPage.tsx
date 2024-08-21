@@ -58,14 +58,14 @@ function SettingPage() {
     if (!ocrResponse) {
       setIsLoading(true); // OCR Response를 기다리는 동안 로딩 상태로 설정
     } else {
-      navigate('/StudyMain');
+      navigate('/Game');
     }
   };
 
   useEffect(() => {
     if (isLoading && ocrResponse) {
       setIsLoading(false);
-      navigate('/StudyMain');
+      navigate('/Game');
     }
   }, [ocrResponse, isLoading, navigate]);
 
