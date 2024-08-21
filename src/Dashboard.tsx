@@ -17,6 +17,7 @@ import {
   ChartOptions,
   ChartData,
   BarController,
+  LineController,
 } from 'chart.js';
 
 // Register Chart.js modules
@@ -29,7 +30,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  BarController
+  BarController,
+  LineController
 );
 
 const Dashboard: React.FC = () => {
