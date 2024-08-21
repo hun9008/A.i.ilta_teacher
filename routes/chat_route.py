@@ -15,7 +15,7 @@ from config import user_vars
 import base64
 import requests
 import re
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 route = APIRouter()
 
