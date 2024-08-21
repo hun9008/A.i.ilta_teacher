@@ -455,13 +455,22 @@ async def define_prob_areas(input: ProbAreas_HandImg):
     for (prob_x, prob_y, prob_w, prob_h) in prob_areas:
         rat_x, rat_y, rat_w, rat_h = area_loc2ratio(image_clean_size, prob_x, prob_y, prob_w, prob_h)
         prob_loc_rats.append((rat_x, rat_y, rat_w, rat_h))
-
+    
     #determine which prob_area the hand_are_loc is located
     handloc_x, handloc_y, handloc_w, handloc_h = hand_area_loc
     
     image_hand_size = (image_hand.shape[0], image_hand.shape[1])
     hand_x, hand_y, hand_w, hand_h = area_loc2ratio(image_hand_size, handloc_x, handloc_y, handloc_w, handloc_h)
-
+    
+    print("-------*********")
+    print("clean figure size: ", image_clean_size)
+    print("hand figure size: ",image_hand_size)
+    for i in prob_loc_rats:
+        print(i)
+    print("\n hand location", hand_area_loc)
+    print(f"hand loc ratio: {hand_x, hand_y, hand_w, hand_h}")
+    print("-------*********")
+    
     prob_num = None
     for i, (prob_x, prob_y, prob_w, prob_h) in enumerate(prob_loc_rats):
         print("prob area: ", i, "prob location rat", (prob_x, prob_y, prob_w, prob_h))
@@ -470,8 +479,6 @@ async def define_prob_areas(input: ProbAreas_HandImg):
             prob_num = i
             break
     
-    print("hand location", hand_area_loc)
-    print("hand location ratio", hand_x, hand_y, hand_w, hand_h)
     if prob_num is None:
         prob_num = -1
     
