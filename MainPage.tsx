@@ -59,6 +59,7 @@ function MainPage(): React.JSX.Element {
         device={device}
         isActive={true}
         codeScanner={codeScanner}
+        photoQualityBalance='quality'
       />
     </SafeAreaView>
   );

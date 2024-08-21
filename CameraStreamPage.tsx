@@ -1,6 +1,6 @@
 // CameraStreamPage.tsx
 import React, {useState, useEffect, useRef} from 'react';
-import {SafeAreaView, Text, StyleSheet, View, Image} from 'react-native';
+import {SafeAreaView, Text, StyleSheet, View, Image, Button} from 'react-native';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {useCameraDevice, Camera} from 'react-native-vision-camera';
 import {useWebSocket} from './WebSocketContext';
@@ -38,13 +38,14 @@ function CameraStreamPage(): React.JSX.Element {
     const intervalId = setInterval(async () => {
       if (camera.current && uId && isConnected(`${webSocketUrl}?u_id=${uId}`)) {
         try {
-          const snapshot = await camera.current.takeSnapshot({
-            quality: 100
-          });
-          setCapturedImageUri(snapshot.path);
-
-          // 이미지 파일을 Base64로 인코딩
-          const base64data = await readFile(snapshot.path, 'base64');
+            const photo = await camera.current.takePhoto({
+              enableShutterSound: false,
+              flash: 'auto',
+              enableAutoDistortionCorrection: true,
+            });
+            setCapturedImageUri(photo.path);
+            const base64data = await readFile(photo.path, 'base64');
+          
 
           // 웹소켓 메시지 생성
           const message = {
@@ -52,6 +53,7 @@ function CameraStreamPage(): React.JSX.Element {
             type: 'video',
             device: 'mobile',
             payload: base64data,
+            position: '',
           };
 
           // 메시지 전송
@@ -66,7 +68,7 @@ function CameraStreamPage(): React.JSX.Element {
           setLastMessageStatus('Failed to capture or send image');
         }
       }
-    }, 1000); // 1초에 한 번씩 캡처 및 전송
+    }, 10000); // 1초에 한 번씩 캡처 및 전송
 
     return () => clearInterval(intervalId); // 컴포넌트 언마운트 시 인터벌 제거
   }, [uId, camera, isConnected, sendMessage]);
@@ -89,6 +91,7 @@ function CameraStreamPage(): React.JSX.Element {
         style={StyleSheet.absoluteFill}
         device={device}
         isActive={true}
+        photoQualityBalance="balanced"
         photo
       />
       <View style={styles.overlay}>
@@ -108,6 +111,7 @@ function CameraStreamPage(): React.JSX.Element {
             style={styles.capturedImage}
           />
         )}
+
       </View>
     </SafeAreaView>
   );
