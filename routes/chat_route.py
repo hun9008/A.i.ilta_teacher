@@ -45,7 +45,7 @@ async def decide_user_wrong(websocket: WebSocket):
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
         storage_dir = os.path.join(root_dir, "local_storage/mobile")
         
-        file_list = glob.glob(os.path.join(storage_dir, '*.jpg'))
+        file_list = glob.glob(os.path.join(storage_dir, "*"))
         if not file_list:
             continue  # 혹시 이미지가 없는 경우
         else:
@@ -58,16 +58,16 @@ async def decide_user_wrong(websocket: WebSocket):
             include_hand = base64.b64encode(target_img.read()).decode('utf-8')
         
 
-        # problem_detect_json = {
-        #     "image_clean" : origin_image[0],
-        #     "image_hand" : include_hand
-        # }
+        problem_detect_json = {
+            "image_clean" : origin_image[0],
+            "image_hand" : include_hand
+        }
 
-        # url = "http://model.maitutor.site/prob_areas_which_prob"
+        url = "http://model.maitutor.site/prob_areas_which_prob"
 
-        # headers = {'Content-Type': 'application/json'}
-        # response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
-        # print("hand response : ", response.json())
+        headers = {'Content-Type': 'application/json'}
+        response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
+        print("hand response : ", response.json())
 
 
         # (assume) 지금 어떤 문제 풀고 있는지 알아내기
