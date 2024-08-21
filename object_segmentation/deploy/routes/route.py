@@ -10,6 +10,7 @@ import time
 from models.cv_ocr import problem_crop
 from models.cv_prob_area import prob_loc_crop, visualize_problem_locations
 from models.cv_hand_loc import hand_loc, visualize_hand_area
+from models.cv_hand_loc_1 import hand_loc_1
 from models.input_ocr import OCRInput, Determinent
 from models.input_hand import ProbAreas_HandImg
 # from models.input_prob import ClassInput
@@ -400,9 +401,6 @@ async def define_prob_areas(input: ProbAreas_HandImg):
     
     prob_loc_l, prob_loc_r = prob_loc_crop(image_clean)
     
-    image_show_clean = image_clean
-    image_show_hand = image_hand
-    
     prob_loc_l.sort(key=lambda x: x[1])
     prob_loc_r.sort(key=lambda x: x[1])
     
@@ -415,7 +413,7 @@ async def define_prob_areas(input: ProbAreas_HandImg):
         tot_loc.append(loc)
         left_prob_count += 1
     for loc in prob_loc_r:
-        loc = (loc[0]+image_show_clean.shape[1]//2,loc[1], loc[2], loc[3])
+        loc = (loc[0]+image_clean.shape[1]//2,loc[1], loc[2], loc[3])
         print("right", loc)
         real_loc_r.append(loc)
         tot_loc.append(loc)
@@ -426,29 +424,31 @@ async def define_prob_areas(input: ProbAreas_HandImg):
         for i in range (left_prob_count - 1):
             tmp = prob_loc_l[i]
             tmp_next = prob_loc_l[i+1]
-            prob_area = (tmp[0], tmp[1], image_show_clean.shape[1]//2-tmp[0]-3, tmp_next[1]-tmp[1]-3)
+            prob_area = (tmp[0], tmp[1], image_clean.shape[1]//2-tmp[0]-3, tmp_next[1]-tmp[1]-3)
             prob_areas.append(prob_area)
         tmp = prob_loc_l[left_prob_count - 1]
-        prob_areas.append((tmp[0], tmp[1], image_show_clean.shape[1]//2-tmp[0], image_show_clean.shape[0]-tmp[1]-3))
+        prob_areas.append((tmp[0], tmp[1], image_clean.shape[1]//2-tmp[0], image_clean.shape[0]-tmp[1]-3))
     else:
-        prob_areas.append((prob_loc_l[0], prob_loc_l[1], image_show_clean.shape[1]//2-prob_loc_l[0]-3, image_show_clean.shape[0]-prob_loc_l[1]-3))
+        prob_areas.append((prob_loc_l[0], prob_loc_l[1], image_clean.shape[1]//2-prob_loc_l[0]-3, image_clean.shape[0]-prob_loc_l[1]-3))
 
     if right_prob_count > 1:
         for i in range (right_prob_count - 1):
             tmp = real_loc_r[i]
             tmp_next = real_loc_r[i+1]
-            prob_area = (tmp[0], tmp[1], image_show_clean.shape[1]-tmp[0]-3, tmp_next[1]-tmp[1]-3)
+            prob_area = (tmp[0], tmp[1], image_clean.shape[1]-tmp[0]-3, tmp_next[1]-tmp[1]-3)
             prob_areas.append(prob_area)
         tmp = real_loc_r[right_prob_count - 1]
-        prob_areas.append((tmp[0], tmp[1], image_show_clean.shape[1]-tmp[0], image_show_clean.shape[0]-tmp[1]-3))
+        prob_areas.append((tmp[0], tmp[1], image_clean.shape[1]-tmp[0], image_clean.shape[0]-tmp[1]-3))
     else:
-        prob_areas.append((real_loc_r[0], real_loc_r[1], image_show_clean.shape[1]-real_loc_r[0]-3, image_show_clean.shape[0]-real_loc_r[1]-3))
+        prob_areas.append((real_loc_r[0], real_loc_r[1], image_clean.shape[1]-real_loc_r[0]-3, image_clean.shape[0]-real_loc_r[1]-3))
 
     # visualize_problem_locations(image_show_clean[:,], prob_areas)
     
     tl, br = hand_loc(image_hand)
     hand_area_loc = (tl[0], tl[1], br[0]-tl[0], br[1]-tl[1])
     # visualize_hand_area(image_show_hand[:,], hand_area_loc)
+    
+    hand_loc_1(image_hand)
     
     prob_loc_rats = []
     image_clean_size = (image_clean.shape[0], image_clean.shape[1])
