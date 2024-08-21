@@ -301,8 +301,8 @@ async def problems_ocr(input: OCRInput):
         if similarity < 0.8:
             # 유사도가 80% 미만이면 솔루션 재시도
             print("retrying solution")
-            # final_solution = await retry_solution(client, ocr, answer)
-            final_solution = solution
+            final_solution = await retry_solution(client, ocr, answer)
+            # final_solution = solution
         else:
             final_solution = solution
 
