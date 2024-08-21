@@ -4,7 +4,7 @@ import requests
 import asyncio
 #from utils.sock_utils import decode_image, detect_hand 
 from utils.sock_utils import detect_motion
-from utils.problem import concepts, solutions, ocrs
+from utils.problem import concepts, solutions, ocrs, origin_image
 from config import user_vars
 import os
 from datetime import datetime
@@ -72,7 +72,9 @@ async def handle_ws_position(position, websocket, u_id, device):
 
 async def handle_ws_ocr(frame_data, websocket, u_id, device): 
     
-    # performing_ocr = True
+    origin_image.clear()
+    origin_image.append(frame_data)
+
     ocr_result = await perform_ocr(frame_data)
     # performing_ocr = False
     
