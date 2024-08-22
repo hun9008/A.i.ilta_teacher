@@ -8,7 +8,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from models.chat import ChatRequest
 
-from utils.problem import concepts, solutions, ocrs, origin_image
+from utils.problem import concepts_storage, solutions_storage, ocrs_storage, origin_image_storage
 from utils.chat_utils import prompt_delay, prompt_wrong
 from fastapi import WebSocket, WebSocketDisconnect
 from config import user_vars
@@ -59,7 +59,7 @@ async def decide_user_wrong(websocket: WebSocket):
         
 
         problem_detect_json = {
-            "image_clean" : origin_image[0],
+            "image_clean" : origin_image_storage[0],
             "image_hand" : include_hand
         }
 
@@ -72,7 +72,7 @@ async def decide_user_wrong(websocket: WebSocket):
 
         # (assume) 지금 어떤 문제 풀고 있는지 알아내기
         problem_index = 0
-        solution = solutions[problem_index]
+        solution = solutions_storage[problem_index]
         
         # hand_ocr = await perform_handwrite_ocr(frame_data, solution)
         hand_ocr = {
@@ -102,10 +102,10 @@ async def websocket_endpoint(websocket: WebSocket):
 
     background_task = asyncio.create_task(decide_user_wrong(websocket))
 
-    print("len(concepts) : ", len(concepts))
-    print("len(solutions) : ", len(solutions))
-    print("len(ocrs) : ", len(ocrs))
-    print("type of origin_image : ", type(origin_image[0]))
+    print("len(concepts) : ", len(concepts_storage))
+    print("len(solutions) : ", len(solutions_storage))
+    print("len(ocrs) : ", len(ocrs_storage))
+    print("type of origin_image : ", type(origin_image_storage[0]))
 
     try:
         data = await websocket.receive_text()
@@ -124,7 +124,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # response = await process_message(chat_request)
             # await websocket.send_text(response)
             
-            for solution in solutions:
+            for solution in solutions_storage:
                 steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', solution)
                 steps_array = [step.strip() for step in steps[1:] if step.strip()]
 
@@ -189,7 +189,7 @@ async def process_message(chat: ChatRequest):
     # (assume) 지금 어떤 문제 풀고 있는지 알아내기
     problem_index = 0
     # print("len(ocrs) : ", len(ocrs))
-    ocr = ocrs[problem_index]
+    ocr = ocrs_storage[problem_index]
     
     if user_id not in user_context:
         user_context[user_id] = {"prev_chat": ""}
@@ -206,7 +206,7 @@ async def process_message(chat: ChatRequest):
             user_context[user_id] = {"solve_delay": True, "prev_chat": ""}
             return "문제에서 어디가 이해가 안돼?" 
         
-        concept = concepts[problem_index]
+        concept = concepts_storage[problem_index]
 
         if user_text:
             print("user text")

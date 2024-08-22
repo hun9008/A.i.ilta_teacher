@@ -4,7 +4,7 @@ import requests
 import asyncio
 #from utils.sock_utils import decode_image, detect_hand 
 from utils.sock_utils import detect_motion
-from utils.problem import concepts, solutions, ocrs, origin_image
+from utils.problem import concepts_storage, solutions_storage, ocrs_storage, origin_image_storage
 from config import user_vars
 import os
 from datetime import datetime
@@ -29,6 +29,7 @@ async def websocket_endpoint(websocket: WebSocket):
             type = message['type']
             u_id = message['u_id']
             position = message['position']
+            ocrs = message['ocrs']
 
             connection_key = f'{u_id}_{device}'
             connections[connection_key] = websocket
@@ -38,11 +39,17 @@ async def websocket_endpoint(websocket: WebSocket):
                 await handle_ws_video(image, websocket, u_id, device)
                 if device == 'mobile':
                     await handle_ws_rtc(image, websocket, u_id, device)
-            elif type == 'all':
+            elif type == 'ocr':
                 await handle_ws_video(image, websocket, u_id, device)
                 if device == 'mobile':
                     await handle_ws_rtc(image, websocket, u_id, device)
                     await handle_ws_ocr(image, websocket, u_id, device)
+                    await handle_ws_position(position, websocket, u_id, device)
+            elif type == 'solution':
+                await handle_ws_video(image, websocket, u_id, device)
+                if device == 'mobile':
+                    await handle_ws_rtc(image, websocket, u_id, device)
+                    await handle_ws_solution(ocrs, websocket, u_id, device)
                     await handle_ws_position(position, websocket, u_id, device)
             elif type == 'hi':
                 response = {'type': 'response', 'message': 'Hello!'}
@@ -59,6 +66,32 @@ async def websocket_endpoint(websocket: WebSocket):
         # else:
         #     print("connection_key not found in connections")
 
+async def handle_ws_solution(user_ocrs, websocket, u_id, device):
+
+    ocrs_storage.clear()
+    ocrs_storage.append(user_ocrs)
+
+    print("type of user_ocrs : ", type(user_ocrs))
+
+    response = await perform_solution(user_ocrs)
+
+    output_json = {
+        "concepts": response.json().get("concepts", []),
+        "solutions": response.json().get("solutions", [])
+    }
+
+    solutions_storage.append(output_json.get("solutions", []))
+    concepts_storage.append(output_json.get("concepts", []))
+    
+    pc_key = f'{u_id}_pc'
+    if pc_key in connections:
+        pc_websocket = connections[pc_key]
+        response = {'type': 'solution-request', 'payload': output_json}
+        await pc_websocket.send_json(response)
+    else:
+        response = {'type': 'error', 'message': 'Peer connection not found'}
+        await websocket.send_json(response)
+
 async def handle_ws_position(position, websocket, u_id, device):
     
     mobile_key = f'{u_id}_mobile'
@@ -72,20 +105,21 @@ async def handle_ws_position(position, websocket, u_id, device):
 
 async def handle_ws_ocr(frame_data, websocket, u_id, device): 
     
-    origin_image.clear()
-    origin_image.append(frame_data)
+    origin_image_storage.clear()
+    origin_image_storage.append(frame_data)
 
     ocr_result = await perform_ocr(frame_data)
     # performing_ocr = False
     
-    concepts.extend(ocr_result.get("concepts", []))
-    solutions.extend(ocr_result.get("solutions", []))
-    ocrs.extend(ocr_result.get("ocrs", []))
+    # concepts.extend(ocr_result.get("concepts", []))
+    # solutions.extend(ocr_result.get("solutions", []))
+    ocrs_storage.extend(ocr_result.get("ocrs", []))
+    print("ocrs_storage : ", ocrs_storage)
 
     output_json = {
-        "concepts": concepts,
-        "solutions": solutions,
-        "ocrs": ocrs,
+        # "concepts": concepts,
+        # "solutions": solutions,
+        "ocrs": ocrs_storage,
     }
     
     pc_key = f'{u_id}_pc'
@@ -166,7 +200,7 @@ async def handle_ws_video(frame_data, websocket, u_id, device):
 
 async def perform_ocr(frame_data):
     print("Performing OCR")
-    url = "http://model.maitutor.site/problems_solver"
+    url = "http://model.maitutor.site/problems_ocr"
     
     print("frame_data : ", frame_data)
 
@@ -184,3 +218,19 @@ async def perform_ocr(frame_data):
     except requests.exceptions.JSONDecodeError:
         raise ValueError("Response is not in JSON format")
     # return "Dummy OCR result"
+
+async def perform_solution(ocrs):
+    print("Performing Solution")
+    url = "http://model.maitutor.site/problems_solver"
+    
+    payload = {'ocrs': ocrs}
+    headers = {'Content-Type': 'application/json'}  # JSON 형식임을 명시
+    response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)  # JSON 형식으로 전송
+    if response.status_code != 200:
+        raise ValueError(f"Server returned status code {response.status_code}: {response.text}")
+    
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        raise ValueError("Response is not in JSON format")
+    # return "Dummy Solution result"
