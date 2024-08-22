@@ -54,6 +54,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
       else if (age === 16) setGradeInfo('중등 수학 3');
       else setGradeInfo('');
     }
+    /* 채팅 오류로 인한 주석처리
     if (!isConnected(chatSocketUrl)) {
       connectWebSocket(chatSocketUrl);
     }
@@ -99,6 +100,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         socket.onmessage = null;
       }
     };
+    */
   }, [getSocket, connectWebSocket, isConnected, sendMessage]);
 
   const handleSendMessage = () => {
