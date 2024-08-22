@@ -8,7 +8,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from models.chat import ChatRequest
 
-from utils.problem import concepts, solutions, ocrs, origin_image
+from utils.problem import concepts_storage, solutions_storage, ocrs_storage, origin_image_storage
 from utils.chat_utils import prompt_delay, prompt_wrong
 from fastapi import WebSocket, WebSocketDisconnect
 from config import user_vars

@@ -29,7 +29,7 @@ async def websocket_endpoint(websocket: WebSocket):
             type = message['type']
             u_id = message['u_id']
             position = message['position']
-            orcs = message['ocrs']
+            ocrs = message['ocrs']
 
             connection_key = f'{u_id}_{device}'
             connections[connection_key] = websocket
