@@ -28,7 +28,7 @@ const PCControlPage: React.FC = () => {
       const base64Image = croppedImage.split(',')[1];
       const message = {
         u_id,
-        type: 'all',
+        type: 'ocr',
         device: 'mobile',
         payload: base64Image,
         position: '',
