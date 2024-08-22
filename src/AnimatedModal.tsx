@@ -153,20 +153,17 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     <AnimatePresence>
       <motion.div
         key="modal"
-        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30"
+        className="fixed inset-0 flex items-center justify-between bg-opacity-30"
         variants={overlayVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
         onClick={handleClose}
       >
-        <div
-          className="flex w-full min-h-[66vh] h-fit max-h-[90vh] max-w-8xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {!chatOnly && (
+        <div className="flex h-[66vh] w-fit max-w-8xl min-w-80">
+          {(!chatOnly&&
             <motion.div
-              className="w-1/4 bg-blue-100 rounded-r-3xl p-5 mr-2"
+              className="w-max bg-white rounded-r-3xl p-5 mr-2 drop-shadow-xl"
               variants={panelVariants}
               initial="hidden"
               animate="visible"
@@ -184,11 +181,14 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 <h3 className="text-lg font-semibold mb-4">{cleanedConcept}</h3>
               </div>
             </motion.div>
-          )}
-
-          {!chatOnly && (
+            )}
+        </div>
+        <div className="w-1/3"/>
+        
+        <div className="flex w-fit h-[66vh] max-w-8xl justify-end min-w-80">
+        {(!chatOnly&&
             <motion.div
-              className="w-1/2 bg-white rounded-3xl p-5"
+              className="min-w-[25vw] w-1/2 bg-white rounded-3xl p-5 drop-shadow-xl"
               variants={centerVariants}
               initial="hidden"
               animate="visible"
@@ -204,21 +204,15 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                     <p dangerouslySetInnerHTML={{ __html: cleanedProblem }} />
                   </h2>
                 </div>
-                <div className="bg-gray-100 rounded-lg p-5 pb-20 mb-10 flex-grow">
-                  <h1 className="text-2xl font-bold mb-4">현재 내 풀이 </h1>
-                  <h2 className="text-xl font-bold mb-4">
-                    "현재 내가 풀고있는 손글씨 ocr이 여기에 들어갑니당"
-                  </h2>
-                </div>
                 <div className="flex justify-end">
                 <button
-                  className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
+                  className="px-3 py-1 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
                   onClick={handleSolveClick}
                 >
                   풀었음
                 </button>
                   <button
-                    className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
+                    className="px-3 py-1 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
                     onClick={handleClose}
                   >
                     Close
@@ -226,10 +220,10 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 </div>
               </div>
             </motion.div>
-          )}
+        )}
 
           <motion.div
-            className="w-1/4 bg-blue-100 rounded-l-3xl p-5 ml-2 flex flex-col"
+            className="min-w-[25vw] w-1/2 bg-blue-100 rounded-l-3xl p-5 ml-2 flex flex-col drop-shadow-xl"
             variants={panelVariants}
             initial="hidden"
             animate="visible"
