@@ -41,7 +41,6 @@ const GameUI: React.FC<UIProps> = ({
   onBreakStop,
   selectedProblem,
   selectedConcept,
-  showChatModal,
   setShowChatModal,
 }) => (
   <>

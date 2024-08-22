@@ -263,11 +263,16 @@ const PCControlPage: React.FC = () => {
 
     let M = window.cv.getPerspectiveTransform(srcTri, dstTri);
     let dsize = new window.cv.Size(width, height);
-    window.cv.warpPerspective(src, dst, M, dsize, window.cv.INTER_LINEAR, window.cv.BORDER_CONSTANT, new window.cv.Scalar());
-  
+    window.cv.warpPerspective(
+      src,
+      dst,
+      M,
+      dsize,
+      window.cv.INTER_LINEAR,
+      window.cv.BORDER_CONSTANT,
+      new window.cv.Scalar()
+    );
 
-
-    
     let tempCanvas = document.createElement('canvas');
     window.cv.imshow(tempCanvas, dst);
     setCroppedImage(tempCanvas.toDataURL('image/jpeg', 0.8));

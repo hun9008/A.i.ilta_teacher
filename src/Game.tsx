@@ -377,12 +377,14 @@ import DebugInfo from './3D/DebugInfo';
 import Axes from './3D/Axes';
 import { useWebSocket } from './WebSocketContext';
 import GameUI from './GameUI';
+import { useWebcamStream } from './WebcamStreamContext';
 
 function Game() {
   const [selectedProblem, setSelectedProblem] = useState<string>('');
   const [selectedConcept, setSelectedConcept] = useState<string>('');
   const { ocrResponse } = useWebSocket();
   const [showChatModal, setShowChatModal] = useState<boolean>(false);
+
 
   interface OcrResponse {
     ocrs: string;
@@ -457,6 +459,12 @@ function Game() {
 
   useEffect(() => {
     generateCircularIcePositions(iceCount);
+    if (problemTexts[1]) {
+      setSelectedFloe(0); // First floe (index 0)
+      setSelectedProblem(problemTexts[1]); // First problem (index 1)
+      setSelectedConcept(concepts[1] || 'No concept available'); // First concept (index 1)
+      setShowModal(true);
+    }
   }, [iceCount]);
 
   useEffect(() => {
@@ -541,6 +549,11 @@ function Game() {
     },
     [icePositions, penguinPosition, problemTexts, concepts]
   );
+
+  const { isStreaming } = useWebcamStream();
+  useEffect(() => {
+    console.log('Webcam isStreaming:', isStreaming);
+  }, [isStreaming]);
 
   return (
     <div className="w-screen h-screen bg-gradient-to-b from-blue-100 to-blue-200 relative">
