@@ -1,3 +1,27 @@
+import os
+import glob
+import json
+import asyncio
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse # API response를 JSON 형식으로 반환
+from openai import OpenAI
+from dotenv import load_dotenv
+
+# from utils.problem import concepts_storage, solutions_storage, ocrs_storage, origin_image_storage
+# from utils.chat_utils import prompt_delay, prompt_wrong
+from fastapi import WebSocket, WebSocketDisconnect
+# from config import user_vars
+from hand_test_example import origin_image
+import base64
+import requests
+import re
+
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+import io
+
+sleep_time = 1
 
 hand_detect_dummy = {
   "prob_area": [
@@ -41,71 +65,44 @@ hand_detect_dummy = {
   "prob_num": 1
 }
 
-async def decide_user_wrong(websocket: WebSocket):
-    while True:
-        
-        await asyncio.sleep(sleep_time)  
-        
-        print("len(concepts) : ", len(concepts_storage))
-        print("len(solutions) : ", len(solutions_storage))
-        print("len(ocrs) : ", len(ocrs_storage))
-        print("len(origin_image) : ", len(origin_image_storage))
-        print("type of origin_image : ", type(origin_image_storage))
-        if len(solutions_storage) != 0 and len(ocrs_storage) != 0 and len(origin_image_storage) != 0:
-            # directory path
-            root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-            storage_dir = os.path.join(root_dir, "local_storage/mobile")
-            
-            file_list = glob.glob(os.path.join(storage_dir, "*"))
-            if not file_list:
-                continue  # 혹시 이미지가 없는 경우
+decode_image = base64.b64decode(origin_image[0])
 
-            latest_img = max(file_list, key=os.path.getctime)
-            
-            # # encoding 
-            with open(latest_img, "rb") as target_img:
-                include_hand = base64.b64encode(target_img.read()).decode('utf-8')
-            
+image = Image.open(io.BytesIO(decode_image))
 
-            # problem_detect_json = {
-            #     "image_clean" : origin_image_storage[0],
-            #     "image_hand" : include_hand
-            # }
+if image.mode == 'RGBA':
+    image = image.convert('RGB')
 
-            # url = "http://model.maitutor.site/prob_areas_which_prob"
+image_array = np.array(image)
 
-            # headers = {'Content-Type': 'application/json'}
-            # response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
-            
-            # response = hand_detect_dummy
-            # print("hand response : ", response)
+index = 0
+target_area = hand_detect_dummy["prob_area"][index]
+x, y, w, h = target_area
+
+crop_image = image_array[y:y+h, x:x+w]
+
+print("crop image type : ", type(crop_image))
+
+plt.imshow(image_array)
+plt.axis('off')
+plt.show()
+
+plt.imshow(crop_image)
+plt.axis('off')
+plt.show()
 
 
-            # # (assume) 지금 어떤 문제 풀고 있는지 알아내기
-            # prob_num = response.get("prob_num")
-            # problem_index = 0
-            # if prob_num != -1:
-            #     problem_index = prob_num
-            #     prob_area = response.get("prob_area")
-            #     this_prob_area = prob_area[problem_index]
-            #     ## 전체 이미지에서 this_prob_area에 해당하는 부분만 crop
-            #     x = this_prob_area[0]
-            #     y = this_prob_area[1]
-            #     w = this_prob_area[2]
-            #     h = this_prob_area[3]
+# crop_image_c_contiguous = np.ascontiguousarray(crop_image)
+# print("crop image c contiguous type : ", type(crop_image_c_contiguous))
 
-            #     origin_image_decoded = base64.b64decode(origin_image_storage[0])
-            #     crop_img = origin_image_decoded[y:y+h, x:x+w]
-            #     frame_data = base64.b64encode(crop_img).decode('utf-8')
+pil_img = Image.fromarray(crop_image)
+buffered = io.BytesIO()
+pil_img.save(buffered, format="JPEG")
+img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-            problem_index = 0
-            solution = solutions_storage[problem_index]
+# crop_encode = base64.b64encode().decode('utf-8')
 
-            # hand_ocr = await perform_handwrite_ocr(frame_data, solution)
-            hand_ocr = {
-                "determinants": "wrong"
-            }
-            
-            user_vars.user_status = hand_ocr.get("determinants")
-            # print("user_status : ", user_vars.user_status)
-        
+# hand_test.txt에 {'image': crop_encode} 저장
+with open('./hand_test.txt', 'w') as f:
+    f.write(json.dumps({'image': img_str}))
+
+

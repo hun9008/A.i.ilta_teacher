@@ -15,6 +15,10 @@ from config import user_vars
 import base64
 import requests
 import re
+
+from PIL import Image
+import io
+import numpy as np
 # import matplotlib.pyplot as plt
 
 route = APIRouter()
@@ -103,45 +107,47 @@ async def decide_user_wrong(websocket: WebSocket):
             with open(latest_img, "rb") as target_img:
                 include_hand = base64.b64encode(target_img.read()).decode('utf-8')
             
+            problem_detect_json = {
+                "image_clean" : origin_image_storage[0],
+                "image_hand" : include_hand
+            }
 
-            # problem_detect_json = {
-            #     "image_clean" : origin_image_storage[0],
-            #     "image_hand" : include_hand
-            # }
+            url = "http://model.maitutor.site/prob_areas_which_prob"
 
-            # url = "http://model.maitutor.site/prob_areas_which_prob"
-
-            # headers = {'Content-Type': 'application/json'}
-            # response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
+            headers = {'Content-Type': 'application/json'}
+            response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
             
             # response = hand_detect_dummy
             # print("hand response : ", response)
-
+            decode_image = base64.b64decode(origin_image_storage[0])
+            image = Image.open(io.BytesIO(decode_image))
+            if image.mode == 'RGBA':
+                image = image.convert('RGB')
+            image_array = np.array(image)
 
             # # (assume) 지금 어떤 문제 풀고 있는지 알아내기
-            # prob_num = response.get("prob_num")
-            # problem_index = 0
-            # if prob_num != -1:
-            #     problem_index = prob_num
-            #     prob_area = response.get("prob_area")
-            #     this_prob_area = prob_area[problem_index]
-            #     ## 전체 이미지에서 this_prob_area에 해당하는 부분만 crop
-            #     x = this_prob_area[0]
-            #     y = this_prob_area[1]
-            #     w = this_prob_area[2]
-            #     h = this_prob_area[3]
+            prob_num = response.get("prob_num")
+            problem_index = 0
+            if prob_num != -1:
+                problem_index = prob_num
+                prob_area = response.get("prob_area")
+                this_prob_area = prob_area[problem_index]
+                ## 전체 이미지에서 this_prob_area에 해당하는 부분만 crop
+                x, y, w, h = this_prob_area
 
-            #     origin_image_decoded = base64.b64decode(origin_image_storage[0])
-            #     crop_img = origin_image_decoded[y:y+h, x:x+w]
-            #     frame_data = base64.b64encode(crop_img).decode('utf-8')
+                crop_image = image_array[y:y+h, x:x+w]
+                pil_img = Image.fromarray(crop_image)
+                buffered = io.BytesIO()
+                pil_img.save(buffered, format="JPEG")
+                img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
             problem_index = 0
             solution = solutions_storage[problem_index]
 
-            # hand_ocr = await perform_handwrite_ocr(frame_data, solution)
-            hand_ocr = {
-                "determinants": "wrong"
-            }
+            hand_ocr = await perform_handwrite_ocr(img_str, solution)
+            # hand_ocr = {
+            #     "determinants": "wrong"
+            # }
             
             user_vars.user_status = hand_ocr.get("determinants")
             # print("user_status : ", user_vars.user_status)
