@@ -1,12 +1,22 @@
 // CameraStreamPage.tsx
 import React, {useState, useEffect, useRef} from 'react';
-import {SafeAreaView, Text, StyleSheet, View, Image, Button} from 'react-native';
+import {
+  SafeAreaView,
+  Text,
+  StyleSheet,
+  View,
+  Image,
+  Button,
+} from 'react-native';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {useCameraDevice, Camera} from 'react-native-vision-camera';
 import {useWebSocket} from './WebSocketContext';
 import {readFile} from 'react-native-fs';
 
-type CameraStreamPageRouteProp = RouteProp<{params: {qrCode: string}}, 'params'>;
+type CameraStreamPageRouteProp = RouteProp<
+  {params: {qrCode: string}},
+  'params'
+>;
 
 function CameraStreamPage(): React.JSX.Element {
   const route = useRoute<CameraStreamPageRouteProp>();
@@ -14,7 +24,9 @@ function CameraStreamPage(): React.JSX.Element {
 
   const [uId, setUId] = useState<string | null>(null);
   const [capturedImageUri, setCapturedImageUri] = useState<string | null>(null);
-  const [lastMessageStatus, setLastMessageStatus] = useState<string | null>(null);
+  const [lastMessageStatus, setLastMessageStatus] = useState<string | null>(
+    null,
+  );
 
   const camera = useRef<Camera>(null);
   const {connectWebSocket, sendMessage, isConnected} = useWebSocket();
@@ -38,14 +50,13 @@ function CameraStreamPage(): React.JSX.Element {
     const intervalId = setInterval(async () => {
       if (camera.current && uId && isConnected(`${webSocketUrl}?u_id=${uId}`)) {
         try {
-            const photo = await camera.current.takePhoto({
-              enableShutterSound: false,
-              flash: 'auto',
-              enableAutoDistortionCorrection: true,
-            });
-            setCapturedImageUri(photo.path);
-            const base64data = await readFile(photo.path, 'base64');
-          
+          const photo = await camera.current.takePhoto({
+            enableShutterSound: false,
+            flash: 'auto',
+            enableAutoDistortionCorrection: true,
+          });
+          setCapturedImageUri(photo.path);
+          const base64data = await readFile(photo.path, 'base64');
 
           // 웹소켓 메시지 생성
           const message = {
@@ -54,6 +65,7 @@ function CameraStreamPage(): React.JSX.Element {
             device: 'mobile',
             payload: base64data,
             position: '',
+            ocrs: '',
           };
 
           // 메시지 전송
@@ -101,7 +113,12 @@ function CameraStreamPage(): React.JSX.Element {
           <>
             <Text style={styles.text}>Extracted u_id:</Text>
             <Text style={styles.uId}>{uId}</Text>
-            <Text style={styles.text}>WebSocket Status: {isConnected(`${webSocketUrl}?u_id=${uId}`) ? 'Connected' : 'Disconnected'}</Text>
+            <Text style={styles.text}>
+              WebSocket Status:{' '}
+              {isConnected(`${webSocketUrl}?u_id=${uId}`)
+                ? 'Connected'
+                : 'Disconnected'}
+            </Text>
             <Text style={styles.text}>Message Status: {lastMessageStatus}</Text>
           </>
         )}
@@ -111,7 +128,6 @@ function CameraStreamPage(): React.JSX.Element {
             style={styles.capturedImage}
           />
         )}
-
       </View>
     </SafeAreaView>
   );
