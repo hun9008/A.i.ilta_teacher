@@ -5,7 +5,7 @@ import * as THREE from 'three';
 interface IceFloeProps {
   position: [number, number, number];
   solved: boolean;
-  onClick: () => void;
+  onClick: (e:any) => void;
 }
 
 const IceFloe: React.FC<IceFloeProps> = ({ position, solved, onClick }) => {
