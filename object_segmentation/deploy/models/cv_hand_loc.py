@@ -6,9 +6,8 @@ from cv_which_prob.hand_detector.detector import YOLO
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 yolo_path = os.path.join('cv_which_prob/weights/yolo.h5')
-fingertip_path = os.path.join('cv_which_prob/weights/fingertip.h5')
 
-hand = YOLO(weights=yolo_path, threshold=0.8)
+hand = YOLO(weights=yolo_path, threshold=0.3)
 
 def hand_loc(image):
 

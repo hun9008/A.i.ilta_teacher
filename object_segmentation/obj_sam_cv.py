@@ -10,7 +10,7 @@ def preprocess_image(page):
     gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
 
-        # 구조적 요소 커널을 생성하여 세로 선 강조
+    # 구조적 요소 커널을 생성하여 세로 선 강조
     vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, page.shape[0] // 30))
     
     # 모폴로지 연산을 통해 세로 선 강조
