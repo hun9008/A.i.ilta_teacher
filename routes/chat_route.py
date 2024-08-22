@@ -119,11 +119,11 @@ async def decide_user_wrong(websocket: WebSocket):
 
 
             # (assume) 지금 어떤 문제 풀고 있는지 알아내기
-            prob_num = response.json().get("prob_num")
+            prob_num = response.get("prob_num")
             problem_index = 0
             if prob_num != -1:
                 problem_index = prob_num
-                prob_area = response.json().get("prob_area")
+                prob_area = response.get("prob_area")
                 this_prob_area = prob_area[problem_index]
                 ## 전체 이미지에서 this_prob_area에 해당하는 부분만 crop
                 x = this_prob_area[0]
@@ -155,7 +155,7 @@ async def perform_handwrite_ocr(frame_data, solution):
     }
     headers = {'Content-Type': 'application/json'} 
     response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)
-    return response.json()
+    return response
      
 @route.websocket("/ws/chat")
 async def websocket_endpoint(websocket: WebSocket):
