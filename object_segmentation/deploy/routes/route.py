@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 import time
 # from models.class_quest_cate import category_inference
 from models.cv_ocr import problem_crop
-from models.input_ocr import OCRInput, Determinent
+from models.input_ocr import OCRInput, Determinent, SolverInput
 # from models.input_prob import ClassInput
 import boto3
 from botocore.exceptions import NoCredentialsError
@@ -216,39 +216,46 @@ async def retry_solution(client, ocr, mistral_answer, retry_count=2):
             return new_solution
     return new_solution
 
-@router.post("/problems_solver")
-async def problems_ocr(input: OCRInput):
-    start = time.time()
-    encoded_imgs = []
+@router.post("/problems_ocr")
+async def just_ocr(input: OCRInput):
+
     image = decode_image(input.image)
+    problem_crop(image)
 
-    problem_crop(image, 'jpeg')
-    
     image_path = './temp'
-    # file_name = str(int(time.time())) + ".jpg"
-    # image_urls = []
+    file_name = str(int(time.time())) + ".jpg"
+    image_urls = []
 
-    def sort_key(filename):
-        return int(''.join(filter(str.isdigit, filename)))
+    for filename in os.listdir(image_path):
+        if not filename.startswith('_'):
+            file_path = os.path.join(image_path, filename)
+            image_url = upload_to_s3(file_path, 'flyai', filename)
+            image_urls.append(image_url)
+
+    claude_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+    ocr_tasks = [
+        fetch_ocr_claude(claude_client, image_url, "이 이미지에서 OCR로 문제를 추출해 알려줘(부등호 구분에 주의).")
+        for image_url in image_urls
+    ]
+
+    ocrs = await asyncio.gather(*ocr_tasks)
+
+    output_json = {
+        "ocrs": ocrs,
+    }
+
+    return JSONResponse(content=output_json)
+
+@router.post("/problems_solver")
+async def problems_ocr(input: SolverInput):
     
-    filenames = sorted([f for f in os.listdir(image_path) if not f.startswith('_')], key=sort_key)
-
-    for filename in filenames:
-        image = cv2.imread(os.path.join(image_path, filename))
-        encoded_img = resize_and_compress_image(image, max_size_kb=3300)  # 3.3MB 이하로 줄이기
-        encoded_imgs.append(encoded_img)
+    ocrs = input.ocrs
 
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     claude_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    
-    ocr_tasks = [
-        fetch_ocr_claude(claude_client, encoded_img, "이 이미지에서 OCR로 문제를 추출해 알려줘(부등호 구분에 주의). 문제 번호 앞뒤로 별표(*)를 붙여줘. 별표 외 다른 사족은 붙이지 말고 추출한 텍스트만 출력해줘.")
-        for encoded_img in encoded_imgs
-    ]
 
-    ocrs = await asyncio.gather(*ocr_tasks)
-    
     concept_tasks = [
         fetch_openai(client, f"이후 보내는 텍스트를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
         for ocr in ocrs
@@ -327,6 +334,7 @@ async def problems_ocr(input: OCRInput):
 
         final_solutions[index] = final_solution
 
+    image_path = './temp'
     # temp directory cleanup
     for filename in os.listdir(image_path):
         os.remove(os.path.join(image_path, filename))
@@ -334,7 +342,6 @@ async def problems_ocr(input: OCRInput):
     output_json = {
         "concepts": concepts,
         "solutions": final_solutions,
-        "ocrs": ocrs,
     }
 
     return JSONResponse(content=output_json)
