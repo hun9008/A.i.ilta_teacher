@@ -16,6 +16,7 @@ const SettingPage = lazy(() => import('./SettingPage'));
 const PCControlPage = lazy(() => import('./PCControlPage'));
 const Game = lazy(() => import('./Game'));
 const ImageCropTest = lazy(() => import('./imageCropTest'));
+const OcrCheck = lazy(() => import('./OcrCheck'));
 
 const Dashboard = lazy(() => import('./Dashboard'));
 const Report = lazy(() => import('./Report'));
@@ -67,6 +68,8 @@ createRoot(document.getElementById('root')!).render(
                         <Route path="/camera" element={<CameraPage />} />
                         <Route path="/studygoals" element={<StudyGoals />} />
                         <Route path="/setting" element={<SettingPage />} />
+                        <Route path="/ocrcheck" element={<OcrCheck />} />
+
                         <Route
                           path="/mobilescreen"
                           element={<PCControlPage />}

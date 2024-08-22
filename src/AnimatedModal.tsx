@@ -30,7 +30,8 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   onSolve,
   enableTTS,
 }) => {
-  const { getSocket, sendMessage, connectWebSocket, isConnected } = useWebSocket();
+  const { getSocket, sendMessage, connectWebSocket, isConnected } =
+    useWebSocket();
   const [messages, setMessages] = useState(globalMessages);
   const [inputMessage, setInputMessage] = useState('');
   const [socketReady, setSocketReady] = useState(false);
@@ -151,7 +152,6 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     text = text.split(/①|②|③|④|⑤/)[0];
     text = text.replace(/\\n/g, '<br />');
     text = text.replace(/[*{}]/g, '').replace(/\s+/g, ' ').trim();
-
     return text;
   };
 
@@ -232,7 +232,9 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             transition={{ type: 'spring', damping: 20 }}
           >
             <h1 className="text-2xl font-bold mb-4">채팅</h1>
-            <button onClick={handleClose} className='bg-gray-400'>닫기</button>
+            <button onClick={handleClose} className="bg-gray-400">
+              닫기
+            </button>
             <div className="flex-grow overflow-y-auto mb-4 bg-white rounded-lg p-3">
               {messages.map((message, index) => (
                 <div

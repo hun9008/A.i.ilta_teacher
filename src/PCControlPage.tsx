@@ -4,7 +4,7 @@ import { useWebSocket } from './WebSocketContext';
 const wsUrl = import.meta.env.VITE_SOCKET_URL;
 
 const PCControlPage: React.FC = () => {
-  const { sendMessage, isConnected, imageData } = useWebSocket();
+  const { sendMessage, isConnected, imageData, setImageData } = useWebSocket();
   const u_id = localStorage.getItem('u_id');
 
   const handleCaptureRequest = async () => {
@@ -14,7 +14,6 @@ const PCControlPage: React.FC = () => {
       setShowPopup(true); // 팝업 열기
     }
   };
-
   const sendRequest = async () => {
     if (!isConnected(wsUrl)) {
       console.error('WebSocket is not connected. Cannot send message.');
@@ -26,6 +25,7 @@ const PCControlPage: React.FC = () => {
     }
     try {
       const base64Image = croppedImage.split(',')[1];
+      setImageData(base64Image); // Store the cropped image in the context
       const message = {
         u_id,
         type: 'ocr',

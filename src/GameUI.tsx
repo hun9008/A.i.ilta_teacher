@@ -21,9 +21,11 @@ interface UIProps {
   selectedConcept: string;
   showChatModal: boolean;
   setShowChatModal: (show: boolean) => void;
+  onEndStudySession: () => Promise<void>;
+
   onSolve: () => void;
   enableTTS: boolean;
-  setEnableTTS: (show: boolean) => void; 
+  setEnableTTS: (show: boolean) => void;
 }
 
 const GameUI: React.FC<UIProps> = ({
@@ -40,13 +42,21 @@ const GameUI: React.FC<UIProps> = ({
   setShowChatModal,
   enableTTS,
   setEnableTTS,
+  onEndStudySession,
 }) => (
   <>
     <div className="absolute top-0 left-0 p-4 text-white">
       <img src={logo} alt="Logo" className="w-10 h-10 mb-2.5" />
     </div>
     <div className="absolute top-4 right-4 flex items-center space-x-4">
-      <button onClick={()=>{setEnableTTS(!enableTTS); console.log("TTS", enableTTS)}}>TTS {enableTTS?"on":"off"}</button>
+      <button
+        onClick={() => {
+          setEnableTTS(!enableTTS);
+          console.log('TTS', enableTTS);
+        }}
+      >
+        TTS {enableTTS ? 'on' : 'off'}
+      </button>
       <div className="border-2 border-primary-400 text-black px-4 py-2 rounded-full">
         <BlinkingRec text="웹캠" />
       </div>
@@ -100,9 +110,7 @@ const GameUI: React.FC<UIProps> = ({
       </button>
       <button
         className="p-4 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200 flex"
-        onClick={() => {
-          /* 여기에 나가기 로직 추가 */
-        }}
+        onClick={onEndStudySession}
       >
         <p className="mr-2">공부 종료하기</p>
         <LogOut size={24} />

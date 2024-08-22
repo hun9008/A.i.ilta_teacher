@@ -17,10 +17,13 @@ export const TTSAudioPlayer: React.FC<TTSAudioPlayerProps> = ({ audioUrl }) => {
   return <audio ref={audioRef} />;
 };
 
-export const handleTTS = async (text: string, u_id: string): Promise<string | null> => {
+export const handleTTS = async (
+  text: string,
+  u_id: string
+): Promise<string | null> => {
   try {
-    const endpoint = import.meta.env.BASE_URL+'/tts/chat';
-    const response = await fetch('https://backend.maitutor.site/tts/chat', {
+    const endpoint = `${import.meta.env.VITE_BASE_URL}/tts/chat`;
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

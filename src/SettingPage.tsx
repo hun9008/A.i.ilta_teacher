@@ -7,6 +7,7 @@ import CameraPage from './camera.tsx';
 import PCControlPage from './PCControlPage.tsx';
 import StudyGoals from './StudyGoals.tsx';
 import LoadingPage from './LoadingPage';
+import OcrCheck from './OcrCheck.tsx';
 
 interface Step {
   id: string;
@@ -18,6 +19,8 @@ const steps: Step[] = [
   { id: 'qr', title: '모바일 연결' },
   { id: 'mobcam', title: '모바일 카메라 설정' },
   { id: 'goals', title: '공부 목표 설정' },
+  { id: 'ocr-check', title: 'OCR 결과 확인' }, // 위치 조정
+
   { id: 'complete', title: '설정 완료' },
 ];
 
@@ -26,7 +29,7 @@ function SettingPage() {
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { ocrResponse } = useWebSocket();
+  const { solutionResponse } = useWebSocket();
 
   const updateCompletedSteps = (stepIndex: number) => {
     const newCompleted: Record<string, boolean> = {};
@@ -55,19 +58,19 @@ function SettingPage() {
   };
 
   const goToGamePage = () => {
-    if (!ocrResponse) {
+    if (!solutionResponse) {
       setIsLoading(true); // OCR Response를 기다리는 동안 로딩 상태로 설정
     } else {
-      navigate('/Game');
+      navigate('/game');
     }
   };
 
   useEffect(() => {
-    if (isLoading && ocrResponse) {
+    if (isLoading && solutionResponse) {
       setIsLoading(false);
-      navigate('/Game');
+      navigate('/game');
     }
-  }, [ocrResponse, isLoading, navigate]);
+  }, [solutionResponse, isLoading, navigate]);
 
   const renderStepContent = (step: Step) => {
     switch (step.id) {
@@ -79,6 +82,8 @@ function SettingPage() {
         return <PCControlPage />;
       case 'goals':
         return <StudyGoals />;
+      case 'ocr-check':
+        return <OcrCheck />; // OCR 확인 페이지 표시
       case 'complete':
         return (
           <p>모든 설정이 완료되었습니다. 공부를 시작할 준비가 되었습니다.</p>

@@ -7,7 +7,11 @@ interface WebSocketContextType {
   disconnectWebSocket: (url: string) => void;
   isConnected: (url: string) => boolean;
   imageData: string | null;
+  setImageData: (data: string | null) => void; // Add this
   ocrResponse: string | null;
+  setOcrResponse: (data: string | null) => void; // Add this
+  solutionResponse: string | null;
+  setSolutionResponse: (data: string | null) => void; // Add this
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -23,6 +27,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   }>({});
   const [imageData, setImageData] = useState<string | null>(null);
   const [ocrResponse, setOcrResponse] = useState<string | null>(null);
+  const [solutionResponse, setSolutionResponse] = useState<string | null>(null);
 
   const connectWebSocket = (url: string) => {
     if (socketRefs.current[url]) return;
@@ -57,6 +62,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
         setOcrResponse(parsedData.payload);
 
         console.log('OCR done', parsedData.payload);
+      }
+      if (parsedData.type === 'solution-request') {
+        setSolutionResponse(parsedData.payload);
+
+        console.log('문제 해결 완료', parsedData.payload);
       }
     };
   };
@@ -107,7 +117,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
         disconnectWebSocket,
         isConnected,
         imageData,
+        setImageData, // Provide this to the context
         ocrResponse,
+        setOcrResponse, // Provide this to the context
+        solutionResponse,
+        setSolutionResponse,
       }}
     >
       {children}
