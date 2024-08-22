@@ -219,24 +219,27 @@ async def retry_solution(client, ocr, mistral_answer, retry_count=2):
 @router.post("/problems_ocr")
 async def just_ocr(input: OCRInput):
 
+    encoded_imgs = []
     image = decode_image(input.image)
-    problem_crop(image)
+    problem_crop(image, 'jpeg')
 
     image_path = './temp'
-    file_name = str(int(time.time())) + ".jpg"
-    image_urls = []
 
-    for filename in os.listdir(image_path):
-        if not filename.startswith('_'):
-            file_path = os.path.join(image_path, filename)
-            image_url = upload_to_s3(file_path, 'flyai', filename)
-            image_urls.append(image_url)
+    def sort_key(filename):
+        return int(''.join(filter(str.isdigit, filename)))
+    
+    filenames = sorted([f for f in os.listdir(image_path) if not f.startswith('_')], key=sort_key)
+
+    for filename in filenames:
+        image = cv2.imread(os.path.join(image_path, filename))
+        encoded_img = resize_and_compress_image(image, max_size_kb=3300)  # 3.3MB 이하로 줄이기
+        encoded_imgs.append(encoded_img)
 
     claude_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
     ocr_tasks = [
-        fetch_ocr_claude(claude_client, image_url, "이 이미지에서 OCR로 문제를 추출해 알려줘(부등호 구분에 주의).")
-        for image_url in image_urls
+        fetch_ocr_claude(claude_client, encoded_img, "이 이미지에서 OCR로 문제를 추출해 알려줘(부등호 구분에 주의). 문제 번호 앞뒤로 별표(*)를 붙여줘. 별표 외 다른 사족은 붙이지 말고 추출한 텍스트만 출력해줘.")
+        for encoded_img in encoded_imgs
     ]
 
     ocrs = await asyncio.gather(*ocr_tasks)
@@ -253,8 +256,6 @@ async def problems_ocr(input: SolverInput):
     ocrs = input.ocrs
 
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-
-    claude_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
     concept_tasks = [
         fetch_openai(client, f"이후 보내는 텍스트를 보고 수학문제를 풀기위한 개념들을 단어로 알려줘. 단어들만 알려주면 돼. {ocr}")
@@ -327,8 +328,8 @@ async def problems_ocr(input: SolverInput):
         if similarity < 0.8:
             # 유사도가 80% 미만이면 솔루션 재시도
             print("retrying solution")
-            final_solution = await retry_solution(client, ocr, answer)
-            # final_solution = solution
+            # final_solution = await retry_solution(client, ocr, answer)
+            final_solution = solution
         else:
             final_solution = solution
 
