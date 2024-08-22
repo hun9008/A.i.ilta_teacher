@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send } from 'lucide-react';
 import { useWebSocket } from './WebSocketContext';
-import { handleTTS } from './TTS';
+// import { handleTTS } from './TTS';
 
 interface AnimatedModalProps {
   isOpen: boolean;
@@ -159,61 +159,61 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           onClick={(e) => e.stopPropagation()}
         >
           {!chatOnly && (
-          <motion.div
-            className="w-1/4 bg-blue-100 rounded-r-3xl p-5 mr-2"
-            variants={panelVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            custom={-1}
-            transition={{ type: 'spring', damping: 20 }}
-          >
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">이 문제에 대한 정보</h1>
-              <h3 className="text-lg font-semibold mb-4">
-                {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
-              </h3>
+            <motion.div
+              className="w-1/4 bg-blue-100 rounded-r-3xl p-5 mr-2"
+              variants={panelVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              custom={-1}
+              transition={{ type: 'spring', damping: 20 }}
+            >
+              <div className="p-8">
+                <h1 className="text-2xl font-bold mb-4">이 문제에 대한 정보</h1>
+                <h3 className="text-lg font-semibold mb-4">
+                  {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
+                </h3>
 
-              <h3 className="text-2xl font-bold mb-4">관련 개념들</h3>
-              <h3 className="text-lg font-semibold mb-4">{cleanedConcept}</h3>
-            </div>
-          </motion.div>
+                <h3 className="text-2xl font-bold mb-4">관련 개념들</h3>
+                <h3 className="text-lg font-semibold mb-4">{cleanedConcept}</h3>
+              </div>
+            </motion.div>
           )}
 
           {!chatOnly && (
-          <motion.div
-            className="w-1/2 bg-white rounded-3xl p-5"
-            variants={centerVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            transition={{ type: 'spring', damping: 20 }}
-          >
-            <div className="p-6 flex-col h-full">
-              <div className="bg-gray-100 rounded-lg p-5 pb-20 mb-10">
-                <h1 className="text-2xl font-bold mb-4">
-                  문제 {selectedFloe + 1}{' '}
-                </h1>
-                <h2 className="text-xl font-bold mb-4">
-                  <p dangerouslySetInnerHTML={{ __html: cleanedProblem }} />
-                </h2>
+            <motion.div
+              className="w-1/2 bg-white rounded-3xl p-5"
+              variants={centerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ type: 'spring', damping: 20 }}
+            >
+              <div className="p-6 flex-col h-full">
+                <div className="bg-gray-100 rounded-lg p-5 pb-20 mb-10">
+                  <h1 className="text-2xl font-bold mb-4">
+                    문제 {selectedFloe + 1}{' '}
+                  </h1>
+                  <h2 className="text-xl font-bold mb-4">
+                    <p dangerouslySetInnerHTML={{ __html: cleanedProblem }} />
+                  </h2>
+                </div>
+                <div className="bg-gray-100 rounded-lg p-5 pb-20 mb-10 flex-grow">
+                  <h1 className="text-2xl font-bold mb-4">현재 내 풀이 </h1>
+                  <h2 className="text-xl font-bold mb-4">
+                    "현재 내가 풀고있는 손글씨 ocr이 여기에 들어갑니당"
+                  </h2>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
+                    onClick={handleClose}
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
-              <div className="bg-gray-100 rounded-lg p-5 pb-20 mb-10 flex-grow">
-                <h1 className="text-2xl font-bold mb-4">현재 내 풀이 </h1>
-                <h2 className="text-xl font-bold mb-4">
-                  "현재 내가 풀고있는 손글씨 ocr이 여기에 들어갑니당"
-                </h2>
-              </div>
-              <div className="flex justify-end">
-                <button
-                  className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
-                  onClick={handleClose}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
           )}
 
           <motion.div
@@ -259,7 +259,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 <Send size={20} />
               </button>
             </div>
-            <audio ref={audioRef}  />
+            <audio ref={audioRef} />
           </motion.div>
         </div>
       </motion.div>

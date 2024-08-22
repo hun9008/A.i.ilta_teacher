@@ -666,7 +666,7 @@ const UI: React.FC<UIProps> = ({
   onBreakStop,
   selectedProblem,
   selectedConcept,
-  showChatModal,
+  // showChatModal,
   setShowChatModal,
 }) => (
   <>
