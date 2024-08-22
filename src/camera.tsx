@@ -11,7 +11,7 @@ function CameraPage() {
   const [capturedImage] = useState<string | null>(null);
 
   const handleStartStreaming = () => {
-    startStreaming(wsUrl, u_id || '', 'video', 'pc', '');
+    startStreaming(wsUrl, u_id || '', 'video', 'pc', '', '');
   };
 
   const handleStopStreaming = () => {
@@ -34,15 +34,17 @@ function CameraPage() {
           />
         </div>
         <div className="text-center">
-          {<Webcam
-            audio={false}
-            screenshotFormat="image/png"
-            videoConstraints={{ facingMode: 'user' }}
-            className="w-72 h-72 mb-10 p-4 bg-white rounded-xl animate-border-glow"
-          />}
+          {
+            <Webcam
+              audio={false}
+              screenshotFormat="image/png"
+              videoConstraints={{ facingMode: 'user' }}
+              className="w-72 h-72 mb-10 p-4 bg-white rounded-xl animate-border-glow"
+            />
+          }
         </div>
       </div>
-      
+
       <div className="flex space-x-4">
         {!isStreaming ? (
           <button
@@ -64,8 +66,14 @@ function CameraPage() {
       </div>
       {capturedImage && (
         <div className="mt-4">
-          <h2 className="text-lg font-semibold text-center mb-2">Captured Image</h2>
-          <img src={capturedImage} alt="Captured" className="border rounded-lg" />
+          <h2 className="text-lg font-semibold text-center mb-2">
+            Captured Image
+          </h2>
+          <img
+            src={capturedImage}
+            alt="Captured"
+            className="border rounded-lg"
+          />
         </div>
       )}
     </div>

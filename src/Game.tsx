@@ -443,7 +443,6 @@ function Game() {
   );
   const [showSolvedMessage, setShowSolvedMessage] = useState(false);
 
-
   const [studyTime, setStudyTime] = useState<{
     hours: number;
     minutes: number;
@@ -564,13 +563,13 @@ function Game() {
     });
     setShowModal(false);
 
-    setShowSolvedMessage(true);  // "Solved!" 메시지 표시
+    setShowSolvedMessage(true); // "Solved!" 메시지 표시
 
     setTimeout(() => {
-      setShowSolvedMessage(false);  // 일정 시간 후 메시지 숨김
+      setShowSolvedMessage(false); // 일정 시간 후 메시지 숨김
     }, 2000);
 
-    console.log("이 문제 풀었음!", selectedFloe);
+    console.log('이 문제 풀었음!', selectedFloe);
   }, [selectedFloe]);
 
   useEffect(() => {
@@ -677,6 +676,7 @@ function Game() {
         selectedProblem={selectedProblem}
         selectedConcept={selectedConcept}
         onEndStudySession={handleEndStudySession}
+        onSolve={handleSolveProblem}
       />
       <AnimatePresence>
         {showModal && (

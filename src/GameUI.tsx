@@ -25,6 +25,7 @@ interface UIProps {
   showChatModal: boolean;
   setShowChatModal: (show: boolean) => void;
   onEndStudySession: () => Promise<void>;
+  onSolve: () => void;
 }
 
 const GameUI: React.FC<UIProps> = ({
@@ -45,6 +46,7 @@ const GameUI: React.FC<UIProps> = ({
   selectedConcept,
   setShowChatModal,
   onEndStudySession,
+  onSolve,
 }) => {
   const navigate = useNavigate();
 
@@ -131,6 +133,7 @@ const GameUI: React.FC<UIProps> = ({
             selectedFloe={selectedFloe}
             selectedProblem={selectedProblem}
             selectedConcept={selectedConcept}
+            onSolve={onSolve}
           />
         )}
       </AnimatePresence>
