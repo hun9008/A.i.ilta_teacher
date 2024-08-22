@@ -89,7 +89,7 @@ def user_focusing_level_calculation(u_id, s_id):
             elif response.status_code != 200:
                 print("Face tracker model request failed.")
             else:
-                is_focus = response["is_focus"]
+                is_focus = response.get("is_focus", 0)
                 if is_focus != 1:
                     if not timer_running:
                         start_time = datetime.now()

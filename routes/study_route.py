@@ -114,7 +114,10 @@ async def real_time(realtime:RealTime):
 
     load_not_focusing = "SELECT sum(not_f_time_t) FROM not_focusing_time WHERE (u_id = '{}' AND s_id = '{}');".format(u_id, s_id)
     not_focusing = read_query(connection, load_not_focusing)
-    not_focusing_time = not_focusing[0][0] / 60
+    if not_focusing[0][0] == None:
+        not_focusing_time = 0
+    else:
+        not_focusing_time = not_focusing[0][0] / 60.0
     print("not_focusing_time : ", not_focusing_time)
 
     if not_focusing_time > 0:
