@@ -11,6 +11,7 @@ interface AnimatedModalProps {
   selectedProblem: string;
   selectedConcept: string;
   chatOnly?: boolean;
+  onSolve: () => void;
 }
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
@@ -25,6 +26,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   selectedProblem,
   selectedConcept,
   chatOnly = false,
+  onSolve,
 }) => {
   const { getSocket, sendMessage, connectWebSocket, isConnected } =
     useWebSocket();
@@ -33,6 +35,10 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   const [socketReady, setSocketReady] = useState(false);
   const [gradeInfo, setGradeInfo] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  const handleSolveClick = () => {
+    onSolve();  // Call the onSolve function
+  };
 
   useEffect(() => {
     const birthday = localStorage.getItem('birthday');
@@ -205,6 +211,12 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   </h2>
                 </div>
                 <div className="flex justify-end">
+                <button
+                  className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
+                  onClick={handleSolveClick}
+                >
+                  풀었음
+                </button>
                   <button
                     className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
                     onClick={handleClose}
