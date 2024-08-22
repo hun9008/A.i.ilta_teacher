@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send } from 'lucide-react';
 import { useWebSocket } from './WebSocketContext';
+import { handleTTS } from './TTS';
 
 interface AnimatedModalProps {
   isOpen: boolean;
@@ -14,7 +15,7 @@ interface AnimatedModalProps {
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
 const u_id = localStorage.getItem('u_id');
-// 전역 상태로 메시지 관리
+
 let globalMessages: { text: string; sender: 'user' | 'bot' }[] = [];
 
 const AnimatedModal: React.FC<AnimatedModalProps> = ({
@@ -31,6 +32,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   const [inputMessage, setInputMessage] = useState('');
   const [socketReady, setSocketReady] = useState(false);
   const [gradeInfo, setGradeInfo] = useState<string>('');
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     const birthday = localStorage.getItem('birthday');
@@ -62,7 +64,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         });
       };
 
-      socket.onmessage = (event: MessageEvent) => {
+      socket.onmessage = async (event: MessageEvent) => {
         const data = event.data;
         console.log('Received WebSocket message:', data);
         const newMessage = { text: data, sender: 'bot' as const };
@@ -71,6 +73,9 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           globalMessages = updatedMessages; // 전역 상태 업데이트
           return updatedMessages;
         });
+        if (newMessage.sender === 'bot') {
+          //await handleTTS(newMessage.text, audioRef);
+        }
       };
     }
 
@@ -254,6 +259,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 <Send size={20} />
               </button>
             </div>
+            <audio ref={audioRef}  />
           </motion.div>
         </div>
       </motion.div>
