@@ -4,35 +4,49 @@ import * as THREE from 'three';
 
 interface CameraControllerProps {
   target: THREE.Vector3;
-  offset?: THREE.Vector3;
   smoothness?: number;
+  showModal: boolean;
 }
 
-const CameraController: React.FC<CameraControllerProps> = ({ 
-  target, 
-  offset = new THREE.Vector3(-2, 6, 6),
-  smoothness = 0.1
+const CameraController: React.FC<CameraControllerProps> = ({
+  target,
+  smoothness = 0.1,
+  showModal = false,
 }) => {
   const { camera } = useThree();
   const cameraPositionRef = useRef(new THREE.Vector3());
-  const initialRotationRef = useRef<THREE.Euler | null>(null);
+  const lookAtPositionRef = useRef(new THREE.Vector3());
+  const showModalRef = useRef(showModal);
+  const normalOffset = new THREE.Vector3(-2, 6, 6);
+  const modalOffset = new THREE.Vector3(-3, 5, 5);
 
   useEffect(() => {
-    cameraPositionRef.current.copy(target).add(offset);
-    camera.position.copy(cameraPositionRef.current);
-    camera.lookAt(target);
-    initialRotationRef.current = camera.rotation.clone();
-  }, []);
+    showModalRef.current = showModal;
+  }, [showModal]);
 
   useFrame(() => {
-    const targetPosition = target.clone().add(offset);
+    let targetPosition: THREE.Vector3;
+    let targetLookAt: THREE.Vector3;
+
+    if (showModalRef.current) {
+      const relativePoint = new THREE.Vector3(1, 0, 1);
+      targetLookAt = target.clone().add(relativePoint);
+      targetPosition = targetLookAt.clone().add(modalOffset);
+    } else {
+      targetLookAt = target.clone();
+      targetPosition = target.clone().add(normalOffset);
+    }
+
     cameraPositionRef.current.lerp(targetPosition, smoothness);
     camera.position.copy(cameraPositionRef.current);
 
-    // 카메라 방향을 초기 방향으로 고정
-    if (initialRotationRef.current) {
-      camera.rotation.copy(initialRotationRef.current);
-    }
+    lookAtPositionRef.current.lerp(targetLookAt, smoothness);
+
+    const direction = lookAtPositionRef.current.clone().sub(camera.position).normalize();
+
+    camera.quaternion.setFromRotationMatrix(
+      new THREE.Matrix4().lookAt(camera.position, camera.position.clone().add(direction), camera.up)
+    );
   });
 
   return null;

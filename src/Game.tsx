@@ -44,6 +44,7 @@ function Game() {
   });
   const [isStudyRunning, setIsStudyRunning] = useState(false);
   const [isBreakRunning, setIsBreakRunning] = useState(false);
+  const [zoom, setZoom] = useState(1);
   const navigate = useNavigate();
 
   interface OcrResp { ocrs: string[]; }
@@ -153,12 +154,25 @@ function Game() {
   );
 
   const handleSolveProblem = useCallback(() => {
+    console.log(selectedFloe);
     setSolvedProblems(prev => ({ ...prev, [selectedFloe]: true }));
     setShowModal(false);
     setShowSolvedMessage(true); // "Solved!" 메시지 표시
     setTimeout(() => setShowSolvedMessage(false), 2000);
     console.log('이 문제 풀었음!', selectedFloe);
   }, [selectedFloe]);
+
+  useEffect(()=>{
+    console.log(solvedProblems);
+  },[solvedProblems])
+
+  useEffect(() => {
+    if (showModal) {
+      setZoom(1.5); // Zoom in when modal is shown
+    } else {
+      setZoom(1); // Zoom out when modal is closed
+    }
+  }, [showModal]);
 
   /* 아래부턴 타이머 부분 */
   useEffect(() => {
@@ -211,8 +225,8 @@ function Game() {
         <PerspectiveCamera makeDefault position={[-2, 8, 8]} />
         <CameraController
           target={penguinPosition}
-          offset={new THREE.Vector3(-2, 6, 6)}
           smoothness={0.1}
+          showModal={showModal}
         />
         <ambientLight intensity={1} />
         <pointLight position={[10, 10, 10]} />
