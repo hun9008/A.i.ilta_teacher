@@ -160,7 +160,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     <AnimatePresence>
       <motion.div
         key="modal"
-        className="fixed inset-0 flex items-center justify-between pointer-events-none"
+        className="fixed inset-0 flex items-center justify-end pointer-events-none"
         variants={overlayVariants}
         initial="hidden"
         animate="visible"

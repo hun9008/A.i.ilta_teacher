@@ -13,7 +13,7 @@ const CameraController: React.FC<CameraControllerProps> = ({
   smoothness = 0.1,
   showModal = false,
 }) => {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const cameraPositionRef = useRef(new THREE.Vector3());
   const lookAtPositionRef = useRef(new THREE.Vector3());
   const showModalRef = useRef(showModal);
@@ -24,12 +24,23 @@ const CameraController: React.FC<CameraControllerProps> = ({
     showModalRef.current = showModal;
   }, [showModal]);
 
+  const calculateRelativePoint = () => {
+    // 기준 너비 (예: 1920px)에 대한 현재 너비의 비율 계산
+    const widthRatio = size.width / 1920;
+    
+    // 비율에 따라 x와 z 값 조정 (1을 기준으로)
+    const x = 2 * widthRatio;
+    const z = 1.5 * widthRatio;
+    
+    return new THREE.Vector3(x, 0, z);
+  };
+
   useFrame(() => {
     let targetPosition: THREE.Vector3;
     let targetLookAt: THREE.Vector3;
 
     if (showModalRef.current) {
-      const relativePoint = new THREE.Vector3(1, 0, 1);
+      const relativePoint = calculateRelativePoint();
       targetLookAt = target.clone().add(relativePoint);
       targetPosition = targetLookAt.clone().add(modalOffset);
     } else {
