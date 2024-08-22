@@ -72,6 +72,7 @@ function StudyGoals() {
 
       const data = await response.json();
       console.log('Server response:', data);
+      localStorage.setItem('s_id', data.s_id);
 
       // Save times to localStorage
       localStorage.setItem('studyTime', studyTime.toString());

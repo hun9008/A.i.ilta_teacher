@@ -59,6 +59,8 @@ function MobileCameraPage() {
           type: 'video',
           device: 'mobile',
           payload: imageData,
+          ocrs: '',
+          positions: '',
         };
         sendMessage(wsUrl, message);
       }
