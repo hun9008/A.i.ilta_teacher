@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send } from 'lucide-react';
 import { useWebSocket } from './WebSocketContext';
-// import { handleTTS } from './TTS';
+import { handleTTS, TTSAudioPlayer } from './TTS';
 
 interface AnimatedModalProps {
   isOpen: boolean;
@@ -28,16 +28,15 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   chatOnly = false,
   onSolve,
 }) => {
-  const { getSocket, sendMessage, connectWebSocket, isConnected } =
-    useWebSocket();
+  const { getSocket, sendMessage, connectWebSocket, isConnected } = useWebSocket();
   const [messages, setMessages] = useState(globalMessages);
   const [inputMessage, setInputMessage] = useState('');
   const [socketReady, setSocketReady] = useState(false);
   const [gradeInfo, setGradeInfo] = useState<string>('');
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const handleSolveClick = () => {
-    onSolve();  // Call the onSolve function
+    onSolve(); // Call the onSolve function
   };
 
   useEffect(() => {
@@ -52,39 +51,45 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
       else if (age === 16) setGradeInfo('중등 수학 3');
       else setGradeInfo('');
     }
-
     if (!isConnected(chatSocketUrl)) {
       connectWebSocket(chatSocketUrl);
     }
-
     const socket = getSocket(chatSocketUrl);
     if (socket) {
       socket.onopen = () => {
         console.log('WebSocket connection opened');
         setSocketReady(true);
-        // 연결이 열리면 서버에 준비 신호를 보냅니다
         sendMessage(chatSocketUrl, {
           u_id: u_id,
           status: 'open',
           text: 'hi',
         });
       };
-
       socket.onmessage = async (event: MessageEvent) => {
         const data = event.data;
         console.log('Received WebSocket message:', data);
+
+        // Ignore messages that start with "status:"
+        if (data.startsWith('status :')) {
+          console.log('Ignoring status message:', data);
+          return;
+        }
+
         const newMessage = { text: data, sender: 'bot' as const };
         setMessages((prevMessages) => {
           const updatedMessages = [...prevMessages, newMessage];
-          globalMessages = updatedMessages; // 전역 상태 업데이트
+          globalMessages = updatedMessages; // Update global state
           return updatedMessages;
         });
+
         if (newMessage.sender === 'bot') {
-          //await handleTTS(newMessage.text, audioRef);
+          const ttsAudioUrl = await handleTTS(newMessage.text, u_id as string);
+          if (ttsAudioUrl) {
+            setAudioUrl(ttsAudioUrl);
+          }
         }
       };
     }
-
     return () => {
       if (socket) {
         socket.onopen = null;
@@ -106,7 +111,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
       const newMessage = { text: inputMessage, sender: 'user' as const };
       setMessages((prevMessages) => {
         const updatedMessages = [...prevMessages, newMessage];
-        globalMessages = updatedMessages; // 전역 상태 업데이트
+        globalMessages = updatedMessages; // Update global state
         return updatedMessages;
       });
       setInputMessage('');
@@ -138,6 +143,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     visible: { y: 0 },
     exit: { y: '100%' },
   };
+
   const cleanText = (text: string): string => {
     text = text.replace(/^\*\d+\*\s*/, '');
     text = text.split(/①|②|③|④|⑤/)[0];
@@ -146,6 +152,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
 
     return text;
   };
+
   const cleanedProblem = cleanText(selectedProblem);
   const cleanedConcept = cleanText(selectedConcept);
 
@@ -153,15 +160,14 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     <AnimatePresence>
       <motion.div
         key="modal"
-        className="fixed inset-0 flex items-center justify-between bg-opacity-30"
+        className="fixed inset-0 flex items-center justify-between pointer-events-none"
         variants={overlayVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
-        onClick={handleClose}
       >
-        <div className="flex h-[66vh] w-fit max-w-8xl min-w-80">
-          {(!chatOnly&&
+        <div className="flex h-[66vh] w-fit max-w-8xl min-w-80 pointer-events-auto">
+          {!chatOnly && (
             <motion.div
               className="w-max bg-white rounded-r-3xl p-5 mr-2 drop-shadow-xl"
               variants={panelVariants}
@@ -176,17 +182,15 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 <h3 className="text-lg font-semibold mb-4">
                   {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
                 </h3>
-
                 <h3 className="text-2xl font-bold mb-4">관련 개념들</h3>
                 <h3 className="text-lg font-semibold mb-4">{cleanedConcept}</h3>
               </div>
             </motion.div>
-            )}
+          )}
         </div>
-        <div className="w-1/3"/>
-        
+        <div className="w-1/3" />
         <div className="flex w-fit h-[66vh] max-w-8xl justify-end min-w-80">
-        {(!chatOnly&&
+          {!chatOnly && (
             <motion.div
               className="min-w-[25vw] w-1/2 bg-white rounded-3xl p-5 drop-shadow-xl"
               variants={centerVariants}
@@ -205,12 +209,12 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   </h2>
                 </div>
                 <div className="flex justify-end">
-                <button
-                  className="px-3 py-1 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
-                  onClick={handleSolveClick}
-                >
-                  풀었음
-                </button>
+                  <button
+                    className="px-3 py-1 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
+                    onClick={handleSolveClick}
+                  >
+                    풀었음
+                  </button>
                   <button
                     className="px-3 py-1 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
                     onClick={handleClose}
@@ -220,7 +224,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 </div>
               </div>
             </motion.div>
-        )}
+          )}
 
           <motion.div
             className="min-w-[25vw] w-1/2 bg-blue-100 rounded-l-3xl p-5 ml-2 flex flex-col drop-shadow-xl"
@@ -265,7 +269,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 <Send size={20} />
               </button>
             </div>
-            <audio ref={audioRef} />
+            {audioUrl && <TTSAudioPlayer audioUrl={audioUrl} />}
           </motion.div>
         </div>
       </motion.div>

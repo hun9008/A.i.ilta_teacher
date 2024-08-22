@@ -1,26 +1,48 @@
-import OpenAI from 'openai';
+import React, { useRef } from 'react';
 
-const openai = new OpenAI({
-  //apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-});
+interface TTSAudioPlayerProps {
+  audioUrl: string;
+}
 
-export const handleTTS = async (text: string, audioRef: React.RefObject<HTMLAudioElement>): Promise<void> => {
+export const TTSAudioPlayer: React.FC<TTSAudioPlayerProps> = ({ audioUrl }) => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  React.useEffect(() => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.src = audioUrl;
+      audioRef.current.play();
+    }
+  }, [audioUrl]);
+
+  return <audio ref={audioRef} />;
+};
+
+export const handleTTS = async (text: string, u_id: string): Promise<string | null> => {
   try {
-    const response = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: "alloy",
-      input: text,
+    const endpoint = import.meta.env.BASE_URL+'/tts/chat';
+    const response = await fetch('https://backend.maitutor.site/tts/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        u_id: u_id,
+        text: text,
+        voice: 'shimmer',
+      }),
     });
 
-    const arrayBuffer = await response.arrayBuffer();
-    const audioBlob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
-    const audioUrl = URL.createObjectURL(audioBlob);
-
-    if (audioRef.current) {
-      audioRef.current.src = audioUrl;
-      await audioRef.current.play();
+    if (!response.ok) {
+      console.error('TTS API request failed:', response.statusText);
+      return null;
     }
+
+    const blob = await response.blob();
+    const audioUrl = URL.createObjectURL(blob);
+
+    return audioUrl;
   } catch (error) {
-    console.error('Error with TTS API:', error);
+    console.error('Error in handleTTS:', error);
+    return null;
   }
 };
