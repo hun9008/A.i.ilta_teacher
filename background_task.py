@@ -82,7 +82,7 @@ def user_focusing_level_calculation(u_id, s_id):
 
             encoding_image = base64.b64encode(image_data).decode('utf-8')
 
-            response = requests.post("model.maitutor.site/face_tracker", json={"image": encoding_image})
+            response = requests.post("http://model.maitutor.site/face_tracker", json={"image": encoding_image})
 
             if stop_thread_flag:
                 break
