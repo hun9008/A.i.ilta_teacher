@@ -6,7 +6,7 @@ from config import user_vars
 from config.database import create_connection, execute_query, read_query
 from utils.study_utils import generate_random_s_id
 from datetime import datetime
-from background_task import start_focusing_level_task
+from background_task import start_focusing_level_task, end_focusing_level_task
 
 route = APIRouter()
 
@@ -20,6 +20,8 @@ async def set_time(settime:SetTime):
     current = datetime.now().strftime("%Y%m%d%H%M%S")
     # start_focusing_level_task()
     s_id = generate_random_s_id(current)
+
+    start_focusing_level_task(settime.u_id, s_id)
     
     # settime에서 u_id, time 두개 가져오기
     u_id = settime.u_id
@@ -68,6 +70,8 @@ async def real_time(realtime:RealTime):
     # DB 연결
     print("DB connected in /study/realtime\n")
     connection = create_connection()
+
+    end_focusing_level_task()
 
     # front에서 가져올 data
     u_id = realtime.u_id

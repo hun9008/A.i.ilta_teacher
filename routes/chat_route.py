@@ -115,7 +115,7 @@ async def decide_user_wrong(websocket: WebSocket):
             response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
             
             response = hand_detect_dummy
-            print("hand response : ", response.json())
+            print("hand response : ", response)
 
 
             # (assume) 지금 어떤 문제 풀고 있는지 알아내기

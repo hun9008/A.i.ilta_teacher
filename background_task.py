@@ -5,6 +5,10 @@ import time
 import threading
 import string
 from decimal import Decimal
+import requests
+import os
+import base64
+from datetime import datetime
 
 stop_thread_flag = False
 focusing_thread = None
@@ -58,7 +62,63 @@ def generate_random_competition(difficulty, term):
 
 def user_focusing_level_calculation(u_id, s_id):
 
-    pass
+    # local_storage/pc의 가장 최근 사진을 model.maitutor.site/face_tracker로 전송
+    timer_running = False
+    start_time = None
+    focus_time_threshold = 60
+
+    while True:
+        image_path = "local_storage/pc"
+        all_pc_images = os.listdir(image_path)
+
+        if len(all_pc_images) > 0:
+            recent_pc_image = all_pc_images[-1]
+
+            with open(f"{image_path}/{recent_pc_image}", "rb") as f:
+                image_data = f.read()
+
+            encoding_image = base64.b64encode(image_data).decode('utf-8')
+
+            response = requests.post("model.maitutor.site/face_tracker", json={"image": encoding_image})
+
+            if stop_thread_flag:
+                break
+            elif response.status_code != 200:
+                print("Face tracker model request failed.")
+            else:
+                is_focus = response["is_focus"]
+                if is_focus != 1:
+                    if not timer_running:
+                        start_time = datetime.now()
+                        timer_running = True
+                        print("User is not focusing.")
+                else:
+                    if timer_running:
+                        end_time = datetime.now()
+                        elapsed_time = (end_time - start_time).total_seconds()
+
+                        if elapsed_time >= focus_time_threshold:
+                            
+                            connection = get_db_connection()
+                            cursor = connection.cursor()
+
+                            insert_query = "INSERT INTO not_focusing_time (u_id, s_id, not_f_time_s, not_f_time_e, not_f_time_t) VALUES (%s, %s, %s, %s, %s)"
+                            cursor.execute(insert_query, (u_id, s_id, start_time, end_time, elapsed_time))
+                            connection.commit()
+
+                            cursor.close()
+                            connection.close()
+                            
+                            print(f"Unfocused time recorded: {elapsed_time} seconds.")
+
+                        timer_running = False
+
+            time.sleep(60)
+        else:
+            time.sleep(120)
+
+
+    
 
 def start_background_task():
     while True:
@@ -86,11 +146,10 @@ def start_background_task():
 #         print("New competitions generated.")
 #         time.sleep(60)
 
-def start_focusing_level_task():
+def start_focusing_level_task(u_id, s_id):
     global focusing_thread
-    focusing_thread = threading.Thread(target=user_focusing_level_calculation, daemon=True)
+    focusing_thread = threading.Thread(target=user_focusing_level_calculation, args=(u_id, s_id), daemon=True)
     focusing_thread.start()
-
 
 def end_focusing_level_task():
     global stop_thread_flag
