@@ -6,6 +6,7 @@ from config import user_vars
 from config.database import create_connection, execute_query, read_query
 from utils.study_utils import generate_random_s_id
 from datetime import datetime
+from background_task import start_focusing_level_task
 
 route = APIRouter()
 
@@ -17,6 +18,7 @@ async def set_time(settime:SetTime):
     
     # s_id 생성 
     current = datetime.now().strftime("%Y%m%d%H%M%S")
+    # start_focusing_level_task()
     s_id = generate_random_s_id(current)
     
     # settime에서 u_id, time 두개 가져오기

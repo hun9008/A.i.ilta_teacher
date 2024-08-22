@@ -6,6 +6,9 @@ import threading
 import string
 from decimal import Decimal
 
+stop_thread_flag = False
+focusing_thread = None
+
 # MySQL 연결 설정
 def get_db_connection():
     return mysql.connector.connect(
@@ -53,6 +56,10 @@ def generate_random_competition(difficulty, term):
 
     print(f"New competition generated for difficulty {difficulty}, term {term} and saved to the database.")
 
+def user_focusing_level_calculation(u_id, s_id):
+
+    pass
+
 def start_background_task():
     while True:
         current_time = time.strftime("%H:%M")
@@ -78,6 +85,22 @@ def start_background_task():
         
 #         print("New competitions generated.")
 #         time.sleep(60)
+
+def start_focusing_level_task():
+    global focusing_thread
+    focusing_thread = threading.Thread(target=user_focusing_level_calculation, daemon=True)
+    focusing_thread.start()
+
+
+def end_focusing_level_task():
+    global stop_thread_flag
+    global focusing_thread
+
+    stop_thread_flag = True
+
+    if focusing_thread is not None:
+        focusing_thread.join()
+        print("Focusing level calculation task stopped.")
 
 def start_task():
     threading.Thread(target=start_background_task, daemon=True).start()
