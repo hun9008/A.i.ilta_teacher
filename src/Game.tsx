@@ -136,14 +136,19 @@ function Game() {
       } else {
         penguinTargetPosition.current = newPosition;
       }
-      console.log(solvedProblems);
     },
     [icePositions, penguinPosition, problemTexts, concepts]
   );
 
   const handleSolveProblem = useCallback(() => {
-    setSolvedProblems((prev) => ({ ...prev, [selectedFloe]: true }));
+    setSolvedProblems((prev) => {
+      const newState = { ...prev, [selectedFloe]: true };
+      console.log(newState);
+      return newState;
+    });
     setShowModal(false);
+
+    console.log("이 문제 풀었음!", selectedFloe);
   }, [selectedFloe]);
 
   useEffect(() => {
