@@ -67,8 +67,11 @@ def user_focusing_level_calculation(u_id, s_id):
     start_time = None
     focus_time_threshold = 60
 
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+
     while True:
-        image_path = "local_storage/pc"
+
+        image_path = os.path.join(root_dir, "local_storage/pc")
         all_pc_images = os.listdir(image_path)
 
         if len(all_pc_images) > 0:

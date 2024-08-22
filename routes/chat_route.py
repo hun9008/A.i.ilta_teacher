@@ -130,7 +130,9 @@ async def decide_user_wrong(websocket: WebSocket):
                 y = this_prob_area[1]
                 w = this_prob_area[2]
                 h = this_prob_area[3]
-                crop_img = origin_image_storage[0][y:y+h, x:x+w]
+
+                origin_image_decoded = base64.b64decode(origin_image_storage[0])
+                crop_img = origin_image_decoded[y:y+h, x:x+w]
                 frame_data = base64.b64encode(crop_img).decode('utf-8')
 
             solution = solutions_storage[problem_index]
