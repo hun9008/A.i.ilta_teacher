@@ -70,7 +70,7 @@ def imtrim(page):
 
     return right, left
 
-def contour(page_rl, output_dir, type, origin, origin_format='png'):
+def contour(page_rl, output_dir, type, origin):
     global problem_idx
 
     if page_rl is None:
@@ -223,19 +223,13 @@ def contour(page_rl, output_dir, type, origin, origin_format='png'):
         # Bilateral Filter 적용
         anti_aliased_image = cv2.bilateralFilter(img_padded, d=15, sigmaColor=100, sigmaSpace=100)
         
-        output_file = f"{output_dir}/problem_{i+1+problem_idx}.{origin_format}"
-        if origin_format.lower() == 'png':
-            cv2.imwrite(output_file, anti_aliased_image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
-        elif origin_format.lower() in ['jpg', 'jpeg']:
-            cv2.imwrite(output_file, anti_aliased_image, [cv2.IMWRITE_JPEG_QUALITY, 95])
-        else:
-            cv2.imwrite(output_file, anti_aliased_image)
+        cv2.imwrite(f"{output_dir}/problem_{i+1+problem_idx}.png", anti_aliased_image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
         cnt += 1
     
     problem_idx += cnt
 
-def problem_crop(image, image_format):
-    
+def problem_crop(image):
+
     durty_image = preprocess_image(image)
 
     right, left = imtrim(durty_image)
@@ -248,11 +242,18 @@ def problem_crop(image, image_format):
         print("Error: Image trimming failed.")
         return
 
-    output_dir = './temp'
+    output_dir = '../temp'
     os.makedirs(output_dir, exist_ok=True)
 
+    # output_dir clean
     for file in os.listdir(output_dir):
         os.remove(os.path.join(output_dir, file))
 
-    contour(left, output_dir, 'left', origin_left, image_format)
-    contour(right, output_dir, 'right', origin_right, image_format)
+    contour(left, output_dir, 'left', origin_left)
+    contour(right, output_dir, 'right', origin_right)
+
+if __name__ == "__main__":
+    image_path = "./front_legacy.jpeg"
+    image = cv2.imread(image_path)
+
+    problem_crop(image)

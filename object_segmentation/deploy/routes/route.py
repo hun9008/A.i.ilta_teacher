@@ -59,6 +59,26 @@ def upload_to_s3(file_name, bucket, object_name=None):
     except NoCredentialsError:
         print("AWS 자격 증명을 찾을 수 없습니다.")
         return None
+    
+def resize_and_compress_image(image, max_size_kb=3300, quality=85):
+    # 이미지 파일 크기 확인
+    _, img_encoded = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
+    img_size_kb = len(img_encoded) / 1024  # KB 단위로 변환
+
+    # 이미지 크기가 제한을 초과하는 경우 크기 조정
+    while img_size_kb > max_size_kb and quality > 10:
+        scale_factor = (max_size_kb / img_size_kb) ** 0.5
+        new_width = int(image.shape[1] * scale_factor)
+        new_height = int(image.shape[0] * scale_factor)
+        image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+
+        _, img_encoded = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
+        img_size_kb = len(img_encoded) / 1024  # 다시 크기 확인
+        quality -= 5  # 품질 감소
+        print(f"Quality reduced to {quality}, new size: {img_size_kb:.2f} KB")
+
+    img_base64 = base64.b64encode(img_encoded).decode('utf-8')
+    return img_base64
 
 def detect_hand_ocr_text(img):
     """Detects text in the file."""
@@ -144,7 +164,7 @@ async def fetch_ocr_claude(client, encoded_img, prompt_type):
                 "type": "image",
                 "source": {
                     "type": "base64",
-                    "media_type": "image/png",
+                    "media_type": "image/jpeg",
                     "data": encoded_img
                 }
             },
@@ -160,7 +180,7 @@ async def fetch_ocr_claude(client, encoded_img, prompt_type):
         None,
         lambda: client.messages.create(
         model="claude-3-5-sonnet-20240620",
-        max_tokens=1000,
+        max_tokens=2000,
         temperature=0,
         system="너는 ocr 기계야.",
         messages=messages
@@ -210,7 +230,8 @@ async def problems_ocr(input: OCRInput):
     start = time.time()
     encoded_imgs = []
     image = decode_image(input.image)
-    problem_crop(image)
+
+    problem_crop(image, 'jpeg')
     
     image_path = './temp'
     # file_name = str(int(time.time())) + ".jpg"
@@ -222,9 +243,10 @@ async def problems_ocr(input: OCRInput):
     filenames = sorted([f for f in os.listdir(image_path) if not f.startswith('_')], key=sort_key)
 
     for filename in filenames:
-        with open(os.path.join(image_path, filename), "rb") as image_file:
-            encoded_imgs.append(base64.b64encode(image_file.read()).decode())
-    
+        image = cv2.imread(os.path.join(image_path, filename))
+        encoded_img = resize_and_compress_image(image, max_size_kb=3300)  # 3.3MB 이하로 줄이기
+        encoded_imgs.append(encoded_img)
+
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     claude_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
@@ -483,7 +505,9 @@ async def define_prob_areas(input: ProbAreas_HandImg):
         prob_num = -1
     
     image_path = './temp'
+    print("image_list : ", os.listdir(image_path))
     for filename in os.listdir(image_path):
+        # print("filename: ", filename)
         os.remove(os.path.join(image_path, filename))
     
     output = {
