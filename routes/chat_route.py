@@ -58,21 +58,27 @@ async def decide_user_wrong(websocket: WebSocket):
             include_hand = base64.b64encode(target_img.read()).decode('utf-8')
         
 
-        problem_detect_json = {
-            "image_clean" : origin_image_storage[0],
-            "image_hand" : include_hand
-        }
+        # problem_detect_json = {
+        #     "image_clean" : origin_image_storage,
+        #     "image_hand" : include_hand
+        # }
 
-        url = "http://model.maitutor.site/prob_areas_which_prob"
+        # url = "http://model.maitutor.site/prob_areas_which_prob"
 
-        headers = {'Content-Type': 'application/json'}
-        response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
-        print("hand response : ", response.json())
+        # headers = {'Content-Type': 'application/json'}
+        # response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
+        # print("hand response : ", response.json())
 
 
-        # (assume) 지금 어떤 문제 풀고 있는지 알아내기
-        problem_index = 0
-        solution = solutions_storage[problem_index]
+        # # (assume) 지금 어떤 문제 풀고 있는지 알아내기
+        # prob_num = response.json().get("prob_num")
+        # problem_index = 0
+        # if prob_num != -1:
+        #     problem_index = prob_num
+        #     prob_area = response.json().get("prob_area")
+        # solution = solutions_storage[problem_index]
+
+
         
         # hand_ocr = await perform_handwrite_ocr(frame_data, solution)
         hand_ocr = {
@@ -105,7 +111,7 @@ async def websocket_endpoint(websocket: WebSocket):
     print("len(concepts) : ", len(concepts_storage))
     print("len(solutions) : ", len(solutions_storage))
     print("len(ocrs) : ", len(ocrs_storage))
-    print("type of origin_image : ", type(origin_image_storage[0]))
+    print("type of origin_image : ", type(origin_image_storage))
 
     try:
         data = await websocket.receive_text()
