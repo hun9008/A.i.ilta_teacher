@@ -14,3 +14,4 @@ keys
 deploy_env
 .venv
 cv_which_prob/*
+segment_anything_/*

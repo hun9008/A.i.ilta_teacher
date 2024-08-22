@@ -9,6 +9,9 @@ import time
 from models.cv_face_focus import is_focus
 from models.input_face import FaceImg
 
+from models.sam_hand import sam_hand_loc
+from models.input_hand import HandArea_HandImg
+
 face_router = APIRouter()
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -29,6 +32,24 @@ async def face_tracker(input: FaceImg):
     
     output = {
         "is_focus": is_focus_output,
+    }
+    
+    return JSONResponse(content=output)
+
+@face_router.post("/hand_loc")
+async def hand_detector(input: HandArea_HandImg):
+    
+    img = decode_image(input.image)
+    time.sleep(0.5)
+    print(type(img))
+    hand_loc_output = sam_hand_loc(img)
+    
+    # image_path = './tmp_sam_output'
+    # for filename in os.listdir(image_path):
+    #     os.remove(os.path.join(image_path, filename))
+    
+    output = {
+        "hand_loc": hand_loc_output,
     }
     
     return JSONResponse(content=output)

@@ -10,7 +10,6 @@ import time
 from models.cv_ocr import problem_crop
 from models.cv_prob_area import prob_loc_crop, visualize_problem_locations
 from models.cv_hand_loc import hand_loc, visualize_hand_area
-from models.cv_hand_loc_1 import hand_loc_1
 from models.input_ocr import OCRInput, Determinent
 from models.input_hand import ProbAreas_HandImg
 # from models.input_prob import ClassInput
