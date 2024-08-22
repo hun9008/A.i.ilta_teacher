@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import Penguin from './3D/Penguin';
 import IceFloe from './3D/IceFloe';
 import CameraController from './3D/CameraController';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import AnimatedModal from './AnimatedModal';
 import DebugInfo from './3D/DebugInfo';
 import Axes from './3D/Axes';
@@ -87,6 +87,8 @@ function Game() {
   const [icePositions, setIcePositions] = useState<[number, number, number][]>(
     []
   );
+  const [showSolvedMessage, setShowSolvedMessage] = useState(false);
+
 
   const [studyTime, setStudyTime] = useState<{
     hours: number;
@@ -147,6 +149,12 @@ function Game() {
       return newState;
     });
     setShowModal(false);
+
+    setShowSolvedMessage(true);  // "Solved!" 메시지 표시
+
+    setTimeout(() => {
+      setShowSolvedMessage(false);  // 일정 시간 후 메시지 숨김
+    }, 2000);
 
     console.log("이 문제 풀었음!", selectedFloe);
   }, [selectedFloe]);
@@ -276,6 +284,16 @@ function Game() {
           />
         )}
       </AnimatePresence>
+      {showSolvedMessage && (
+        <motion.div
+          className="fixed inset-0 flex items-center justify-center text-7xl font-bold text-primary-500"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          🎉정답!🥳
+        </motion.div>
+      )}
     </div>
   );
 }
