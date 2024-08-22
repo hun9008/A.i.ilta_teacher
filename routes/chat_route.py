@@ -83,11 +83,11 @@ async def decide_user_wrong(websocket: WebSocket):
         
         await asyncio.sleep(sleep_time)  
         
-        print("len(concepts) : ", len(concepts_storage))
-        print("len(solutions) : ", len(solutions_storage))
-        print("len(ocrs) : ", len(ocrs_storage))
-        print("len(origin_image) : ", len(origin_image_storage))
-        print("type of origin_image : ", type(origin_image_storage))
+        # print("len(concepts) : ", len(concepts_storage))
+        # print("len(solutions) : ", len(solutions_storage))
+        # print("len(ocrs) : ", len(ocrs_storage))
+        # print("len(origin_image) : ", len(origin_image_storage))
+        # print("type of origin_image : ", type(origin_image_storage))
         if len(solutions_storage) != 0 and len(ocrs_storage) != 0 and len(origin_image_storage) != 0:
             # directory path
             root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
