@@ -167,26 +167,6 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         exit="exit"
       >
         <div className="flex h-[66vh] w-fit max-w-8xl min-w-80 pointer-events-auto">
-          {!chatOnly && (
-            <motion.div
-              className="w-max bg-white rounded-r-3xl p-5 mr-2 drop-shadow-xl"
-              variants={panelVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              custom={-1}
-              transition={{ type: 'spring', damping: 20 }}
-            >
-              <div className="p-8">
-                <h1 className="text-2xl font-bold mb-4">이 문제에 대한 정보</h1>
-                <h3 className="text-lg font-semibold mb-4">
-                  {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
-                </h3>
-                <h3 className="text-2xl font-bold mb-4">관련 개념들</h3>
-                <h3 className="text-lg font-semibold mb-4">{cleanedConcept}</h3>
-              </div>
-            </motion.div>
-          )}
         </div>
         <div className="w-1/3 pointer-events-none" />
         <div className="flex w-fit h-[66vh] max-w-8xl justify-end min-w-80 pointer-events-auto">
@@ -208,7 +188,15 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                     <p dangerouslySetInnerHTML={{ __html: cleanedProblem }} />
                   </h2>
                 </div>
-                <div className="flex justify-end">
+                <div className="p-5">
+                <h1 className="text-2xl font-bold mb-4">이 문제에 대한 정보</h1>
+                <h3 className="text-lg font-semibold mb-4">
+                  {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
+                </h3>
+                <h3 className="text-2xl font-bold mb-4">관련 개념들</h3>
+                <h3 className="text-lg font-semibold mb-4">{cleanedConcept}</h3>
+                </div>
+                <div className="flex justify-end">              
                   <button
                     className="px-3 py-1 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
                     onClick={handleSolveClick}

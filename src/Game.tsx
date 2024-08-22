@@ -44,24 +44,9 @@ function Game() {
   });
   const [isStudyRunning, setIsStudyRunning] = useState(false);
   const [isBreakRunning, setIsBreakRunning] = useState(false);
-  const [zoom, setZoom] = useState(1);
   const navigate = useNavigate();
 
-  interface OcrResp { ocrs: string[]; }
   interface SolResp {concepts: string[];}
-
-  const parseOcrProblems = (ocrs: string[]): { [key: number]: string } => {
-    const parsedProblems: { [key: number]: string } = {};
-    ocrs.forEach((ocr) => {
-      const problems = ocr.split(/\*([0-9]+)\*/).slice(1);
-      for (let i = 0; i < problems.length; i += 2) {
-        const problemNumber = parseInt(problems[i], 10);
-        const problemText = problems[i + 1]?.trim().replace(/^\\n+|\\n+$/g, '') || '';
-        parsedProblems[problemNumber] = problemText;
-      }
-    });
-    return parsedProblems;
-  };
 
   useEffect(() => {
     // 로컬 스토리지에서 수정된 문제 불러오기
@@ -165,14 +150,6 @@ function Game() {
   useEffect(()=>{
     console.log(solvedProblems);
   },[solvedProblems])
-
-  useEffect(() => {
-    if (showModal) {
-      setZoom(1.5); // Zoom in when modal is shown
-    } else {
-      setZoom(1); // Zoom out when modal is closed
-    }
-  }, [showModal]);
 
   /* 아래부턴 타이머 부분 */
   useEffect(() => {

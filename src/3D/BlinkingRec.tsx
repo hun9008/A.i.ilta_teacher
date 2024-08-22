@@ -12,10 +12,29 @@ const BlinkingRec: React.FC<BlinkingRecProps> = ({ text }) => {
     return () => clearInterval(interval);
   }, []);
 
+  const containerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    borderRadius: '4px',
+  };
+
+  const circleStyle: React.CSSProperties = {
+    width: '12px',
+    height: '12px',
+    borderRadius: '50%',
+    marginRight: '8px',
+    backgroundColor: isVisible ? '#4ade80' : 'transparent',
+    transition: 'background-color 0.2s'
+  };
+
+  const textStyle: React.CSSProperties = {
+    color: 'black',
+  };
+
   return (
-    <div className="flex items-center">
-      <div className={`w-3 h-3 rounded-full mr-2 ${isVisible ? 'bg-green-400' : 'bg-transparent'}`} />
-      <span>{text}</span>
+    <div style={containerStyle}>
+      <div style={circleStyle} />
+      <span style={textStyle}>{text}</span>
     </div>
   );
 };
