@@ -8,10 +8,7 @@ from fastapi.responses import JSONResponse
 import time
 # from models.class_quest_cate import category_inference
 from models.cv_ocr import problem_crop
-from models.cv_prob_area import prob_loc_crop, visualize_problem_locations
-from models.cv_hand_loc import hand_loc, visualize_hand_area
 from models.input_ocr import OCRInput, Determinent
-from models.input_hand import ProbAreas_HandImg
 # from models.input_prob import ClassInput
 import boto3
 from botocore.exceptions import NoCredentialsError
@@ -113,12 +110,6 @@ def detect_hand_ocr_text(img):
     # print('len : ', len(texts[0].description))
 
     return texts[0].description
-
-def area_loc2ratio(image_size, x, y, w, h):
-    
-    output_loc2rat = ((x*100)/image_size[1], (y*100)/image_size[0], (w*100)/image_size[1], (h*100)/image_size[0])
-    
-    return output_loc2rat
 
 def query_model(question):
     result = subprocess.run(
@@ -413,108 +404,6 @@ async def hand_ocr(input: Determinent):
     print("output_json : ", output_json)
 
     return JSONResponse(content=output_json)
-
-## which problem is user solving
-@router.post("/prob_areas_which_prob")
-async def define_prob_areas(input: ProbAreas_HandImg):
-    image_clean = decode_image(input.image_clean)
-    image_hand = decode_image(input.image_hand)
-    
-    prob_loc_l, prob_loc_r = prob_loc_crop(image_clean)
-    
-    prob_loc_l.sort(key=lambda x: x[1])
-    prob_loc_r.sort(key=lambda x: x[1])
-    
-    real_loc_r = []
-    tot_loc = []
-    left_prob_count = 0
-    right_prob_count = 0
-    for loc in prob_loc_l:
-        print("left", loc)
-        tot_loc.append(loc)
-        left_prob_count += 1
-    for loc in prob_loc_r:
-        loc = (loc[0]+image_clean.shape[1]//2,loc[1], loc[2], loc[3])
-        print("right", loc)
-        real_loc_r.append(loc)
-        tot_loc.append(loc)
-        right_prob_count += 1
-        
-    prob_areas = []
-    if left_prob_count > 1:
-        for i in range (left_prob_count - 1):
-            tmp = prob_loc_l[i]
-            tmp_next = prob_loc_l[i+1]
-            prob_area = (tmp[0], tmp[1], image_clean.shape[1]//2-tmp[0]-3, tmp_next[1]-tmp[1]-3)
-            prob_areas.append(prob_area)
-        tmp = prob_loc_l[left_prob_count - 1]
-        prob_areas.append((tmp[0], tmp[1], image_clean.shape[1]//2-tmp[0], image_clean.shape[0]-tmp[1]-3))
-    else:
-        prob_areas.append((prob_loc_l[0], prob_loc_l[1], image_clean.shape[1]//2-prob_loc_l[0]-3, image_clean.shape[0]-prob_loc_l[1]-3))
-
-    if right_prob_count > 1:
-        for i in range (right_prob_count - 1):
-            tmp = real_loc_r[i]
-            tmp_next = real_loc_r[i+1]
-            prob_area = (tmp[0], tmp[1], image_clean.shape[1]-tmp[0]-3, tmp_next[1]-tmp[1]-3)
-            prob_areas.append(prob_area)
-        tmp = real_loc_r[right_prob_count - 1]
-        prob_areas.append((tmp[0], tmp[1], image_clean.shape[1]-tmp[0], image_clean.shape[0]-tmp[1]-3))
-    else:
-        prob_areas.append((real_loc_r[0], real_loc_r[1], image_clean.shape[1]-real_loc_r[0]-3, image_clean.shape[0]-real_loc_r[1]-3))
-
-    # visualize_problem_locations(image_show_clean[:,], prob_areas)
-    
-    tl, br = hand_loc(image_hand)
-    hand_area_loc = (tl[0], tl[1], br[0]-tl[0], br[1]-tl[1])
-    # visualize_hand_area(image_show_hand[:,], hand_area_loc)
-    
-    hand_loc_1(image_hand)
-    
-    prob_loc_rats = []
-    image_clean_size = (image_clean.shape[0], image_clean.shape[1])
-    for (prob_x, prob_y, prob_w, prob_h) in prob_areas:
-        rat_x, rat_y, rat_w, rat_h = area_loc2ratio(image_clean_size, prob_x, prob_y, prob_w, prob_h)
-        prob_loc_rats.append((rat_x, rat_y, rat_w, rat_h))
-    
-    #determine which prob_area the hand_are_loc is located
-    handloc_x, handloc_y, handloc_w, handloc_h = hand_area_loc
-    
-    image_hand_size = (image_hand.shape[0], image_hand.shape[1])
-    hand_x, hand_y, hand_w, hand_h = area_loc2ratio(image_hand_size, handloc_x, handloc_y, handloc_w, handloc_h)
-    
-    print("-------*********")
-    print("clean figure size: ", image_clean_size)
-    print("hand figure size: ",image_hand_size)
-    for i in prob_loc_rats:
-        print(i)
-    print("\n hand location", hand_area_loc)
-    print(f"hand loc ratio: {hand_x, hand_y, hand_w, hand_h}")
-    print("-------*********")
-    
-    prob_num = None
-    for i, (prob_x, prob_y, prob_w, prob_h) in enumerate(prob_loc_rats):
-        print("prob area: ", i, "prob location rat", (prob_x, prob_y, prob_w, prob_h))
-        if (hand_x >= prob_x and hand_x <= prob_x + prob_w and
-            hand_y >= prob_y and hand_y <= prob_y + prob_h):
-            prob_num = i
-            break
-    
-    if prob_num is None:
-        prob_num = -1
-    
-    image_path = './temp'
-    print("image_list : ", os.listdir(image_path))
-    for filename in os.listdir(image_path):
-        # print("filename: ", filename)
-        os.remove(os.path.join(image_path, filename))
-    
-    output = {
-        "prob_area": prob_areas,
-        "prob_num": prob_num,
-    }
-    
-    return JSONResponse(content=output)
 
 @router.get("/test")
 async def test():

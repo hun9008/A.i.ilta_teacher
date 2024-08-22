@@ -36,20 +36,20 @@ async def face_tracker(input: FaceImg):
     
     return JSONResponse(content=output)
 
-@face_router.post("/hand_loc")
-async def hand_detector(input: HandArea_HandImg):
+# @face_router.post("/hand_loc")
+# async def hand_detector(input: HandArea_HandImg):
     
-    img = decode_image(input.image)
-    time.sleep(0.5)
-    print(type(img))
-    # hand_loc_output = sam_hand_loc(img)
+#     img = decode_image(input.image)
+#     time.sleep(0.5)
+#     print(type(img))
+#     # hand_loc_output = sam_hand_loc(img)
     
-    # image_path = './tmp_sam_output'
-    # for filename in os.listdir(image_path):
-    #     os.remove(os.path.join(image_path, filename))
+#     # image_path = './tmp_sam_output'
+#     # for filename in os.listdir(image_path):
+#     #     os.remove(os.path.join(image_path, filename))
     
-    output = {
-        # "hand_loc": hand_loc_output,
-    }
+#     output = {
+#         # "hand_loc": hand_loc_output,
+#     }
     
-    return JSONResponse(content=output)
+#     return JSONResponse(content=output)
