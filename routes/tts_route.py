@@ -1,10 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from models.tts_chat import TextChat
 from openai import OpenAI
 
-import json
 import os
+from fastapi.responses import FileResponse
 
 route = APIRouter()
 
@@ -15,20 +15,21 @@ async def process_text(textchat: TextChat):
     
     user_text = textchat.text
     user_id = textchat.u_id
+    voice = textchat.voice
     
-    response = await call_tts_api(user_text)
+    output_file = await call_tts_api(user_text, voice)
     
-    return json.dumps({
-        "u_id": user_id,
-        "speech": response
-    })
+    if not os.path.exists(output_file):
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    return FileResponse(output_file, media_type='audio/mpeg', filename="output.mp3")
     
     
-async def call_tts_api(user_text):
+async def call_tts_api(user_text, voice):
     try:
         response = client.audio.speech.create(
             model = "tts-1",
-            voice="nova",
+            voice = voice,
             input = user_text
         )
         
@@ -40,4 +41,4 @@ async def call_tts_api(user_text):
         return output_file
     
     except Exception as e:
-        return f"OpenAI API error: {str(e)}"
+        raise HTTPException(status_code=500, detail=f"OpenAI API error: {str(e)}")
