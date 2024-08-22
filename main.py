@@ -6,6 +6,7 @@ from routes.chat_route import route as chat_route
 from routes.study_route import route as study_route
 from routes.competition_route import route as competition_route
 from routes.info_route import route as info_route
+from routes.tts_route import route as tts_route
 
 from fastapi.middleware.cors import CORSMiddleware
 from background_task import start_task
@@ -19,6 +20,7 @@ app.include_router(chat_route)
 app.include_router(study_route)
 app.include_router(competition_route)
 app.include_router(info_route)
+app.include_router(tts_route)
 
 # middleware
 app.add_middleware(
