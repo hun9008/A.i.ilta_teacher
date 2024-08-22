@@ -1,8 +1,6 @@
 import React from 'react';
-import { AnimatePresence } from 'framer-motion';
 import { LogOut, User } from 'lucide-react';
 import BlinkingRec from './3D/BlinkingRec';
-import AnimatedModal from './AnimatedModal';
 import logo from './assets/logo.svg';
 
 interface UIProps {
@@ -31,9 +29,6 @@ interface UIProps {
 const GameUI: React.FC<UIProps> = ({
   showDebugInfo,
   setShowDebugInfo,
-  showModal,
-  setShowModal,
-  selectedFloe,
   studyTime,
   breakTime,
   isStudyRunning,
@@ -42,10 +37,7 @@ const GameUI: React.FC<UIProps> = ({
   onStudyStop,
   onBreakStart,
   onBreakStop,
-  selectedProblem,
-  selectedConcept,
   setShowChatModal,
-  onSolve,
   enableTTS,
   setEnableTTS,
 }) => (
@@ -54,7 +46,7 @@ const GameUI: React.FC<UIProps> = ({
       <img src={logo} alt="Logo" className="w-10 h-10 mb-2.5" />
     </div>
     <div className="absolute top-4 right-4 flex items-center space-x-4">
-      <button onClick={()=>{setEnableTTS(!enableTTS)}}>TTS {enableTTS?"on":"off"}</button>
+      <button onClick={()=>{setEnableTTS(!enableTTS); console.log("TTS", enableTTS)}}>TTS {enableTTS?"on":"off"}</button>
       <div className="border-2 border-primary-400 text-black px-4 py-2 rounded-full">
         <BlinkingRec text="웹캠" />
       </div>

@@ -217,12 +217,6 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   >
                     풀었음
                   </button>
-                  <button
-                    className="px-3 py-1 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
-                    onClick={handleClose}
-                  >
-                    Close
-                  </button>
                 </div>
               </div>
             </motion.div>
@@ -238,6 +232,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             transition={{ type: 'spring', damping: 20 }}
           >
             <h1 className="text-2xl font-bold mb-4">채팅</h1>
+            <button onClick={handleClose} className='bg-gray-400'>닫기</button>
             <div className="flex-grow overflow-y-auto mb-4 bg-white rounded-lg p-3">
               {messages.map((message, index) => (
                 <div
