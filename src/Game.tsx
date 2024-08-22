@@ -22,6 +22,7 @@ function Game() {
   const [solvedProblems, setSolvedProblems] = useState<{
     [key: number]: boolean;
   }>({});
+  const [enableTTS, setEnableTTS] = useState<boolean>(false);
 
   interface OcrResponse {
     ocrs: string;
@@ -262,6 +263,8 @@ function Game() {
         selectedProblem={selectedProblem}
         selectedConcept={selectedConcept}
         onSolve={handleSolveProblem}
+        enableTTS={enableTTS}
+        setEnableTTS={setEnableTTS}
       />
       <AnimatePresence>
         {showModal && (
@@ -272,6 +275,7 @@ function Game() {
             selectedProblem={selectedProblem}
             selectedConcept={selectedConcept}
             onSolve={handleSolveProblem}
+            enableTTS={enableTTS}
           />
         )}
       </AnimatePresence>
@@ -285,6 +289,7 @@ function Game() {
             selectedConcept={selectedConcept}
             chatOnly={true}
             onSolve={handleSolveProblem}
+            enableTTS={enableTTS}
           />
         )}
       </AnimatePresence>

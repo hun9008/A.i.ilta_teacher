@@ -12,6 +12,7 @@ interface AnimatedModalProps {
   selectedConcept: string;
   chatOnly?: boolean;
   onSolve: () => void;
+  enableTTS: boolean;
 }
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
@@ -27,6 +28,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   selectedConcept,
   chatOnly = false,
   onSolve,
+  enableTTS,
 }) => {
   const { getSocket, sendMessage, connectWebSocket, isConnected } = useWebSocket();
   const [messages, setMessages] = useState(globalMessages);
@@ -82,7 +84,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           return updatedMessages;
         });
 
-        if (newMessage.sender === 'bot') {
+        if (newMessage.sender === 'bot' && enableTTS) {
           const ttsAudioUrl = await handleTTS(newMessage.text, u_id as string);
           if (ttsAudioUrl) {
             setAudioUrl(ttsAudioUrl);
@@ -188,8 +190,8 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             </motion.div>
           )}
         </div>
-        <div className="w-1/3" />
-        <div className="flex w-fit h-[66vh] max-w-8xl justify-end min-w-80">
+        <div className="w-1/3 pointer-events-none" />
+        <div className="flex w-fit h-[66vh] max-w-8xl justify-end min-w-80 pointer-events-auto">
           {!chatOnly && (
             <motion.div
               className="min-w-[25vw] w-1/2 bg-white rounded-3xl p-5 drop-shadow-xl"

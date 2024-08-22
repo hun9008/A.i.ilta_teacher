@@ -24,6 +24,8 @@ interface UIProps {
   showChatModal: boolean;
   setShowChatModal: (show: boolean) => void;
   onSolve: () => void;
+  enableTTS: boolean;
+  setEnableTTS: (show: boolean) => void; 
 }
 
 const GameUI: React.FC<UIProps> = ({
@@ -44,12 +46,15 @@ const GameUI: React.FC<UIProps> = ({
   selectedConcept,
   setShowChatModal,
   onSolve,
+  enableTTS,
+  setEnableTTS,
 }) => (
   <>
     <div className="absolute top-0 left-0 p-4 text-white">
       <img src={logo} alt="Logo" className="w-10 h-10 mb-2.5" />
     </div>
     <div className="absolute top-4 right-4 flex items-center space-x-4">
+      <button onClick={()=>{setEnableTTS(!enableTTS)}}>TTS {enableTTS?"on":"off"}</button>
       <div className="border-2 border-primary-400 text-black px-4 py-2 rounded-full">
         <BlinkingRec text="웹캠" />
       </div>
@@ -117,18 +122,6 @@ const GameUI: React.FC<UIProps> = ({
         className="absolute bottom-4 left-4 bg-white bg-opacity-75 p-2 rounded text-black"
       ></div>
     )}
-    <AnimatePresence>
-      {showModal && (
-        <AnimatedModal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          selectedFloe={selectedFloe}
-          selectedProblem={selectedProblem}
-          selectedConcept={selectedConcept}
-          onSolve={onSolve}
-        />
-      )}
-    </AnimatePresence>
   </>
 );
 
