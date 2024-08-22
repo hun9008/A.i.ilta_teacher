@@ -17,36 +17,17 @@ import { useNavigate } from 'react-router-dom';
 function Game() {
   const [selectedProblem, setSelectedProblem] = useState<string>('');
   const [selectedConcept, setSelectedConcept] = useState<string>('');
-  const { ocrResponse, solutionResponse } = useWebSocket();
+  const { solutionResponse } = useWebSocket();
   const [showChatModal, setShowChatModal] = useState<boolean>(false);
-  const [iceCount, setIceCount] = useState<number>(5); // 초기값을 5로 설정
+  const [iceCount, setIceCount] = useState<number>(0);
   const [solvedProblems, setSolvedProblems] = useState<{
     [key: number]: boolean;
   }>({});
   const [enableTTS, setEnableTTS] = useState<boolean>(false);
 
-  interface OcrResponse {
-    ocrs: string[];
-  }
   interface SolutionResponse {
     concepts: string[];
   }
-
-  const parseOcrProblems = (ocrs: string[]): { [key: number]: string } => {
-    const parsedProblems: { [key: number]: string } = {};
-
-    ocrs.forEach((ocr) => {
-      const problems = ocr.split(/\*([0-9]+)\*/).slice(1);
-      for (let i = 0; i < problems.length; i += 2) {
-        const problemNumber = parseInt(problems[i], 10);
-        const problemText =
-          problems[i + 1]?.trim().replace(/^\\n+|\\n+$/g, '') || '';
-        parsedProblems[problemNumber] = problemText;
-      }
-    });
-
-    return parsedProblems;
-  };
 
   const [problemTexts, setProblemTexts] = useState<{ [key: number]: string }>(
     {}
@@ -54,35 +35,51 @@ function Game() {
   const [concepts, setConcepts] = useState<{ [key: number]: string }>({});
 
   useEffect(() => {
-    if (
-      ocrResponse &&
-      typeof ocrResponse === 'object' &&
-      'ocrs' in ocrResponse
-    ) {
-      console.log('ocrresponse와서 얼음 개수 반영되는중');
-      const parsedProblems = parseOcrProblems(
-        (ocrResponse as OcrResponse).ocrs
+    // 로컬 스토리지에서 수정된 문제 불러오기
+    const editedProblemsJSON = localStorage.getItem('editedProblems');
+    if (editedProblemsJSON) {
+      const editedProblems = JSON.parse(editedProblemsJSON);
+      setProblemTexts(editedProblems);
+      setIceCount(Object.keys(editedProblems).length);
+      console.log(
+        'Edited problems loaded from localStorage:',
+        editedProblemsJSON
       );
-      setProblemTexts(parsedProblems);
-      setIceCount(Object.keys(parsedProblems).length); // 문제 수에 맞게 iceCount 설정
-    } else {
-      console.log('ocr안와서 일단 초기 몇개 생성');
-    }
 
+      // 초기 solvedProblems 상태 설정
+      const initialSolvedState = Object.keys(editedProblems).reduce(
+        (acc, key) => {
+          acc[parseInt(key)] = false;
+          return acc;
+        },
+        {} as { [key: number]: boolean }
+      );
+      setSolvedProblems(initialSolvedState);
+
+      // Ice positions 생성
+      generateCircularIcePositions(Object.keys(editedProblems).length);
+    }
+  }, []);
+
+  useEffect(() => {
     if (
       solutionResponse &&
       typeof solutionResponse === 'object' &&
       'concepts' in solutionResponse
     ) {
-      const parsedConcepts = (
-        solutionResponse as SolutionResponse
-      ).concepts.reduce((acc: { [key: number]: string }, concept, index) => {
-        acc[index + 1] = concept;
-        return acc;
-      }, {});
+      console.log('Solution response received, updating concepts');
+      const parsedConcepts: { [key: number]: string } = {};
+      (solutionResponse as SolutionResponse).concepts.forEach(
+        (concept, index) => {
+          const problemNumber = Object.keys(problemTexts)[index];
+          if (problemNumber) {
+            parsedConcepts[parseInt(problemNumber)] = concept;
+          }
+        }
+      );
       setConcepts(parsedConcepts);
     }
-  }, [ocrResponse, solutionResponse]);
+  }, [solutionResponse, problemTexts]);
 
   useEffect(() => {
     // 초기 solvedProblems 상태 설정
@@ -202,16 +199,17 @@ function Game() {
 
     setIcePositions(positions);
   };
+
   const handleFloeClick = useCallback(
     (index: number) => {
       const newPosition = new THREE.Vector3(...icePositions[index]);
       newPosition.y = 0.5;
       if (penguinPosition.equals(newPosition)) {
-        const problemNumber = parseInt(Object.keys(problemTexts)[index], 10);
+        const problemNumbers = Object.keys(problemTexts).map(Number);
+        const problemNumber = problemNumbers[index];
         setSelectedFloe(problemNumber);
         setSelectedProblem(problemTexts[problemNumber] || '');
         setSelectedConcept(concepts[problemNumber] || 'No concept available');
-
         setShowModal(true);
       } else {
         penguinTargetPosition.current = newPosition;

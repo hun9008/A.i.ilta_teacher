@@ -206,7 +206,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               <div className="p-6 flex-col h-full">
                 <div className="bg-gray-100 rounded-lg p-5 pb-20 mb-10">
                   <h1 className="text-2xl font-bold mb-4">
-                    문제 {selectedFloe + 1}{' '}
+                    문제 {selectedFloe}{' '}
                   </h1>
                   <h2 className="text-xl font-bold mb-4">
                     <p dangerouslySetInnerHTML={{ __html: cleanedProblem }} />
