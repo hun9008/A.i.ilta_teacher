@@ -385,11 +385,7 @@ function Game() {
   const { ocrResponse } = useWebSocket();
   const [showChatModal, setShowChatModal] = useState<boolean>(false);
 
-
-  interface OcrResponse {
-    ocrs: string;
-    concepts: string[];
-  }
+  interface OcrResponse { ocrs: string; concepts: string[]; }
 
   const parseOcrProblems = (ocrs: string) => {
     ocrs = JSON.stringify(ocrs);
@@ -406,7 +402,7 @@ function Game() {
 
   let problemTexts: { [key: number]: string } = {};
   let concepts: { [key: number]: string } = {};
-  let iceCount = 0;
+  let iceCount = 5;
 
   if (
     ocrResponse &&
@@ -423,7 +419,6 @@ function Game() {
       },
       {}
     );
-
     iceCount = Object.keys(problemTexts).length; // 문제 개수에 맞게 iceCount 설정
   }
 
