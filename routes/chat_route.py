@@ -142,11 +142,12 @@ async def decide_user_wrong(websocket: WebSocket):
                     
                     problem_index = 0
                     if prob_num != -1:
-                        print("len solution_storage :", len(solutions_storage))
-                        print("solution_storage : ", solutions_storage)
-                        print("solution_storage[0] : ", solutions_storage[0])
-                        print("solution_storage[0][0] : ", solutions_storage[0][0])
-                        print("prob_num : ", prob_num)
+                        # print("len solution_storage :", len(solutions_storage))
+                        # print("solution_storage : ", solutions_storage)
+                        # print("solution_storage[0] : ", solutions_storage[0])
+                        # print("solution_storage[0][0] : ", solutions_storage[0][0])
+                        # print("prob_num : ", prob_num)
+                        print("len solution_storage[0] : ", len(solutions_storage[0]))
                         problem_index = prob_num
                         prob_area = response_json.get("prob_area")
                         this_prob_area = prob_area[problem_index]
@@ -158,7 +159,7 @@ async def decide_user_wrong(websocket: WebSocket):
                         pil_img.save(buffered, format="JPEG")
                         img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-                        solution = solutions_storage[problem_index]
+                        solution = solutions_storage[0][problem_index]
                         print("##### start hand_ocr #####")
                         hand_ocr = await perform_handwrite_ocr(img_str, solution)
                         print("##### end hand_ocr #####")
