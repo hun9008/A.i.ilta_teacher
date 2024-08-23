@@ -19,7 +19,6 @@ import {
   BarController,
   LineController,
 } from 'chart.js';
-import { Session } from 'inspector';
 
 // Register Chart.js modules
 ChartJS.register(
@@ -338,7 +337,7 @@ const Dashboard: React.FC = () => {
   const colorScale = ['#aee6b7', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
   // 카테고리 쪼개기
 
-  const categoryMapping = {
+  const categoryMapping: Record<string, string> = {
     '00': '자연수, 정수, 유리수',
     '01': '문자와 식, 일차방정식',
     '02': '좌표평면과 그래프',
@@ -582,7 +581,7 @@ const Dashboard: React.FC = () => {
         0
       ); // 자정 시간으로 초기화
 
-      sessionData.forEach(({ startTime, endTime, duration }) => {
+      sessionData.forEach(({ startTime, endTime }) => {
         const startMinutes =
           (new Date(startTime).getTime() - previousEndTime) / (1000 * 60); // 자정부터 startTime까지의 분 차이
         const durationMinutes =
@@ -694,7 +693,7 @@ const Dashboard: React.FC = () => {
 
   const focusChartData = {
     labels: recentSessions.map((_, index) => `Day ${9 - index}`),
-    datasets: recentSessions.flatMap((sessionId, sessionIndex) => {
+    datasets: recentSessions.flatMap((_, sessionIndex) => {
       // 해당 세션의 StackData를 가져옴
       const sessionStackData = stackDataArray[sessionIndex];
 
@@ -726,7 +725,7 @@ const Dashboard: React.FC = () => {
       legend: {
         position: 'top' as const,
         labels: {
-          filter: (legendItem, chartData) => {
+          filter: (legendItem) => {
             return legendItem.text !== '빈 구간';
           },
         },

@@ -39,7 +39,7 @@ const GameUI: React.FC<UIProps> = ({
   onStudyStop,
   onBreakStart,
   onBreakStop,
-  setShowChatModal,
+  // setShowChatModal,
   enableTTS,
   setEnableTTS,
   onEndStudySession,
@@ -72,9 +72,12 @@ const GameUI: React.FC<UIProps> = ({
     <div className="absolute bottom-4 left-4 flex">
       <div className="p-6 bg-gray-50 bg-opacity-50 rounded-2xl flex shadow-lg backdrop-blur-sm space-x-4">
         <div className="text-center">
-          <h2 className="text-xl font-bold text-indigo-600 mb-2">남은 공부 시간</h2>
+          <h2 className="text-xl font-bold text-indigo-600 mb-2">
+            남은 공부 시간
+          </h2>
           <p className="text-3xl font-bold text-indigo-800 mb-3">
-            {studyTime.hours.toString().padStart(2, '0')}:{studyTime.minutes.toString().padStart(2, '0')}
+            {studyTime.hours.toString().padStart(2, '0')}:
+            {studyTime.minutes.toString().padStart(2, '0')}
           </p>
           <button
             onClick={isStudyRunning ? onStudyStop : onStudyStart}
@@ -85,9 +88,12 @@ const GameUI: React.FC<UIProps> = ({
         </div>
         <div className="w-px bg-indigo-200"></div>
         <div className="text-center ">
-          <h2 className="text-xl font-bold text-teal-600 mb-2">남은 쉬는 시간</h2>
+          <h2 className="text-xl font-bold text-teal-600 mb-2">
+            남은 쉬는 시간
+          </h2>
           <p className="text-3xl font-bold text-teal-800 mb-3">
-            {breakTime.hours.toString().padStart(2, '0')}:{breakTime.minutes.toString().padStart(2, '0')}
+            {breakTime.hours.toString().padStart(2, '0')}:
+            {breakTime.minutes.toString().padStart(2, '0')}
           </p>
           <button
             onClick={isBreakRunning ? onBreakStop : onBreakStart}
@@ -98,9 +104,8 @@ const GameUI: React.FC<UIProps> = ({
         </div>
       </div>
     </div>
-    
+
     <div className="absolute bottom-4 right-4 flex space-x-4">
-      
       <button onClick={() => setShowDebugInfo(!showDebugInfo)}>
         {showDebugInfo ? '디버그 정보 숨기기' : '디버그 정보 표시'}
       </button>
