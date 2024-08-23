@@ -32,7 +32,7 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # websocket 연결 관리 
 connections = []
 
-sleep_time = 15
+sleep_time = 5
 
 # (assume) define user_status
 user_vars.user_status = "doing"
@@ -138,6 +138,7 @@ async def decide_user_wrong(websocket: WebSocket):
                 try:
                     response_json = response.json()  # JSON 응답을 파싱
                     prob_num = response_json.get("prob_num")
+                    print("I deal with prob_position : ", prob_num)
                 except json.JSONDecodeError:
                     print("warning: JSON decoding failed")
                     prob_num = -1
@@ -221,6 +222,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 if type(solution) == list:
                     print("warning : solution is list")
                 else:
+                    print("I deal with solution!")
                     steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', solution)
                     steps_array = [step.strip() for step in steps[1:] if step.strip()]
 

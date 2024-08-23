@@ -82,7 +82,10 @@ async def real_time(realtime:RealTime):
     end_date = datetime.now()
     
     # dummy : focusing level
-    focusing_level = (r_study_time - r_break_time) / r_study_time
+    if r_study_time == 0:
+        focusing_level = 0.8
+    else:
+        focusing_level = (r_study_time - r_break_time) / r_study_time
     
     # DB : end_state
     insert_realtime = """
