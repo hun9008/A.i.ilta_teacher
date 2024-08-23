@@ -48,7 +48,7 @@ def imtrim(page):
     else:
         h, w, _ = page.shape
     
-    print(f"Image size after trimming: {h}x{w}")
+    # print(f"Image size after trimming: {h}x{w}")
 
     half_width = w // 2  
     
@@ -60,8 +60,8 @@ def imtrim(page):
     left = page[:, x_left:x_left + w_left]  
     right = page[:, x_right:]
 
-    print(f"Left image shape: {left.shape}")
-    print(f"Right image shape: {right.shape}")
+    # print(f"Left image shape: {left.shape}")
+    # print(f"Right image shape: {right.shape}")
 
     return right, left
 
@@ -69,7 +69,7 @@ def prob_loc_contour(page_rl, output_dir, type, origin):
     global problem_idx
 
     if page_rl is None:
-        print("Error: page_rl is None.")
+        # print("Error: page_rl is None.")
         return
 
     imgray = page_rl

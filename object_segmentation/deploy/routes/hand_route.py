@@ -43,12 +43,12 @@ async def define_prob_areas(input: ProbAreas_HandImg):
         left_prob_count = 0
         right_prob_count = 0
         for loc in prob_loc_l:
-            print("left", loc)
+            # print("left", loc)
             tot_loc.append(loc)
             left_prob_count += 1
         for loc in prob_loc_r:
             loc = (loc[0]+image_clean.shape[1]//2,loc[1], loc[2], loc[3])
-            print("right", loc)
+            # print("right", loc)
             real_loc_r.append(loc)
             tot_loc.append(loc)
             right_prob_count += 1
@@ -96,18 +96,18 @@ async def define_prob_areas(input: ProbAreas_HandImg):
         image_hand_size = (image_hand.shape[0], image_hand.shape[1])
         hand_x, hand_y, hand_w, hand_h = area_loc2ratio(image_hand_size, handloc_x, handloc_y, handloc_w, handloc_h)
         
-        print("-------*********")
-        print("clean figure size: ", image_clean_size)
-        print("hand figure size: ",image_hand_size)
-        for i in prob_loc_rats:
-            print(i)
-        print("\n hand location", hand_area_loc)
-        print(f"hand loc ratio: {hand_x, hand_y, hand_w, hand_h}")
-        print("-------*********")
+        # print("-------*********")
+        # print("clean figure size: ", image_clean_size)
+        # print("hand figure size: ",image_hand_size)
+        # for i in prob_loc_rats:
+            # print(i)
+        # print("\n hand location", hand_area_loc)
+        # print(f"hand loc ratio: {hand_x, hand_y, hand_w, hand_h}")
+        # print("-------*********")
         
         prob_num = None
         for i, (prob_x, prob_y, prob_w, prob_h) in enumerate(prob_loc_rats):
-            print("prob area: ", i, "prob location rat", (prob_x, prob_y, prob_w, prob_h))
+            # print("prob area: ", i, "prob location rat", (prob_x, prob_y, prob_w, prob_h))
             if (hand_x >= prob_x and hand_x <= prob_x + prob_w and
                 hand_y >= prob_y and hand_y <= prob_y + prob_h):
                 prob_num = i
@@ -117,7 +117,7 @@ async def define_prob_areas(input: ProbAreas_HandImg):
             prob_num = -1
         
         image_path = './temp'
-        print("image_list : ", os.listdir(image_path))
+        # print("image_list : ", os.listdir(image_path))
         for filename in os.listdir(image_path):
             # print("filename: ", filename)
             os.remove(os.path.join(image_path, filename))
