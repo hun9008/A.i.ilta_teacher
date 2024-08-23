@@ -160,20 +160,24 @@ async def decide_user_wrong(websocket: WebSocket):
                 img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
                 
 
-                problem_index = 0
+                # problem_index = 0
                 solution = solutions_storage[problem_index]
 
+                print("@@@ type check | img_str : ", type(img_str))
+                print("@@@ type check | solution : ", type(solution))
                 hand_ocr = await perform_handwrite_ocr(img_str, solution)
 
-                print("hand_ocr_reslut : ", hand_ocr.get("ocr_result"))
-                print("hand_ocr_determinants : ", hand_ocr.get("determinants"))
+                print("hand_ocr_reslut : ", hand_ocr.json().get("ocr_result"))
+                print("hand_ocr_determinants : ", hand_ocr.json().get("determinants"))
+
+                user_vars.user_status = hand_ocr.json().get("determinants")
             else:
                 print("warning : prob_num is -1")
                 hand_ocr = {
                     "determinants": "solve_delay"
                 }
             
-            user_vars.user_status = hand_ocr.get("determinants")
+                user_vars.user_status = hand_ocr.get("determinants")
             # print("user_status : ", user_vars.user_status)
         
 async def perform_handwrite_ocr(frame_data, solution):
