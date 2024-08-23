@@ -63,8 +63,10 @@ async def define_prob_areas(input: ProbAreas_HandImg):
             tmp = prob_loc_l[left_prob_count - 1]
             prob_areas.append((tmp[0], tmp[1], image_clean.shape[1]//2-tmp[0], image_clean.shape[0]-tmp[1]-3))
         else:
-            prob_areas.append((prob_loc_l[0], prob_loc_l[1], image_clean.shape[1]//2-prob_loc_l[0]-3, image_clean.shape[0]-prob_loc_l[1]-3))
-
+            if len(prob_loc_l) > 0 and len(prob_loc_r) > 0:
+                prob_areas.append((prob_loc_l[0], prob_loc_l[1], image_clean.shape[1]//2-prob_loc_l[0]-3, image_clean.shape[0]-prob_loc_l[1]-3))
+            else:
+                prob_areas.append((0, 0, image_clean.shape[1]//2, image_clean.shape[0]))
         if right_prob_count > 1:
             for i in range (right_prob_count - 1):
                 tmp = real_loc_r[i]
