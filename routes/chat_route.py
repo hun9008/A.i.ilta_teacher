@@ -164,6 +164,9 @@ async def decide_user_wrong(websocket: WebSocket):
                 solution = solutions_storage[problem_index]
 
                 hand_ocr = await perform_handwrite_ocr(img_str, solution)
+
+                print("hand_ocr_reslut : ", hand_ocr.get("ocr_result"))
+                print("hand_ocr_determinants : ", hand_ocr.get("determinants"))
             else:
                 print("warning : prob_num is -1")
                 hand_ocr = {
