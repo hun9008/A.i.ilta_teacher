@@ -80,9 +80,8 @@ export const WebcamStreamProvider: React.FC<{ children: React.ReactNode }> = ({
           position,
           payload: imageData,
           ocrs,
-        }; // 올바른 객체 문법 사용
+        };
         sendMessage(wsUrl, message);
-        console.log('Sending captured image via WebSocket:', message);
       }
     }
   }, [isStreaming, sendMessage]);

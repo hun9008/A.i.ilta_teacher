@@ -54,54 +54,66 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
       else if (age === 16) setGradeInfo('중등 수학 3');
       else setGradeInfo('');
     }
-    /* 채팅 오류로 인한 주석처리
-    if (!isConnected(chatSocketUrl)) {
-      connectWebSocket(chatSocketUrl);
-    }
-    const socket = getSocket(chatSocketUrl);
-    if (socket) {
-      socket.onopen = () => {
-        console.log('WebSocket connection opened');
-        setSocketReady(true);
-        sendMessage(chatSocketUrl, {
-          u_id: u_id,
-          status: 'open',
-          text: 'hi',
-        });
-      };
-      socket.onmessage = async (event: MessageEvent) => {
-        const data = event.data;
-        console.log('Received WebSocket message:', data);
 
-        // Ignore messages that start with "status:"
-        if (data.startsWith('status :')) {
-          console.log('Ignoring status message:', data);
-          return;
-        }
+    if (isOpen) {
+      let socket = getSocket(chatSocketUrl);
 
-        const newMessage = { text: data, sender: 'bot' as const };
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages, newMessage];
-          globalMessages = updatedMessages; // Update global state
-          return updatedMessages;
-        });
-
-        if (newMessage.sender === 'bot' && enableTTS) {
-          const ttsAudioUrl = await handleTTS(newMessage.text, u_id as string);
-          if (ttsAudioUrl) {
-            setAudioUrl(ttsAudioUrl);
-          }
-        }
-      };
-    }
-    return () => {
-      if (socket) {
-        socket.onopen = null;
-        socket.onmessage = null;
+      if (!isConnected(chatSocketUrl)) {
+        connectWebSocket(chatSocketUrl);
+        socket = getSocket(chatSocketUrl); // 재연결 후 소켓 다시 가져오기
       }
-    };
-    */
-  }, [getSocket, connectWebSocket, isConnected, sendMessage]);
+
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        setSocketReady(true);
+      }
+
+      if (socket) {
+        socket.onopen = () => {
+          console.log('WebSocket connection opened');
+          setSocketReady(true);
+          sendMessage(chatSocketUrl, {
+            u_id: u_id,
+            status: 'open',
+            text: 'hi',
+          });
+        };
+
+        socket.onmessage = async (event: MessageEvent) => {
+          const data = event.data;
+          console.log('Received WebSocket message:', data);
+
+          if (data.startsWith('status :')) {
+            console.log('Ignoring status message:', data);
+            return;
+          }
+
+          const newMessage = { text: data, sender: 'bot' as const };
+          setMessages((prevMessages) => {
+            const updatedMessages = [...prevMessages, newMessage];
+            globalMessages = updatedMessages;
+            return updatedMessages;
+          });
+
+          if (newMessage.sender === 'bot' && enableTTS) {
+            const ttsAudioUrl = await handleTTS(
+              newMessage.text,
+              u_id as string
+            );
+            if (ttsAudioUrl) {
+              setAudioUrl(ttsAudioUrl);
+            }
+          }
+        };
+      }
+
+      return () => {
+        if (socket) {
+          socket.onopen = null;
+          socket.onmessage = null;
+        }
+      };
+    }
+  }, [isOpen, getSocket, connectWebSocket, isConnected, sendMessage]);
 
   const handleSendMessage = () => {
     if (inputMessage.trim() && socketReady) {
@@ -116,16 +128,22 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
       const newMessage = { text: inputMessage, sender: 'user' as const };
       setMessages((prevMessages) => {
         const updatedMessages = [...prevMessages, newMessage];
-        globalMessages = updatedMessages; // Update global state
+        globalMessages = updatedMessages;
         return updatedMessages;
       });
       setInputMessage('');
+    } else if (!socketReady) {
+      console.log('WebSocket is not ready. Please check the connection.');
     }
   };
 
-  const handleClose = () => {onClose();};
+  const handleClose = () => {
+    onClose();
+  };
 
-  if (!isOpen) {return null;}
+  if (!isOpen) {
+    return null;
+  }
 
   const overlayVariants = {
     hidden: { opacity: 0 },
@@ -166,8 +184,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         animate="visible"
         exit="exit"
       >
-        <div className="flex h-[66vh] w-fit max-w-8xl min-w-80 pointer-events-auto">
-        </div>
+        <div className="flex h-[66vh] w-fit max-w-8xl min-w-80 pointer-events-auto"></div>
         <div className="w-1/3 pointer-events-none" />
         <div className="flex w-fit h-[66vh] max-w-8xl justify-end min-w-80 pointer-events-auto">
           {!chatOnly && (
@@ -189,14 +206,18 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   </h2>
                 </div>
                 <div className="p-5">
-                <h1 className="text-2xl font-bold mb-4">이 문제에 대한 정보</h1>
-                <h3 className="text-lg font-semibold mb-4">
-                  {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
-                </h3>
-                <h3 className="text-2xl font-bold mb-4">관련 개념들</h3>
-                <h3 className="text-lg font-semibold mb-4">{cleanedConcept}</h3>
+                  <h1 className="text-2xl font-bold mb-4">
+                    이 문제에 대한 정보
+                  </h1>
+                  <h3 className="text-lg font-semibold mb-4">
+                    {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
+                  </h3>
+                  <h3 className="text-2xl font-bold mb-4">관련 개념들</h3>
+                  <h3 className="text-lg font-semibold mb-4">
+                    {cleanedConcept}
+                  </h3>
                 </div>
-                <div className="flex justify-end">              
+                <div className="flex justify-end">
                   <button
                     className="px-3 py-1 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
                     onClick={handleSolveClick}
