@@ -740,7 +740,7 @@ const Dashboard: React.FC = () => {
                     className={styles.competitionButton}
                     onClick={() => navigate('/main/competition')}
                   >
-                    1등 도전하기
+                  1등 도전하기
                   </button>
                 </div>
               </div>
@@ -781,14 +781,14 @@ const Dashboard: React.FC = () => {
                 options={solvedChartOptions}
               />
             </div>
-            <div className={styles.chartWrapper}>
+            {/* <div className={styles.chartWrapper}>
               <h3 className={styles.chartTitle}>주간 리포트 - 공부 시간</h3>
               <Chart
                 type="bar"
                 data={studyTimeData}
                 options={studyTimeChartOptions}
               />
-            </div>
+            </div> */}
           </div>
           <div className={styles.centerColumn}>
             <div
