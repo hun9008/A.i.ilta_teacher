@@ -151,14 +151,17 @@ async def decide_user_wrong(websocket: WebSocket):
                 buffered = io.BytesIO()
                 pil_img.save(buffered, format="JPEG")
                 img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                
 
-            problem_index = 0
-            solution = solutions_storage[problem_index]
+                problem_index = 0
+                solution = solutions_storage[problem_index]
 
-            hand_ocr = await perform_handwrite_ocr(img_str, solution)
-            # hand_ocr = {
-            #     "determinants": "wrong"
-            # }
+                hand_ocr = await perform_handwrite_ocr(img_str, solution)
+            else:
+                print("warning : prob_num is -1")
+                hand_ocr = {
+                    "determinants": "solve_delay"
+                }
             
             user_vars.user_status = hand_ocr.get("determinants")
             # print("user_status : ", user_vars.user_status)
