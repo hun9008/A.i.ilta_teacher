@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send,  BookOpen } from 'lucide-react';
+import { Send,  BookOpen, User } from 'lucide-react';
 import { useWebSocket } from './WebSocketContext';
 import { handleTTS, TTSAudioPlayer } from './TTS';
+import logo from './assets/logo.svg';
 
 interface AnimatedModalProps {
   isOpen: boolean;
@@ -231,7 +232,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           )}
 
           <motion.div
-            className="min-w-[25vw] w-1/2 border-r-2 border-l-2 border-b-8 border-blue-400 border-opacity-50 bg-blue-50 bg-opacity-100 rounded-3xl p-5 overflow-hidden shadow-2xl "
+            className="flex flex-col min-w-[25vw] w-1/2 border-r-2 border-l-2 border-b-8 border-blue-400 border-opacity-50 bg-blue-50 bg-opacity-100 rounded-3xl p-5 overflow-hidden shadow-2xl "
             variants={panelVariants}
             initial="hidden"
             animate="visible"
@@ -246,16 +247,25 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`mb-2 p-2.5 rounded ${
-                    message.sender === 'user'
-                      ? 'bg-blue-500 text-white ml-8'
-                      : 'bg-gray-200 text-black mr-8'
+                  className={`mb-4 flex items-start ${
+                    message.sender === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  <span className="font-bold">
-                    {message.sender === 'user' ? '학생: ' : 'm.AI 튜터: '}
-                  </span>
-                  {message.text}
+                  {message.sender !== 'user' && (
+                    <img src={logo} alt="m.AI Tutor" className="w-8 h-8 mr-4 flex-shrink-0" />
+                  )}
+                  <div
+                    className={`max-w-3/4 p-2.5 pr-5 pl-5 rounded-2xl ${
+                      message.sender === 'user'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-200 text-black'
+                    }`}
+                  >
+                    <div className="break-words">{message.text}</div>
+                  </div>
+                  {message.sender === 'user' && (
+                    <User className="w-8 h-8 ml-2 text-primary-600 flex-shrink-0" />
+                  )}
                 </div>
               ))}
             </div>
@@ -279,8 +289,8 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             <button onClick={handleClose} className="bg-gray-400">
               닫기
             </button>*/}
-            {audioUrl && <TTSAudioPlayer audioUrl={audioUrl} />}
           </motion.div>
+          {audioUrl && <TTSAudioPlayer audioUrl={audioUrl} />}
         </div>
       </motion.div>
     </AnimatePresence>
