@@ -148,7 +148,7 @@ async def decide_user_wrong(websocket: WebSocket):
             problem_index = 0
             if prob_num != -1:
                 problem_index = prob_num
-                prob_area = response.get("prob_area")
+                prob_area = response.json().get("prob_area")
                 this_prob_area = prob_area[problem_index]
                 ## 전체 이미지에서 this_prob_area에 해당하는 부분만 crop
                 x, y, w, h = this_prob_area
