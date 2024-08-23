@@ -99,6 +99,9 @@ async def decide_user_wrong(websocket: WebSocket):
             
             file_list = glob.glob(os.path.join(storage_dir, "*"))
             if not file_list:
+                print("@@@@@@@@@@@@@@@@@@@@@@@@@")
+                print("@ warning: no mobile image @")
+                print("@@@@@@@@@@@@@@@@@@@@@@@@@")
                 continue  # 혹시 이미지가 없는 경우
 
             latest_img = max(file_list, key=os.path.getctime)
@@ -119,7 +122,7 @@ async def decide_user_wrong(websocket: WebSocket):
             
             # response = hand_detect_dummy
             # print("hand response : ", response)
-            decode_image = base64.b64decode(origin_image_storage[0])
+            decode_image = base64.b64decode(include_hand)
             image = Image.open(io.BytesIO(decode_image))
             if image.mode == 'RGBA':
                 image = image.convert('RGB')
