@@ -218,6 +218,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 data = await asyncio.wait_for(websocket.receive_text(), timeout=sleep_time)
                 message = json.loads(data)
                 chat_request = ChatRequest(**message)
+                print("chat_request : ", chat_request)
 
                 response = await process_message(chat_request)
 
