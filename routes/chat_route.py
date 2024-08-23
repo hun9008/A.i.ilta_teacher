@@ -32,7 +32,7 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # websocket 연결 관리 
 connections = []
 
-sleep_time = 5
+sleep_time = 1
 
 # (assume) define user_status
 user_vars.user_status = "doing"
@@ -143,6 +143,9 @@ async def decide_user_wrong(websocket: WebSocket):
                     problem_index = 0
                     if prob_num != -1:
                         print("len solution_storage :", len(solutions_storage))
+                        print("solution_storage : ", solutions_storage)
+                        print("solution_storage[0] : ", solutions_storage[0])
+                        print("solution_storage[0][0] : ", solutions_storage[0][0])
                         print("prob_num : ", prob_num)
                         problem_index = prob_num
                         prob_area = response_json.get("prob_area")
