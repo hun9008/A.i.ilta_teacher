@@ -24,7 +24,7 @@ const MainPage: React.FC = () => {
           <FileText size={30} className="mx-auto" />
         </button>
         <button
-          className={`mb-8 w-16 h-20 rounded-r-none py-2 ${isActive('/main/competition') ? 'bg-white text-gray-500' : 'text-white'}`}
+          className={`mb-8 w-16 h-20 rounded-r-none py-2 ${(isActive('/main/competition')||isActive('/main/competition/difficulty-select')||isActive('/main/competition/problem-set')) ? 'bg-white text-gray-500' : 'text-white'}`}
           onClick={() => navigate('/main/competition')}
         >
           <Trophy size={30} className="mx-auto" />

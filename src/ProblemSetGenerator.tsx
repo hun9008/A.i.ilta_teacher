@@ -120,7 +120,7 @@ const ProblemSetGenerator: React.FC = () => {
         }}
       >
         <div className={styles.competitionContainer}>
-          <h2 className={styles.sectionTitle}>문제집</h2>
+          <h2 className="text-2xl text-bold">문제집</h2>
           {problems.map((problem, index) => (
             <div key={index} className={styles.problemSection}>
               <h3>문제 {index + 1}</h3>
@@ -143,8 +143,10 @@ const ProblemSetGenerator: React.FC = () => {
               <button
                 onClick={submitAnswers}
                 disabled={!isSubmitEnabled}
-                className={`${styles.submitButton} ${
-                  isSubmitEnabled ? styles.enabled : styles.disabled
+                className={`px-6 py-3 text-white font-semibold rounded-lg transition-all duration-300 ease-in-out ${
+                  isSubmitEnabled
+                    ? 'bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300'
+                    : 'bg-gray-400 cursor-not-allowed'
                 }`}
               >
                 제출하기
