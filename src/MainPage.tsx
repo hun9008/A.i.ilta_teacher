@@ -11,7 +11,7 @@ const MainPage: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex flex-col p-20">
+    <div className="flex flex-row bg-primary-200 ">
       <div className="flex flex-col items-center pt-[20px] bg-primary-100 w-16 h-screen fixed left-0 top-0">
         <button
           className={`text-gray-400 mb-0 w-16 h-20 rounded-r-none py-2 ${isActive('/main') ? 'bg-white' : ''}`}
@@ -32,7 +32,7 @@ const MainPage: React.FC = () => {
           <Trophy size={30} className="mx-auto" />
         </button>
       </div>
-      <div className="bg-gray-50 rounded-xl h-full">
+      <div className="flex bg-white rounded-3xl flex-grow ">
         <Outlet />
       </div>
     </div>
