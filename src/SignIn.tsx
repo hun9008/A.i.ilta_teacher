@@ -379,6 +379,7 @@ function SignIn() {
           </div>
         </div>
       </div>
+      {/*
       <div style={{ transform: 'translateY(-40px)' }}>
         <button
           className="secondary-button"
@@ -391,6 +392,7 @@ function SignIn() {
         </button>
         <button onClick={() => navigate('/setting')}>Setting페이지</button>
       </div>
+      */}
     </div>
   );
 }

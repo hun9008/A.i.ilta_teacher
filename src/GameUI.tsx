@@ -123,12 +123,12 @@ const GameUI: React.FC<UIProps> = ({
         <LogOut size={24} />
       </button>
     </div>
-    {showDebugInfo && (
+    {/*showDebugInfo && (
       <div
         id="debug-info"
         className="absolute bottom-4 left-4 bg-white bg-opacity-75 p-2 rounded text-black"
       ></div>
-    )}
+    )*/}
   </>
 );
 

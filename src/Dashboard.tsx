@@ -670,10 +670,7 @@ const Dashboard: React.FC = () => {
       x: {
         type: 'category',
         position: 'bottom',
-        title: {
-          display: true,
-          text: 'Categories',
-        },
+        
       },
       y: {
         type: 'linear' as const,
