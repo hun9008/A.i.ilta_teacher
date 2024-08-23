@@ -194,7 +194,7 @@ def contour(page_rl, output_dir, type, origin, origin_format='png'):
     print("net_contours: ", len(net_location))
     problem_locations = net_location
 
-    # problem_loc의 y좌표는 0, w는 전체 w로 변경
+    # problem_loc의 x좌표는 0, w는 전체 w로 변경
     for i, p_loc in enumerate(problem_locations):
         x, y, w, h = p_loc
         problem_locations[i] = (0, y, page_rl.shape[1], h)

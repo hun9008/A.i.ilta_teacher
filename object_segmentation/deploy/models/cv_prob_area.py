@@ -9,7 +9,7 @@ problem_idx = 0
 def preprocess_image(page):
 
     gray = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
-    _, binary = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
+    _, binary = cv2.threshold(gray, 110, 255, cv2.THRESH_BINARY_INV)
 
     # 구조적 요소 커널을 생성하여 세로 선 강조
     vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, page.shape[0] // 30))
@@ -17,12 +17,18 @@ def preprocess_image(page):
     # 모폴로지 연산을 통해 세로 선 강조
     detected_lines = cv2.morphologyEx(binary, cv2.MORPH_OPEN, vertical_kernel, iterations=2)
 
-    # 세로 구분선 제거
-    cnts = cv2.findContours(detected_lines, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
-    for c in cnts:
-        x, y, w, h = cv2.boundingRect(c)
-        if h > page.shape[0] // 2:  # 세로 선이 이미지의 절반 이상을 잇는 경우
-            cv2.drawContours(binary, [c], -1, (0, 0, 0), thickness=cv2.FILLED)  
+    edges = cv2.Canny(detected_lines, 50, 150, apertureSize=3)
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 100, minLineLength=page.shape[0] // 2, maxLineGap=10)
+    
+    if lines is not None:
+        for line in lines:
+            for x1, y1, x2, y2 in line:
+                angle = np.abs(np.arctan2(y2 - y1, x2 - x1) * 180 / np.pi)
+                line_length = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+                if angle > 85 and angle < 95 and line_length >= (page.shape[0] / 2):  
+                    cv2.line(binary, (x1, y1), (x2, y2), (0, 0, 0), thickness=3)
+                # elif x1 == x2 or (x2 - x1) < 10:  # 세로가 매우 작은 부분 제거
+                #     cv2.line(binary, (x1, y1), (x2, y2), (0, 0, 0), thickness=cv2.FILLED)
 
     processed_image = cv2.bitwise_not(binary)
 
@@ -78,18 +84,122 @@ def prob_loc_contour(page_rl, output_dir, type, origin):
     contours, hierarchy = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     contoured_image = page_rl.copy()
-    cv2.drawContours(contoured_image, contours, -1, (0, 255, 0), 2) 
+    contoured_image = cv2.cvtColor(contoured_image, cv2.COLOR_GRAY2BGR)
+    cv2.drawContours(contoured_image, contours, -1, (0, 0, 255), 2) 
 
     cv2.imwrite(f"{output_dir}/_{type}_contoured_image.png", contoured_image)
 
     problem_locations = []
+    net_location = []
 
+
+    contours = sorted(contours, key=lambda c: cv2.boundingRect(c)[1])
     cnt = 0
-    print("contours len, type: ", len(contours), " ",type)
+    # print("contours len, type: ", len(contours), " ",type)
     for i, c in enumerate(contours):
         x, y, w, h = cv2.boundingRect(c)
-        if w > 100 and h > 50:  
+        # print("w, h : ", w, h)
+        if w > 120 and h > 50:  
             problem_locations.append((x, y, w, h))
+            # print("append : ", (x, y, w, h))
+
+    # append된 것만 따로 파일로 coutour그린 이미지 저장
+    contoured_image = page_rl.copy()
+    contoured_image = cv2.cvtColor(contoured_image, cv2.COLOR_GRAY2BGR)
+    for p_loc in problem_locations:
+        x, y, w, h = p_loc
+        cv2.rectangle(contoured_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+    cv2.imwrite(f"{output_dir}/_{type}_problem_contoured_image.png", contoured_image)
+
+
+    # 1단계: y 값 기준으로 영역 병합
+
+    y_threshold = 0
+    y_merged_locations = []
+    for i, c in enumerate(contours):
+        x, y, w, h = cv2.boundingRect(c)
+        # print("x, y, w, h : ", x, y, w, h)
+        
+        merged = False
+        for j in range(len(y_merged_locations)):
+            prev_x, prev_y, prev_w, prev_h = y_merged_locations[j]
+            
+            # 조건 1: y 값과 y + h 값의 포함 관계 확인
+            if ((y >= prev_y and y <= prev_y + prev_h) or (prev_y >= y and prev_y <= y + h)) and abs(y - prev_y) <= y_threshold:
+                # 두 영역을 합치기
+                new_x = min(prev_x, x)
+                new_y = min(prev_y, y)
+                new_w = max(prev_x + prev_w, x + w) - new_x
+                new_h = max(prev_y + prev_h, y + h) - new_y
+            
+                # 전체 영역의 높이 1/3 이상인 경우 제외
+                if new_h > page_rl.shape[0] // 3:
+                    continue
+
+                # 합쳐진 영역으로 업데이트
+                y_merged_locations[j] = (new_x, new_y, new_w, new_h)
+                # print("y_merge : ", y_merged_locations[j], end=" ")
+                # print("y, h : ", y, h, end=" ")
+                # print("prev : ", prev_y, prev_h)
+                merged = True
+                break
+        
+        if not merged:
+            # 새로운 영역 추가
+            y_merged_locations.append((x, y, w, h))
+    
+    # 2단계: x + w 값 기준으로 영역 병합
+    final_locations = []
+    for loc in y_merged_locations:
+        x, y, w, h = loc
+        merged = False
+        for j in range(len(final_locations)):
+            prev_x, prev_y, prev_w, prev_h = final_locations[j]
+            
+            # 조건 2: y 값 차이가 100 이하이고, x + w 값이 포함 관계인 경우
+            if abs(y - prev_y) <= 150 and ((x + w >= prev_x and x + w <= prev_x + prev_w) or (prev_x + prev_w >= x and prev_x + prev_w <= x + w)):
+                # 두 영역을 합치기
+                new_x = min(prev_x, x)
+                new_y = min(prev_y, y)
+                new_w = max(prev_x + prev_w, x + w) - new_x
+                new_h = max(prev_y + prev_h, y + h) - new_y
+
+                # 합쳐진 영역으로 업데이트
+                final_locations[j] = (new_x, new_y, new_w, new_h)
+                # print("x_merge : ", final_locations[j])
+                merged = True
+                break
+        
+        if not merged:
+            # 새로운 영역 추가
+            final_locations.append((x, y, w, h))
+
+    problem_locations = final_locations
+
+    for p_loc in problem_locations:
+        # print("location : " ,p_loc)
+        if  p_loc[2] > 300 and p_loc[3] > 90:
+            # print("location : " ,p_loc)
+            net_location.append(p_loc)
+
+    # print("problem_locations: ", len(problem_locations))
+    print("net_contours: ", len(net_location))
+    problem_locations = net_location
+
+    # problem_loc의 x좌표는 0, w는 전체 w로 변경
+    for i, p_loc in enumerate(problem_locations):
+        x, y, w, h = p_loc
+        problem_locations[i] = (0, y, page_rl.shape[1], h)
+
+    # print("problem_locations: ", len(problem_locations))
+
+    # for i 
+
+    # print("contours len, type: ", len(contours), " ",type)
+    # for i, c in enumerate(contours):
+    #     x, y, w, h = cv2.boundingRect(c)
+    #     if w > 100 and h > 50:  
+    #         problem_locations.append((x, y, w, h))
     
     return problem_locations
 
@@ -106,7 +216,13 @@ def prob_loc_crop(image):
     output_dir = './temp'
     os.makedirs(output_dir, exist_ok=True)
 
-    return prob_loc_contour(left, output_dir, 'left', origin_left), prob_loc_contour(right, output_dir, 'right', origin_right)
+    for file in os.listdir(output_dir):
+        os.remove(os.path.join(output_dir, file))
+
+    left_contour = prob_loc_contour(left, output_dir, 'left', origin_left)
+    right_contour = prob_loc_contour(right, output_dir, 'right', origin_right)
+
+    return left_contour, right_contour
 
 def visualize_problem_locations(image, problem_locations):
     for (x, y, w, h) in problem_locations:
