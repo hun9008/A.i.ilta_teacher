@@ -83,106 +83,91 @@ hand_detect_dummy = {
 }
 
 async def decide_user_wrong(websocket: WebSocket):
-    while True:
+    try:
+        while True:
+            await asyncio.sleep(sleep_time)  
+            # 디버그 로그 추가
+            print("Running decide_user_wrong loop")
+
+            # 여기서 에러가 발생할 가능성이 있는 모든 코드를 try-except로 감싸서 에러 로그 확인
+            try:
+                # 여기에 현재 실행하고 있는 코드들
+                # 문제 발생 가능성 있는 부분을 전부 감싸기
+                if len(solutions_storage) != 0 and len(ocrs_storage) != 0 and len(origin_image_storage) != 0:
+                    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+                    storage_dir = os.path.join(root_dir, "local_storage/mobile")
+
+                    file_list = glob.glob(os.path.join(storage_dir, "*"))
+                    if not file_list:
+                        print("@@@@@@@@@@@@@@@@@@@@@@@@@")
+                        print("@ warning: no mobile image @")
+                        print("@@@@@@@@@@@@@@@@@@@@@@@@@")
+                        continue  # 혹시 이미지가 없는 경우
+
+                    latest_img = max(file_list, key=os.path.getctime)
+
+                    latest_img_name = latest_img.split("/")[-1]
+                    print("latest_img_name : ", latest_img_name)
+                    
+                    with open(latest_img, "rb") as target_img:
+                        include_hand = base64.b64encode(target_img.read()).decode('utf-8')
+                    
+                    problem_detect_json = {
+                        "image_clean" : origin_image_storage[0],
+                        "image_hand" : include_hand
+                    }
+
+                    url = "http://model.maitutor.site/prob_areas_which_prob"
+
+                    headers = {'Content-Type': 'application/json'}
+                    response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
+
+                    decode_image = base64.b64decode(include_hand)
+                    image = Image.open(io.BytesIO(decode_image))
+                    if image.mode == 'RGBA':
+                        image = image.convert('RGB')
+                    image_array = np.array(image)
+
+                    if isinstance(response, requests.models.Response):
+                        try:
+                            response_json = response.json()
+                            prob_num = response_json.get("prob_num")
+                            print("I deal with prob_position : ", prob_num)
+                        except json.JSONDecodeError:
+                            print("warning: JSON decoding failed")
+                            prob_num = -1
+                    else:
+                        print("warning (unexpected type) :", type(response))
+                        prob_num = -1
+                    
+                    problem_index = 0
+                    if prob_num != -1:
+                        problem_index = prob_num
+                        prob_area = response_json.get("prob_area")
+                        this_prob_area = prob_area[problem_index]
+                        x, y, w, h = this_prob_area
+
+                        crop_image = image_array[y:y+h, x:x+w]
+                        pil_img = Image.fromarray(crop_image)
+                        buffered = io.BytesIO()
+                        pil_img.save(buffered, format="JPEG")
+                        img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+                        solution = solutions_storage[problem_index]
+                        hand_ocr = await perform_handwrite_ocr(img_str, solution)
+
+                        user_vars.user_status = hand_ocr.json().get("determinants")
+                    else:
+                        hand_ocr = {
+                            "determinants": "solve_delay"
+                        }
+                        user_vars.user_status = hand_ocr.get("determinants")
+
+            except Exception as e:
+                print(f"Error in decide_user_wrong loop: {str(e)}")
         
-        await asyncio.sleep(sleep_time)  
-        
-        # print("len(concepts) : ", len(concepts_storage))
-        # print("len(solutions) : ", len(solutions_storage))
-        # print("len(ocrs) : ", len(ocrs_storage))
-        # print("len(origin_image) : ", len(origin_image_storage))
-        # print("type of origin_image : ", type(origin_image_storage))
-        if len(solutions_storage) != 0 and len(ocrs_storage) != 0 and len(origin_image_storage) != 0:
-            # directory path
-            root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-            storage_dir = os.path.join(root_dir, "local_storage/mobile")
-            
-            file_list = glob.glob(os.path.join(storage_dir, "*"))
-            if not file_list:
-                print("@@@@@@@@@@@@@@@@@@@@@@@@@")
-                print("@ warning: no mobile image @")
-                print("@@@@@@@@@@@@@@@@@@@@@@@@@")
-                continue  # 혹시 이미지가 없는 경우
-
-            latest_img = max(file_list, key=os.path.getctime)
-
-            latest_img_name = latest_img.split("/")[-1]
-            print("latest_img_name : ", latest_img_name)
-            
-            # # encoding 
-            with open(latest_img, "rb") as target_img:
-                include_hand = base64.b64encode(target_img.read()).decode('utf-8')
-            
-            problem_detect_json = {
-                "image_clean" : origin_image_storage[0],
-                "image_hand" : include_hand
-            }
-
-            url = "http://model.maitutor.site/prob_areas_which_prob"
-
-            headers = {'Content-Type': 'application/json'}
-            response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
-            
-            # response = hand_detect_dummy
-            # print("hand response : ", response)
-            decode_image = base64.b64decode(include_hand)
-            image = Image.open(io.BytesIO(decode_image))
-            if image.mode == 'RGBA':
-                image = image.convert('RGB')
-            image_array = np.array(image)
-
-            # # (assume) 지금 어떤 문제 풀고 있는지 알아내기
-            # prob_num = response.get("prob_num")
-            if type(response) == json:
-                prob_num = response.get("prob_num")
-            elif type(response) == dict:
-                prob_num = response["prob_num"]
-            elif isinstance(response, requests.models.Response):
-                try:
-                    response_json = response.json()  # JSON 응답을 파싱
-                    prob_num = response_json.get("prob_num")
-                    print("I deal with prob_position : ", prob_num)
-                except json.JSONDecodeError:
-                    print("warning: JSON decoding failed")
-                    prob_num = -1
-            else:
-                print("warning (unexpected type) :", type(response))
-                prob_num = -1
-            
-            problem_index = 0
-            if prob_num != -1:
-                problem_index = prob_num
-                prob_area = response.json().get("prob_area")
-                this_prob_area = prob_area[problem_index]
-                ## 전체 이미지에서 this_prob_area에 해당하는 부분만 crop
-                x, y, w, h = this_prob_area
-
-                crop_image = image_array[y:y+h, x:x+w]
-                pil_img = Image.fromarray(crop_image)
-                buffered = io.BytesIO()
-                pil_img.save(buffered, format="JPEG")
-                img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-                
-
-                # problem_index = 0
-                solution = solutions_storage[problem_index]
-
-                print("@@@ type check | img_str : ", type(img_str))
-                print("@@@ type check | solution : ", type(solution))
-                hand_ocr = await perform_handwrite_ocr(img_str, solution)
-
-                print("hand_ocr_reslut : ", hand_ocr.json().get("ocr_result"))
-                print("hand_ocr_determinants : ", hand_ocr.json().get("determinants"))
-
-                user_vars.user_status = hand_ocr.json().get("determinants")
-            else:
-                print("@@@ warning : prob_num is -1")
-                hand_ocr = {
-                    "determinants": "solve_delay"
-                }
-            
-                user_vars.user_status = hand_ocr.get("determinants")
-            # print("user_status : ", user_vars.user_status)
+    except Exception as e:
+        print(f"Critical error in decide_user_wrong: {str(e)}")
         
 async def perform_handwrite_ocr(frame_data, solution):
     
