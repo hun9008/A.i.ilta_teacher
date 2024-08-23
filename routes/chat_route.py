@@ -105,6 +105,9 @@ async def decide_user_wrong(websocket: WebSocket):
                 continue  # 혹시 이미지가 없는 경우
 
             latest_img = max(file_list, key=os.path.getctime)
+
+            latest_img_name = latest_img.split("/")[-1]
+            print("latest_img_name : ", latest_img_name)
             
             # # encoding 
             with open(latest_img, "rb") as target_img:
