@@ -82,8 +82,8 @@ async def handle_ws_solution(user_ocrs, websocket, u_id, device):
 
     concepts_storage.clear()
     solutions_storage.clear()
-    concepts_storage.append(output_json.get("concepts", []))
-    solutions_storage.append(output_json.get("solutions", []))
+    concepts_storage.append(output_json.get("concepts"))
+    solutions_storage.append(output_json.get("solutions"))
     
     pc_key = f'{u_id}_pc'
     if pc_key in connections:
@@ -117,14 +117,17 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
     # solutions.extend(ocr_result.get("solutions", []))
     # ocrs_storage.extend(ocr_result.get("ocrs", []))
     # print("ocrs_storage : ", ocrs_storage)
-    ocrs_storage.clear()
-    ocrs_storage.append(ocr_result.get("ocrs", []))
+
+    print("type of ocrs_storage : ", type(ocrs_storage))
 
     output_json = {
         # "concepts": concepts,
         # "solutions": solutions,
         "ocrs": ocr_result.get("ocrs", [])
     }
+
+    ocrs_storage.clear()
+    ocrs_storage.append(output_json.get("ocrs"))
     
     pc_key = f'{u_id}_pc'
     if pc_key in connections:

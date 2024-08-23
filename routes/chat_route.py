@@ -134,6 +134,13 @@ async def decide_user_wrong(websocket: WebSocket):
                 prob_num = response.get("prob_num")
             elif type(response) == dict:
                 prob_num = response["prob_num"]
+            elif isinstance(response, requests.models.Response):
+                try:
+                    response_json = response.json()  # JSON 응답을 파싱
+                    prob_num = response_json.get("prob_num")
+                except json.JSONDecodeError:
+                    print("warning: JSON decoding failed")
+                    prob_num = -1
             else:
                 print("warning (unexpected type) :", type(response))
                 prob_num = -1
