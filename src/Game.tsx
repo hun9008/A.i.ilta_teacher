@@ -20,25 +20,41 @@ function Game() {
   const { solutionResponse } = useWebSocket();
   const [showChatModal, setShowChatModal] = useState<boolean>(false);
   const [iceCount, setIceCount] = useState<number>(5);
-  const [solvedProblems, setSolvedProblems] = useState<{ [key: number]: boolean }>({});
+  const [solvedProblems, setSolvedProblems] = useState<{
+    [key: number]: boolean;
+  }>({});
   const [enableTTS, setEnableTTS] = useState<boolean>(false);
 
-  const [problemTexts, setProblemTexts] = useState<{ [key: number]: string }>({});
+  const [problemTexts, setProblemTexts] = useState<{ [key: number]: string }>(
+    {}
+  );
   const [concepts, setConcepts] = useState<{ [key: number]: string }>({});
-  
-  const [penguinPosition, setPenguinPosition] = useState<THREE.Vector3>(new THREE.Vector3(0, 0.5, 0));
+
+  const [penguinPosition, setPenguinPosition] = useState<THREE.Vector3>(
+    new THREE.Vector3(0, 0.5, 0)
+  );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedFloe, setSelectedFloe] = useState<number>(0);
-  const penguinTargetPosition = useRef<THREE.Vector3>(new THREE.Vector3(0, 0.5, 0));
+  const penguinTargetPosition = useRef<THREE.Vector3>(
+    new THREE.Vector3(0, 0.5, 0)
+  );
   const [showDebugInfo, setShowDebugInfo] = useState<boolean>(false);
-  const [icePositions, setIcePositions] = useState<[number, number, number][]>([]);
+  const [icePositions, setIcePositions] = useState<[number, number, number][]>(
+    []
+  );
   const [showSolvedMessage, setShowSolvedMessage] = useState(false);
 
-  const [studyTime, setStudyTime] = useState<{ hours: number; minutes: number }>(() => {
+  const [studyTime, setStudyTime] = useState<{
+    hours: number;
+    minutes: number;
+  }>(() => {
     const savedTime = parseInt(localStorage.getItem('studyTime') || '0');
     return { hours: Math.floor(savedTime / 60), minutes: savedTime % 60 };
   });
-  const [breakTime, setBreakTime] = useState<{ hours: number; minutes: number }>(() => {
+  const [breakTime, setBreakTime] = useState<{
+    hours: number;
+    minutes: number;
+  }>(() => {
     const savedTime = parseInt(localStorage.getItem('breakTime') || '0');
     return { hours: Math.floor(savedTime / 60), minutes: savedTime % 60 };
   });
@@ -46,7 +62,9 @@ function Game() {
   const [isBreakRunning, setIsBreakRunning] = useState(false);
   const navigate = useNavigate();
 
-  interface SolResp {concepts: string[];}
+  interface SolResp {
+    concepts: string[];
+  }
 
   useEffect(() => {
     // 로컬 스토리지에서 수정된 문제 불러오기
@@ -83,27 +101,25 @@ function Game() {
     ) {
       console.log('Solution response received, updating concepts');
       const parsedConcepts: { [key: number]: string } = {};
-      (solutionResponse as SolResp).concepts.forEach(
-        (concept, index) => {
-          const problemNumber = Object.keys(problemTexts)[index];
-          if (problemNumber) {
-            parsedConcepts[parseInt(problemNumber)] = concept;
-          }
+      (solutionResponse as SolResp).concepts.forEach((concept, index) => {
+        const problemNumber = Object.keys(problemTexts)[index];
+        if (problemNumber) {
+          parsedConcepts[parseInt(problemNumber)] = concept;
         }
-      );
+      });
       setConcepts(parsedConcepts);
     }
   }, [solutionResponse, problemTexts]);
 
   useEffect(() => {
     // 초기 solvedProblems 상태 설정
-    const initialSolvedState = Array(iceCount).fill(false).reduce((acc, _, index) => {
-        acc[index + 1] = false;
-        return acc;
-      }, {} as { [key: number]: boolean });
+    const initialSolvedState = Object.keys(problemTexts).reduce((acc, key) => {
+      acc[parseInt(key)] = false;
+      return acc;
+    }, {} as { [key: number]: boolean });
     setSolvedProblems(initialSolvedState);
     generateCircularIcePositions(iceCount);
-  }, [iceCount]); // iceCount가 변경될 때마다 실행
+  }, [iceCount, problemTexts]); // iceCount가 변경될 때마다 실행
 
   const handleEndStudySession = async () => {
     await sendTimeDataToServer();
@@ -113,15 +129,22 @@ function Game() {
   const generateCircularIcePositions = (count: number) => {
     const goldenAngle = Math.PI * (3 - Math.sqrt(5));
     const maxRadius = Math.sqrt(count) * 0.6;
-    setIcePositions(Array.from({ length: count }, (_, i) => {
-      const t = i / count;
-      const radius = maxRadius * Math.sqrt(t);
-      const theta = i * goldenAngle;
-      return [radius * Math.cos(theta), 0, radius * Math.sin(theta)] as [number, number, number];
-    }));
+    setIcePositions(
+      Array.from({ length: count }, (_, i) => {
+        const t = i / count;
+        const radius = maxRadius * Math.sqrt(t);
+        const theta = i * goldenAngle;
+        return [radius * Math.cos(theta), 0, radius * Math.sin(theta)] as [
+          number,
+          number,
+          number
+        ];
+      })
+    );
   };
 
-  const handleFloeClick = useCallback((index: number) => {
+  const handleFloeClick = useCallback(
+    (index: number) => {
       const newPosition = new THREE.Vector3(...icePositions[index]);
       newPosition.y = 0.5;
       if (penguinPosition.equals(newPosition)) {
@@ -140,41 +163,66 @@ function Game() {
 
   const handleSolveProblem = useCallback(() => {
     console.log(selectedFloe);
-    setSolvedProblems(prev => ({ ...prev, [selectedFloe]: true }));
+    setSolvedProblems((prev) => ({ ...prev, [selectedFloe]: true }));
     setShowModal(false);
     setShowSolvedMessage(true); // "Solved!" 메시지 표시
     setTimeout(() => setShowSolvedMessage(false), 2000);
     console.log('이 문제 풀었음!', selectedFloe);
   }, [selectedFloe]);
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log(solvedProblems);
-  },[solvedProblems])
+  }, [solvedProblems]);
 
   /* 아래부턴 타이머 부분 */
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
-    const decreaseTime = (setTime: React.Dispatch<React.SetStateAction<{ hours: number; minutes: number }>>) => {
-      setTime(prev => prev.minutes > 0 ? { ...prev, minutes: prev.minutes - 1 } : prev.hours > 0 ? { hours: prev.hours - 1, minutes: 59 } : prev);
+    const decreaseTime = (
+      setTime: React.Dispatch<
+        React.SetStateAction<{ hours: number; minutes: number }>
+      >
+    ) => {
+      setTime((prev) =>
+        prev.minutes > 0
+          ? { ...prev, minutes: prev.minutes - 1 }
+          : prev.hours > 0
+          ? { hours: prev.hours - 1, minutes: 59 }
+          : prev
+      );
     };
-    if (isStudyRunning) timer = setInterval(() => decreaseTime(setStudyTime), 60000);
-    if (isBreakRunning) timer = setInterval(() => decreaseTime(setBreakTime), 60000);
-    return () => { if (timer) clearInterval(timer);};
+    if (isStudyRunning)
+      timer = setInterval(() => decreaseTime(setStudyTime), 60000);
+    if (isBreakRunning)
+      timer = setInterval(() => decreaseTime(setBreakTime), 60000);
+    return () => {
+      if (timer) clearInterval(timer);
+    };
   }, [isStudyRunning, isBreakRunning]);
 
-  const handleStudyStart = useCallback(() => { setIsStudyRunning(true); setIsBreakRunning(false); }, []);
+  const handleStudyStart = useCallback(() => {
+    setIsStudyRunning(true);
+    setIsBreakRunning(false);
+  }, []);
   const handleStudyStop = useCallback(() => setIsStudyRunning(false), []);
-  const handleBreakStart = useCallback(() => { setIsBreakRunning(true); setIsStudyRunning(false); }, []);
+  const handleBreakStart = useCallback(() => {
+    setIsBreakRunning(true);
+    setIsStudyRunning(false);
+  }, []);
   const handleBreakStop = useCallback(() => setIsBreakRunning(false), []);
   const { isStreaming } = useWebcamStream();
-  useEffect(() => { console.log('Webcam isStreaming:', isStreaming);}, [isStreaming]);
+  useEffect(() => {
+    console.log('Webcam isStreaming:', isStreaming);
+  }, [isStreaming]);
 
   const calculateElapsedTime = () => {
     const initialStudyTime = parseInt(localStorage.getItem('studyTime') || '0');
     const initialBreakTime = parseInt(localStorage.getItem('breakTime') || '0');
     const remainingStudyMinutes = studyTime.hours * 60 + studyTime.minutes;
     const remainingBreakMinutes = breakTime.hours * 60 + breakTime.minutes;
-    return { usedStudyMinutes: initialStudyTime - remainingStudyMinutes, usedBreakMinutes: initialBreakTime - remainingBreakMinutes };
+    return {
+      usedStudyMinutes: initialStudyTime - remainingStudyMinutes,
+      usedBreakMinutes: initialBreakTime - remainingBreakMinutes,
+    };
   };
 
   const sendTimeDataToServer = async () => {
@@ -186,7 +234,12 @@ function Game() {
       const response = await fetch(`${baseUrl}/study/realtime`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ u_id, s_id, study_time: usedStudyMinutes, break_time: usedBreakMinutes }),
+        body: JSON.stringify({
+          u_id,
+          s_id,
+          study_time: usedStudyMinutes,
+          break_time: usedBreakMinutes,
+        }),
       });
       if (!response.ok) throw new Error('Failed to send data to server');
       console.log('Server response:', await response.json());
@@ -194,7 +247,6 @@ function Game() {
       console.error('Error sending time data to server:', error);
     }
   };
-
 
   return (
     <div className="w-screen h-screen bg-gradient-to-b from-blue-100 to-blue-200 relative">
@@ -212,18 +264,28 @@ function Game() {
           args={[1000, 1000]} // Plane 크기 조절
           rotation={[-Math.PI / 2, 0, 0]} // Plane을 바닥으로 회전
           position={[0, -100, 0]} // Plane의 위치 설정
-          onClick={(e) => {e.stopPropagation();setShowModal(false);}} // Plane 클릭 시 showModal을 false로 설정
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowModal(false);
+          }} // Plane 클릭 시 showModal을 false로 설정
         >
           <meshBasicMaterial attach="material" color="#b9d5ff" />
         </Plane>
-        {icePositions.map((position, index) => (
-          <IceFloe
-            key={index}
-            position={position}
-            solved={solvedProblems[index + 1]}
-            onClick={(e) => {e.stopPropagation();handleFloeClick(index);}}
-          />
-        ))}
+        {icePositions.map((position, index) => {
+          const problemNumbers = Object.keys(problemTexts).map(Number);
+          const problemNumber = problemNumbers[index];
+          return (
+            <IceFloe
+              key={problemNumber}
+              position={position}
+              solved={solvedProblems[problemNumber]}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleFloeClick(index);
+              }}
+            />
+          );
+        })}
         <Penguin
           position={penguinPosition.toArray()}
           targetPosition={penguinTargetPosition}
