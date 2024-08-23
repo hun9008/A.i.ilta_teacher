@@ -142,6 +142,8 @@ async def decide_user_wrong(websocket: WebSocket):
                     
                     problem_index = 0
                     if prob_num != -1:
+                        print("len solution_storage :", len(solutions_storage))
+                        print("prob_num : ", prob_num)
                         problem_index = prob_num
                         prob_area = response_json.get("prob_area")
                         this_prob_area = prob_area[problem_index]
