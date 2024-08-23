@@ -43,7 +43,9 @@ function SignIn() {
       localStorage.setItem('z_log', data.z_log);
       localStorage.setItem('nickname', data.nickname);
       localStorage.setItem('birthday', data.birthday);
-      localStorage.setItem('not_focusing_list', data.not_focusing_list);
+      localStorage.setItem('not_focusing_list', JSON.stringify(data.not_focusing_list));
+      // console.log('Type of data.not_focusing_list:', typeof data.not_focusing_list);
+      // console.log('Contents of data.not_focusing_list:', data.not_focusing_list);
 
       localStorage.setItem('parent_email', data.parent_email);
 

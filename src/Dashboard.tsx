@@ -19,6 +19,7 @@ import {
   BarController,
   LineController,
 } from 'chart.js';
+import { Session } from 'inspector';
 
 // Register Chart.js modules
 ChartJS.register(
@@ -41,7 +42,9 @@ const Dashboard: React.FC = () => {
   const progress_unit = localStorage.getItem('progress_unit');
   const badge_details = localStorage.getItem('badge_details');
   const nickname = localStorage.getItem('nickname');
+
   const not_focusing_list = localStorage.getItem('not_focusing_list');
+  console.log("First not_focusing_list: ", not_focusing_list)
 
   const [competitionRange, setCompetitionRange] = useState('중등 수학 0');
 
@@ -346,62 +349,215 @@ const Dashboard: React.FC = () => {
   const top30Accuracy = parsedData.map((item) => parseFloat(item[2]));
   const problemsSolved = parsedData.map((item) => parseInt(item[3]));
 
-  // 집중도 확인 부분
+  // 집중도 확인 부분 ///////////////////////////////////hans
+  interface NotFocusingTime {
+    id: string;
+    startTime: Date;
+    endTime: Date;
+    duration: number;
+    sessionId: string;
+  }
+
+  interface ParsedItem {
+    s_id: string;
+    start_time: string;
+    end_time: string;
+    not_focusing_time: [string, string, string, number, string][];
+  }
+  
   const parseNotFocusingList = (notFocusingList: string | null) => {
-    console.log('Original not_focusing_list:', not_focusing_list);
+    const parsedNotFocusingList = JSON.parse(notFocusingList || '[]');
+    console.log('Original not_focusing_list 0 idx:', parsedNotFocusingList[0], "len not_focusing_list: ", parsedNotFocusingList.length);
+    console.log('Original not_focusing_time: ', parsedNotFocusingList[0]['not_focusing_time'])
+    // console.log('Original not_focusing_time: ', parsedNotFocusingList[0]['not_focusing_time'][0])
+    // console.log('Original not_focusing_time: ', parsedNotFocusingList[0]['not_focusing_time'][0][0])
 
     if (!notFocusingList) {
       console.log('No not_focusing_list data');
       return [];
     }
 
-    const parsed = notFocusingList.split(',').map((item) => {
-      const [id, startTime, endTime, duration, sessionId] = item.split('|');
-      return {
-        id,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
-        duration: parseInt(duration),
-        sessionId,
-      };
+    const notFocusingData: NotFocusingTime[] = [];
+
+    parsedNotFocusingList.forEach((item: ParsedItem)=> {
+      item.not_focusing_time.forEach((focusTime) => {
+        notFocusingData.push({
+          id: focusTime[0],
+          startTime: new Date(focusTime[1]),
+          endTime: new Date(focusTime[2]),
+          duration: parseInt(focusTime[3].toString()),
+          sessionId: focusTime[4],
+        });
+      });
     });
 
-    console.log('Parsed not_focusing_list:', parsed);
-    return parsed;
+    // console.log('Parsed not_focusing_list:', parsed);
+    return notFocusingData
   };
 
+  
   const notFocusingData = parseNotFocusingList(not_focusing_list);
+  // console.log('Parsed not focusing time list data: ', notFocusingData)
 
   // 모든 세션에 대한 데이터 사용
   const allSessions = [
     ...new Set(notFocusingData.map((item) => item.sessionId)),
   ];
+  console.log('Result of allSessions: ', allSessions)
+  console.log('notFocusingData after allSessions: ', notFocusingData)
+
+  const recentSessions = allSessions.slice(-9);
+  console.log("recent 10 Sessions", recentSessions)
+
+  interface NotFocusingDataItem {
+    id: string;
+    startTime: Date;
+    endTime: Date;
+    duration: number;
+    sessionId: string;
+  }
+  
+  interface StackDataItem {
+    not_f: string;
+    dur: string;
+  }
+  
+  function createStackData(
+    notFocusingData: NotFocusingDataItem[],
+    recentSessions: string[]
+  ): StackDataItem[][] {
+    // StackData들을 저장할 배열
+    const stackDataArray: StackDataItem[][] = [];
+  
+    // 각 세션 ID에 대해 처리
+    recentSessions.forEach((sessionId) => {
+      // 해당 세션 ID와 일치하는 데이터들을 필터링
+      const sessionData = notFocusingData.filter(item => item.sessionId === sessionId);
+  
+      const sessionStackData: StackDataItem[] = []; // 특정 세션의 StackData를 저장할 배열
+      let previousEndTime = new Date(sessionData[0].startTime).setHours(0, 0, 0, 0); // 자정 시간으로 초기화
+  
+      sessionData.forEach(({ startTime, endTime, duration }) => {
+        const startMinutes = (new Date(startTime).getTime() - previousEndTime) / (1000 * 60); // 자정부터 startTime까지의 분 차이
+        const durationMinutes = (new Date(endTime).getTime() - new Date(startTime).getTime()) / (1000 * 60); // duration은 이미 분 단위로 주어짐
+  
+        // 집중한 시간(이전 endTime부터 현재 startTime까지)
+        if (startMinutes > 0) {
+          sessionStackData.push({
+            not_f: "0",
+            dur: startMinutes.toString(),
+          });
+        }
+  
+        // 집중하지 않은 시간(startTime ~ endTime)
+        sessionStackData.push({
+          not_f: "1",
+          dur: durationMinutes.toString(),
+        });
+  
+        // 이전 endTime을 현재 endTime으로 업데이트
+        previousEndTime = new Date(endTime).getTime();
+      });
+  
+      // 마지막으로 하루 종료까지의 시간을 집중한 시간으로 추가
+      const endOfDay = new Date(sessionData[0].startTime).setHours(24, 0, 0, 0);
+      const remainingMinutes = (endOfDay - previousEndTime) / (1000 * 60);
+  
+      if (remainingMinutes > 0) {
+        sessionStackData.push({
+          not_f: "0",
+          dur: remainingMinutes.toString(),
+        });
+      }
+  
+      // 해당 세션의 StackData를 배열에 추가
+      stackDataArray.push(sessionStackData);
+    });
+  
+    return stackDataArray;
+  }
+
+  function findMinMaxTimes(notFocusingData: Array<{ startTime: Date, endTime: Date }>) {
+    let minTime = new Date(Math.min.apply(null, notFocusingData.map(item => 
+        new Date(1970, 0, 1, item.startTime.getHours(), item.startTime.getMinutes(), item.startTime.getSeconds()).getTime())));
+    let maxTime = new Date(Math.max.apply(null, notFocusingData.map(item => 
+        new Date(1970, 0, 1, item.endTime.getHours(), item.endTime.getMinutes(), item.endTime.getSeconds()).getTime())));
+
+    return {
+        minTime: minTime.toTimeString().split(' ')[0],
+        maxTime: maxTime.toTimeString().split(' ')[0],
+    };
+  }
+  // 예제 사용법:
+  // findMinMaxTimes 결과
+  const { minTime, maxTime } = findMinMaxTimes(notFocusingData);
+
+  // minTime과 maxTime을 분으로 변환
+  function timeToMinutes(time: string) {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
+  }
+
+  const minMinutes = timeToMinutes(minTime);
+  const maxMinutes = timeToMinutes(maxTime);
+  console.log("max: ", maxMinutes, "min: ", minMinutes)
+  console.log("maxMin - minMin: ", maxMinutes-minMinutes)
+
+  // StackData 생성
+  const stackDataArray = createStackData(notFocusingData, recentSessions);
+  stackDataArray.forEach((sessionData, index) => {
+    // if (sessionData.length > 0 && sessionData[0].dur) {
+    //   const tmpDur = parseFloat(sessionData[0].dur) - minMinutes + 1;
+    //   stackDataArray[index][0].dur = tmpDur.toString();
+    // }
+    if (sessionData.length > 0) {
+        stackDataArray[index] = sessionData.slice(0, -1); // 마지막 요소를 제거한 새로운 배열로 교체
+      }
+  });
+  console.log("%%%% stackDataArray: ", stackDataArray);
 
   const focusChartData = {
-    labels: allSessions.map((_, index) => `세션 ${index + 1}`),
-    datasets: [
-      {
-        label: '집중하지 않은 시간 (분)',
-        data: allSessions.map((sessionId) =>
-          notFocusingData
-            .filter((item) => item.sessionId === sessionId)
-            .reduce((sum, item) => sum + item.duration, 0)
-        ),
-        backgroundColor: 'rgba(255, 99, 132, 0.6)',
-      },
-    ],
-  };
+    labels: recentSessions.map((_, index) => `Day ${9 - index}`),
+    datasets: recentSessions.flatMap((sessionId, sessionIndex) => {
+      // 해당 세션의 StackData를 가져옴
+      const sessionStackData = stackDataArray[sessionIndex];
+  
+      return sessionStackData.map((dataItem, dataIndex) => {
+        // 첫 번째 데이터를 투명색으로 처리
+        const isStart = dataIndex === 0;
+        const backgroundColor = isStart
+          ? 'rgba(0, 0, 0, 0)'  // 투명색
+          : dataItem.not_f === '1'
+          ? 'rgba(32, 180, 208, 0.7)'
+          : 'rgba(229, 57, 53, 0.8)'; // 파란색
+  
+        return {
+          label: '빈 구간',
+          data: recentSessions.map((_, idx) => {
+            return idx === sessionIndex ? parseFloat(dataItem.dur) : 0;
+          }),
+          backgroundColor: backgroundColor,
+          stack: `Session 0`, // 각 세션을 스택으로 지정
+        };
+      });
+    }),
+  };  
 
   const focusChartOptions: ChartOptions<'bar'> = {
-    indexAxis: 'y', // 가로 방향 차트
+    indexAxis: 'x', // 가로 방향 차트
     responsive: true,
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          filter: (legendItem, chartData) => {
+            return legendItem.text !== '빈 구간';
+          }
+        }
       },
       title: {
         display: true,
-        text: '모든 세션의 집중하지 않은 시간',
+        text: '빨간 시간대에 집중도가 낮아요',
       },
     },
     scales: {
@@ -409,17 +565,48 @@ const Dashboard: React.FC = () => {
         beginAtZero: true,
         title: {
           display: true,
-          text: '시간 (분)',
+          text: '공부 세션',
+        },
+        ticks: {
+          autoSkip: false,
         },
       },
       y: {
+        type: 'linear',
+        beginAtZero: true,
+        min: minMinutes,
+        max: maxMinutes,
         title: {
           display: true,
-          text: '세션',
+          text: '시간 (1 day)',
+        },
+        ticks: {
+          // stepSize: 20,
+          callback: function(tickValue: string | number){
+            const numericValue = typeof tickValue === 'number' ? tickValue : parseFloat(tickValue);
+            const normalizedValue: number = isNaN(numericValue) ? 130 : numericValue;
+          
+            const hours = Math.floor(normalizedValue / 60);  // 'normalizedValue'를 시간으로 변환
+            const minutes = normalizedValue % 60;            // 'normalizedValue'를 분으로 변환
+            return `${hours}시 ${minutes}분`;        
+          },
         },
       },
     },
+    datasets: {
+      bar: {
+          categoryPercentage: 0.9, // 카테고리에서 막대가 차지하는 비율 조정
+          barPercentage: 0.7, // 막대 너비 비율 조정
+      }
+    }
   };
+
+  const chartStyle = {
+    height: '250px', // 차트의 세로 크기를 600px로 설정
+    width: '100%',   // 차트의 가로 크기는 100%로 설정
+  };
+
+  ///////////////////////////////////////////////////////
 
   const categoryData: ChartData<'bar' | 'line', number[], string> = {
     labels: categories,
@@ -598,11 +785,12 @@ const Dashboard: React.FC = () => {
                 { '--session-count': allSessions.length } as React.CSSProperties
               }
             >
-              <h3 className={styles.chartTitle}>집중력</h3>
+              <h3 className={styles.chartTitle}>세션 별 집중도</h3>
               <Chart
                 type="bar"
                 data={focusChartData}
                 options={focusChartOptions}
+                style={chartStyle}
               />
             </div>
           </div>
