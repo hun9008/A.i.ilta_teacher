@@ -126,7 +126,13 @@ async def decide_user_wrong(websocket: WebSocket):
             image_array = np.array(image)
 
             # # (assume) 지금 어떤 문제 풀고 있는지 알아내기
-            prob_num = response.get("prob_num")
+            # prob_num = response.get("prob_num")
+            if type(response) == json:
+                prob_num = response.get("prob_num")
+            elif type(response) == dict:
+                prob_num = response["prob_num"]
+            else:
+                print("warning (unexpected type) :", type(response))
             problem_index = 0
             if prob_num != -1:
                 problem_index = prob_num
