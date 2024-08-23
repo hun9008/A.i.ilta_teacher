@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send } from 'lucide-react';
+import { Send,  BookOpen } from 'lucide-react';
 import { useWebSocket } from './WebSocketContext';
 import { handleTTS, TTSAudioPlayer } from './TTS';
 
@@ -22,7 +22,7 @@ let globalMessages: { text: string; sender: 'user' | 'bot' }[] = [];
 
 const AnimatedModal: React.FC<AnimatedModalProps> = ({
   isOpen,
-  onClose,
+  //onClose,
   selectedFloe,
   selectedProblem,
   selectedConcept,
@@ -137,9 +137,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     }
   };
 
-  const handleClose = () => {
-    onClose();
-  };
+  //const handleClose = () => {onClose();};
 
   if (!isOpen) {
     return null;
@@ -178,59 +176,62 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     <AnimatePresence>
       <motion.div
         key="modal"
-        className="fixed inset-0 flex items-center justify-end pointer-events-none"
-        variants={overlayVariants}
+        className="fixed inset-x-0 top-28 flex items-start justify-end pointer-events-none"        variants={overlayVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
       >
-        <div className="flex h-[66vh] w-fit max-w-8xl min-w-80 pointer-events-auto"></div>
-        <div className="w-1/3 pointer-events-none" />
-        <div className="flex w-fit h-[66vh] max-w-8xl justify-end min-w-80 pointer-events-auto">
+        <div className="flex w-2/3 h-[70vh] justify-end min-w-80 pointer-events-auto ">
           {!chatOnly && (
             <motion.div
-              className="min-w-[25vw] w-1/2 bg-white rounded-3xl p-5 drop-shadow-xl"
+              className="min-w-[30vw] w-1/2 border-l-2 border-r-2 border-b-8 border-purple-400 border-opacity-50 bg-white bg-opacity-100 rounded-3xl p-5 overflow-hidden shadow-2xl mr-2"
               variants={centerVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
               transition={{ type: 'spring', damping: 20 }}
             >
-              <div className="p-6 flex-col h-full">
-                <div className="bg-gray-100 rounded-lg p-5 pb-20 mb-10">
-                  <h1 className="text-2xl font-bold mb-4">
+              <div className="h-full flex flex-col">
+              <h1 className="text-2xl font-bold mb-4 text-gray-900">
                     문제 {selectedFloe}{' '}
                   </h1>
-                  <h2 className="text-xl font-bold mb-4">
+              <div className="bg-gradient-to-t from-blue-50 to-purple-50 rounded-xl p-5 mb-6 flex-grow overflow-y-auto">
+                  
+                  <h2 className="text-xl font-bold mb-4 text-gray-800">
                     <p dangerouslySetInnerHTML={{ __html: cleanedProblem }} />
                   </h2>
                 </div>
-                <div className="p-5">
-                  <h1 className="text-2xl font-bold mb-4">
-                    이 문제에 대한 정보
-                  </h1>
-                  <h3 className="text-lg font-semibold mb-4">
-                    {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
-                  </h3>
-                  <h3 className="text-2xl font-bold mb-4">관련 개념들</h3>
-                  <h3 className="text-lg font-semibold mb-4">
-                    {cleanedConcept}
-                  </h3>
+                <div className="bg-gray-50 p-5 rounded-xl mb-4">
+                <h1 className="text-xl font-bold mb-4 text-gray-900">이 문제에 대한 정보</h1>
+                <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                  {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
+                </h3>
+                <h3 className="text-xl font-bold mb-4 text-gray-900">관련 개념들</h3>
+                <h3 className="text-lg font-semibold mb-4 text-gray-800">{cleanedConcept}</h3>
                 </div>
-                <div className="flex justify-end">
-                  <button
-                    className="px-3 py-1 bg-primary-400 text-white rounded-2xl hover:bg-primary-500"
-                    onClick={handleSolveClick}
-                  >
-                    풀었음
-                  </button>
+                <div className="flex justify-end">              
+                <button
+                  className="
+                    px-4 py-2 bg-blue-500 text-white rounded-full
+                    hover:from-blue-400 hover:to-purple-400 active:from-blue-600 active:to-purple-600
+                    transition-all duration-200
+                    transform hover:-translate-y-0.5 active:translate-y-0
+                    flex items-center justify-center
+                    border-b-8 border-blue-600 active:border-b-0
+                    font-bold text-base
+                  "
+                  onClick={handleSolveClick}
+                >
+                  <BookOpen className="inline-block mr-2" size={20} />
+                  풀었음
+                </button>
                 </div>
               </div>
             </motion.div>
           )}
 
           <motion.div
-            className="min-w-[25vw] w-1/2 bg-blue-100 rounded-l-3xl p-5 ml-2 flex flex-col drop-shadow-xl"
+            className="min-w-[25vw] w-1/2 border-r-2 border-l-2 border-b-8 border-blue-400 border-opacity-50 bg-blue-50 bg-opacity-100 rounded-3xl p-5 overflow-hidden shadow-2xl "
             variants={panelVariants}
             initial="hidden"
             animate="visible"
@@ -238,19 +239,17 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             custom={1}
             transition={{ type: 'spring', damping: 20 }}
           >
-            <h1 className="text-2xl font-bold mb-4">채팅</h1>
-            {/*
-            <button onClick={handleClose} className="bg-gray-400">
-              닫기
-            </button>*/}
-            <div className="flex-grow overflow-y-auto mb-4 bg-white rounded-lg p-3">
+            <h1 className="text-2xl font-bold mb-6 text-gray-900 flex items-center">
+              채팅
+            </h1>
+            <div className="flex-grow overflow-y-auto mb-6 bg-white bg-opacity-90 rounded-2xl p-4 shadow-inner">
               {messages.map((message, index) => (
                 <div
                   key={index}
                   className={`mb-2 p-2.5 rounded ${
                     message.sender === 'user'
-                      ? 'bg-blue-500 text-white self-end'
-                      : 'bg-gray-200 text-black self-start'
+                      ? 'bg-blue-500 text-white ml-8'
+                      : 'bg-gray-200 text-black mr-8'
                   }`}
                 >
                   <span className="font-bold">
@@ -260,22 +259,26 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 </div>
               ))}
             </div>
-            <div className="flex p-3">
+            <div className="flex p-1.5 bg-white rounded-full shadow-lg overflow-hidden">
               <input
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                 placeholder="메시지를 입력하세요..."
-                className="flex-grow p-2 rounded-l-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500"
+                className="flex-grow pl-4 p-1.5 rounded-l-full focus:outline-none"
               />
               <button
                 onClick={handleSendMessage}
-                className="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 transition-colors"
+                className="round-full bg-blue-500 text-white hover:bg-blue-600"
               >
-                <Send size={20} />
+                <Send size={16} className='mx-4' />
               </button>
             </div>
+            {/*
+            <button onClick={handleClose} className="bg-gray-400">
+              닫기
+            </button>*/}
             {audioUrl && <TTSAudioPlayer audioUrl={audioUrl} />}
           </motion.div>
         </div>

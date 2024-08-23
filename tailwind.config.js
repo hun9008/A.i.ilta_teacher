@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'poor-story': ['"Poor Story"', 'cursive'],
+      },
       keyframes: {
         'border-glow': {
           '0%, 100%': { boxShadow: '0 0 10px rgba(134, 104, 255, 0)' },

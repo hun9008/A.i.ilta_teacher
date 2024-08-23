@@ -261,7 +261,7 @@ function Game() {
         <pointLight position={[10, 10, 10]} />
         <fog attach="fog" args={['#b9d5ff', 0, 20]} />
         <Plane
-          args={[1000, 1000]} // Plane 크기 조절
+          args={[1500, 1500]} // Plane 크기 조절
           rotation={[-Math.PI / 2, 0, 0]} // Plane을 바닥으로 회전
           position={[0, -100, 0]} // Plane의 위치 설정
           onClick={(e) => {
