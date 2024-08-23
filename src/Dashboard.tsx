@@ -366,16 +366,28 @@ const Dashboard: React.FC = () => {
   }
   
   const parseNotFocusingList = (notFocusingList: string | null) => {
-    const parsedNotFocusingList = JSON.parse(notFocusingList || '[]');
-    console.log('Original not_focusing_list 0 idx:', parsedNotFocusingList[0], "len not_focusing_list: ", parsedNotFocusingList.length);
-    console.log('Original not_focusing_time: ', parsedNotFocusingList[0]['not_focusing_time'])
-    // console.log('Original not_focusing_time: ', parsedNotFocusingList[0]['not_focusing_time'][0])
-    // console.log('Original not_focusing_time: ', parsedNotFocusingList[0]['not_focusing_time'][0][0])
-
-    if (!notFocusingList) {
-      console.log('No not_focusing_list data');
+    if (!notFocusingList || notFocusingList === '[]') {
+      console.log('No valid not_focusing_list data');
       return [];
     }
+    
+    // JSON 문자열을 배열로 파싱
+    const parsedNotFocusingList = JSON.parse(notFocusingList);
+
+    // 파싱된 배열이 비어있거나 예상된 구조가 아니면 빈 배열을 반환
+    if (!Array.isArray(parsedNotFocusingList) || parsedNotFocusingList.length === 0) {
+        console.log('Parsed list is empty or not valid');
+        return [];
+    }
+
+    // 예상된 데이터 구조가 아닌 경우를 처리
+    if (!parsedNotFocusingList[0]?.not_focusing_time) {
+        console.log('No not_focusing_time data available');
+        return [];
+    }
+
+    console.log('Original not_focusing_list 0 idx:', parsedNotFocusingList[0], "len not_focusing_list: ", parsedNotFocusingList.length);
+    console.log('Original not_focusing_time: ', parsedNotFocusingList[0]['not_focusing_time']);
 
     const notFocusingData: NotFocusingTime[] = [];
 
@@ -403,11 +415,11 @@ const Dashboard: React.FC = () => {
   const allSessions = [
     ...new Set(notFocusingData.map((item) => item.sessionId)),
   ];
-  console.log('Result of allSessions: ', allSessions)
-  console.log('notFocusingData after allSessions: ', notFocusingData)
+  // console.log('Result of allSessions: ', allSessions)
+  // console.log('notFocusingData after allSessions: ', notFocusingData)
 
-  const recentSessions = allSessions.slice(-9);
-  console.log("recent 10 Sessions", recentSessions)
+  const recentSessions = allSessions.length >= 9 ? allSessions.slice(-9) : allSessions;
+  // console.log("recent Sessions", recentSessions);
 
   interface NotFocusingDataItem {
     id: string;
@@ -473,7 +485,7 @@ const Dashboard: React.FC = () => {
       // 해당 세션의 StackData를 배열에 추가
       stackDataArray.push(sessionStackData);
     });
-  
+    // console.log("stackDataArray: ", stackDataArray)
     return stackDataArray;
   }
 
@@ -500,8 +512,8 @@ const Dashboard: React.FC = () => {
 
   const minMinutes = timeToMinutes(minTime);
   const maxMinutes = timeToMinutes(maxTime);
-  console.log("max: ", maxMinutes, "min: ", minMinutes)
-  console.log("maxMin - minMin: ", maxMinutes-minMinutes)
+  // console.log("max: ", maxMinutes, "min: ", minMinutes)
+  // console.log("maxMin - minMin: ", maxMinutes-minMinutes)
 
   // StackData 생성
   const stackDataArray = createStackData(notFocusingData, recentSessions);
@@ -514,7 +526,7 @@ const Dashboard: React.FC = () => {
         stackDataArray[index] = sessionData.slice(0, -1); // 마지막 요소를 제거한 새로운 배열로 교체
       }
   });
-  console.log("%%%% stackDataArray: ", stackDataArray);
+  // console.log("%%%% stackDataArray: ", stackDataArray);
 
   const focusChartData = {
     labels: recentSessions.map((_, index) => `Day ${9 - index}`),
