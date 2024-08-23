@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chart } from 'react-chartjs-2';
-import { ResponsiveCalendar } from '@nivo/calendar';
+import { ResponsiveTimeRange } from '@nivo/calendar';
 import styles from './css/MainPage.module.css';
 
 import {
@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
   const nickname = localStorage.getItem('nickname');
 
   const not_focusing_list = localStorage.getItem('not_focusing_list');
-  console.log("First not_focusing_list: ", not_focusing_list)
+  console.log('First not_focusing_list: ', not_focusing_list);
 
   const [competitionRange, setCompetitionRange] = useState('중등 수학 0');
 
@@ -278,6 +278,7 @@ const Dashboard: React.FC = () => {
   };
   const solvedChartOptions: ChartOptions<'bar'> = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
@@ -297,6 +298,7 @@ const Dashboard: React.FC = () => {
 
   const studyTimeChartOptions: ChartOptions<'bar'> = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
@@ -333,8 +335,32 @@ const Dashboard: React.FC = () => {
   };
 
   const calendarData = parseZLog(z_log);
-
+  const colorScale = ['#aee6b7', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
   // 카테고리 쪼개기
+
+  const categoryMapping = {
+    '00': '자연수, 정수, 유리수',
+    '01': '문자와 식, 일차방정식',
+    '02': '좌표평면과 그래프',
+    '03': '도형의 기초',
+    '04': '통계의 기초',
+    '10': '순환소수',
+    '11': '지수법칙, 단항식, 다항식',
+    '12': '연립방정식',
+    '13': '부등식',
+    '14': '일차함수',
+    '15': '도형의 성질, 닮음',
+    '16': '피타고라스',
+    '17': '확률',
+    '20': '실수(제곱근, 무리수)',
+    '21': '인수분해',
+    '22': '이차방정식',
+    '23': '이차함수',
+    '24': '통계',
+    '25': '삼각비',
+    '26': '원',
+  };
+
   const parsedData = progress_unit
     ? progress_unit.split(',').reduce((acc, curr, index) => {
         const i = Math.floor(index / 4);
@@ -344,10 +370,99 @@ const Dashboard: React.FC = () => {
       }, [] as string[][])
     : [];
 
-  const categories = parsedData.map((item) => item[0]);
+  const categories = parsedData.map((item) => {
+    const categoryCode = item[0].slice(-2); // 마지막 두 자리만 사용
+    return categoryMapping[categoryCode] || categoryCode;
+  });
   const myAccuracy = parsedData.map((item) => parseFloat(item[1]));
   const top30Accuracy = parsedData.map((item) => parseFloat(item[2]));
   const problemsSolved = parsedData.map((item) => parseInt(item[3]));
+
+  const categoryData: ChartData<'bar' | 'line', number[], string> = {
+    labels: categories,
+    datasets: [
+      {
+        type: 'bar' as const,
+        label: '푼 문제 수',
+        data: problemsSolved,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+        yAxisID: 'y',
+      },
+      {
+        type: 'line' as const,
+        label: '나의 정확도 (%)',
+        data: myAccuracy,
+        borderColor: 'rgba(54, 162, 235, 1)',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        fill: false,
+        tension: 0.1,
+        yAxisID: 'y1',
+      },
+      {
+        type: 'line' as const,
+        label: '상위 30% 정확도 (%)',
+        data: top30Accuracy,
+        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        fill: false,
+        tension: 0.1,
+        yAxisID: 'y1',
+      },
+    ],
+  };
+
+  const categoryOptions: ChartOptions<'bar' | 'line'> = {
+    responsive: true,
+    maintainAspectRatio: true,
+    aspectRatio: 2,
+    plugins: {
+      title: {
+        display: true,
+        text: '단원별 성취도',
+        font: {
+          size: 18,
+        },
+      },
+      legend: {
+        position: 'bottom' as const,
+      },
+    },
+
+    scales: {
+      x: {
+        type: 'category',
+        position: 'bottom',
+        ticks: {
+          autoSkip: false,
+          maxRotation: 90,
+          minRotation: 90,
+        },
+      },
+      y: {
+        type: 'linear' as const,
+        position: 'left' as const,
+        title: {
+          display: true,
+          text: '푼 문제 수',
+        },
+        beginAtZero: true,
+      },
+      y1: {
+        type: 'linear' as const,
+        position: 'right' as const,
+        title: {
+          display: true,
+          text: '정확도 (%)',
+        },
+        beginAtZero: true,
+        grid: {
+          drawOnChartArea: false,
+        },
+      },
+    },
+  };
 
   // 집중도 확인 부분 ///////////////////////////////////hans
   interface NotFocusingTime {
@@ -364,34 +479,45 @@ const Dashboard: React.FC = () => {
     end_time: string;
     not_focusing_time: [string, string, string, number, string][];
   }
-  
+
   const parseNotFocusingList = (notFocusingList: string | null) => {
     if (!notFocusingList || notFocusingList === '[]') {
       console.log('No valid not_focusing_list data');
       return [];
     }
-    
+
     // JSON 문자열을 배열로 파싱
     const parsedNotFocusingList = JSON.parse(notFocusingList);
 
     // 파싱된 배열이 비어있거나 예상된 구조가 아니면 빈 배열을 반환
-    if (!Array.isArray(parsedNotFocusingList) || parsedNotFocusingList.length === 0) {
-        console.log('Parsed list is empty or not valid');
-        return [];
+    if (
+      !Array.isArray(parsedNotFocusingList) ||
+      parsedNotFocusingList.length === 0
+    ) {
+      console.log('Parsed list is empty or not valid');
+      return [];
     }
 
     // 예상된 데이터 구조가 아닌 경우를 처리
     if (!parsedNotFocusingList[0]?.not_focusing_time) {
-        console.log('No not_focusing_time data available');
-        return [];
+      console.log('No not_focusing_time data available');
+      return [];
     }
 
-    console.log('Original not_focusing_list 0 idx:', parsedNotFocusingList[0], "len not_focusing_list: ", parsedNotFocusingList.length);
-    console.log('Original not_focusing_time: ', parsedNotFocusingList[0]['not_focusing_time']);
+    console.log(
+      'Original not_focusing_list 0 idx:',
+      parsedNotFocusingList[0],
+      'len not_focusing_list: ',
+      parsedNotFocusingList.length
+    );
+    console.log(
+      'Original not_focusing_time: ',
+      parsedNotFocusingList[0]['not_focusing_time']
+    );
 
     const notFocusingData: NotFocusingTime[] = [];
 
-    parsedNotFocusingList.forEach((item: ParsedItem)=> {
+    parsedNotFocusingList.forEach((item: ParsedItem) => {
       item.not_focusing_time.forEach((focusTime) => {
         notFocusingData.push({
           id: focusTime[0],
@@ -404,10 +530,9 @@ const Dashboard: React.FC = () => {
     });
 
     // console.log('Parsed not_focusing_list:', parsed);
-    return notFocusingData
+    return notFocusingData;
   };
 
-  
   const notFocusingData = parseNotFocusingList(not_focusing_list);
   // console.log('Parsed not focusing time list data: ', notFocusingData)
 
@@ -418,7 +543,8 @@ const Dashboard: React.FC = () => {
   // console.log('Result of allSessions: ', allSessions)
   // console.log('notFocusingData after allSessions: ', notFocusingData)
 
-  const recentSessions = allSessions.length >= 9 ? allSessions.slice(-9) : allSessions;
+  const recentSessions =
+    allSessions.length >= 9 ? allSessions.slice(-9) : allSessions;
   // console.log("recent Sessions", recentSessions);
 
   interface NotFocusingDataItem {
@@ -428,60 +554,70 @@ const Dashboard: React.FC = () => {
     duration: number;
     sessionId: string;
   }
-  
+
   interface StackDataItem {
     not_f: string;
     dur: string;
   }
-  
+
   function createStackData(
     notFocusingData: NotFocusingDataItem[],
     recentSessions: string[]
   ): StackDataItem[][] {
     // StackData들을 저장할 배열
     const stackDataArray: StackDataItem[][] = [];
-  
+
     // 각 세션 ID에 대해 처리
     recentSessions.forEach((sessionId) => {
       // 해당 세션 ID와 일치하는 데이터들을 필터링
-      const sessionData = notFocusingData.filter(item => item.sessionId === sessionId);
-  
+      const sessionData = notFocusingData.filter(
+        (item) => item.sessionId === sessionId
+      );
+
       const sessionStackData: StackDataItem[] = []; // 특정 세션의 StackData를 저장할 배열
-      let previousEndTime = new Date(sessionData[0].startTime).setHours(0, 0, 0, 0); // 자정 시간으로 초기화
-  
+      let previousEndTime = new Date(sessionData[0].startTime).setHours(
+        0,
+        0,
+        0,
+        0
+      ); // 자정 시간으로 초기화
+
       sessionData.forEach(({ startTime, endTime, duration }) => {
-        const startMinutes = (new Date(startTime).getTime() - previousEndTime) / (1000 * 60); // 자정부터 startTime까지의 분 차이
-        const durationMinutes = (new Date(endTime).getTime() - new Date(startTime).getTime()) / (1000 * 60); // duration은 이미 분 단위로 주어짐
-  
+        const startMinutes =
+          (new Date(startTime).getTime() - previousEndTime) / (1000 * 60); // 자정부터 startTime까지의 분 차이
+        const durationMinutes =
+          (new Date(endTime).getTime() - new Date(startTime).getTime()) /
+          (1000 * 60); // duration은 이미 분 단위로 주어짐
+
         // 집중한 시간(이전 endTime부터 현재 startTime까지)
         if (startMinutes > 0) {
           sessionStackData.push({
-            not_f: "0",
+            not_f: '0',
             dur: startMinutes.toString(),
           });
         }
-  
+
         // 집중하지 않은 시간(startTime ~ endTime)
         sessionStackData.push({
-          not_f: "1",
+          not_f: '1',
           dur: durationMinutes.toString(),
         });
-  
+
         // 이전 endTime을 현재 endTime으로 업데이트
         previousEndTime = new Date(endTime).getTime();
       });
-  
+
       // 마지막으로 하루 종료까지의 시간을 집중한 시간으로 추가
       const endOfDay = new Date(sessionData[0].startTime).setHours(24, 0, 0, 0);
       const remainingMinutes = (endOfDay - previousEndTime) / (1000 * 60);
-  
+
       if (remainingMinutes > 0) {
         sessionStackData.push({
-          not_f: "0",
+          not_f: '0',
           dur: remainingMinutes.toString(),
         });
       }
-  
+
       // 해당 세션의 StackData를 배열에 추가
       stackDataArray.push(sessionStackData);
     });
@@ -489,15 +625,43 @@ const Dashboard: React.FC = () => {
     return stackDataArray;
   }
 
-  function findMinMaxTimes(notFocusingData: Array<{ startTime: Date, endTime: Date }>) {
-    let minTime = new Date(Math.min.apply(null, notFocusingData.map(item => 
-        new Date(1970, 0, 1, item.startTime.getHours(), item.startTime.getMinutes(), item.startTime.getSeconds()).getTime())));
-    let maxTime = new Date(Math.max.apply(null, notFocusingData.map(item => 
-        new Date(1970, 0, 1, item.endTime.getHours(), item.endTime.getMinutes(), item.endTime.getSeconds()).getTime())));
+  function findMinMaxTimes(
+    notFocusingData: Array<{ startTime: Date; endTime: Date }>
+  ) {
+    let minTime = new Date(
+      Math.min.apply(
+        null,
+        notFocusingData.map((item) =>
+          new Date(
+            1970,
+            0,
+            1,
+            item.startTime.getHours(),
+            item.startTime.getMinutes(),
+            item.startTime.getSeconds()
+          ).getTime()
+        )
+      )
+    );
+    let maxTime = new Date(
+      Math.max.apply(
+        null,
+        notFocusingData.map((item) =>
+          new Date(
+            1970,
+            0,
+            1,
+            item.endTime.getHours(),
+            item.endTime.getMinutes(),
+            item.endTime.getSeconds()
+          ).getTime()
+        )
+      )
+    );
 
     return {
-        minTime: minTime.toTimeString().split(' ')[0],
-        maxTime: maxTime.toTimeString().split(' ')[0],
+      minTime: minTime.toTimeString().split(' ')[0],
+      maxTime: maxTime.toTimeString().split(' ')[0],
     };
   }
   // 예제 사용법:
@@ -506,8 +670,8 @@ const Dashboard: React.FC = () => {
 
   // minTime과 maxTime을 분으로 변환
   function timeToMinutes(time: string) {
-      const [hours, minutes] = time.split(':').map(Number);
-      return hours * 60 + minutes;
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
   }
 
   const minMinutes = timeToMinutes(minTime);
@@ -523,8 +687,8 @@ const Dashboard: React.FC = () => {
     //   stackDataArray[index][0].dur = tmpDur.toString();
     // }
     if (sessionData.length > 0) {
-        stackDataArray[index] = sessionData.slice(0, -1); // 마지막 요소를 제거한 새로운 배열로 교체
-      }
+      stackDataArray[index] = sessionData.slice(0, -1); // 마지막 요소를 제거한 새로운 배열로 교체
+    }
   });
   // console.log("%%%% stackDataArray: ", stackDataArray);
 
@@ -533,16 +697,16 @@ const Dashboard: React.FC = () => {
     datasets: recentSessions.flatMap((sessionId, sessionIndex) => {
       // 해당 세션의 StackData를 가져옴
       const sessionStackData = stackDataArray[sessionIndex];
-  
+
       return sessionStackData.map((dataItem, dataIndex) => {
         // 첫 번째 데이터를 투명색으로 처리
         const isStart = dataIndex === 0;
         const backgroundColor = isStart
-          ? 'rgba(0, 0, 0, 0)'  // 투명색
+          ? 'rgba(0, 0, 0, 0)' // 투명색
           : dataItem.not_f === '1'
           ? 'rgba(32, 180, 208, 0.7)'
           : 'rgba(229, 57, 53, 0.8)'; // 파란색
-  
+
         return {
           label: '빈 구간',
           data: recentSessions.map((_, idx) => {
@@ -553,7 +717,7 @@ const Dashboard: React.FC = () => {
         };
       });
     }),
-  };  
+  };
 
   const focusChartOptions: ChartOptions<'bar'> = {
     indexAxis: 'x', // 가로 방향 차트
@@ -564,8 +728,8 @@ const Dashboard: React.FC = () => {
         labels: {
           filter: (legendItem, chartData) => {
             return legendItem.text !== '빈 구간';
-          }
-        }
+          },
+        },
       },
       title: {
         display: true,
@@ -594,115 +758,41 @@ const Dashboard: React.FC = () => {
         },
         ticks: {
           // stepSize: 20,
-          callback: function(tickValue: string | number){
-            const numericValue = typeof tickValue === 'number' ? tickValue : parseFloat(tickValue);
-            const normalizedValue: number = isNaN(numericValue) ? 130 : numericValue;
-          
-            const hours = Math.floor(normalizedValue / 60);  // 'normalizedValue'를 시간으로 변환
-            const minutes = normalizedValue % 60;            // 'normalizedValue'를 분으로 변환
-            return `${hours}시 ${minutes}분`;        
+          callback: function (tickValue: string | number) {
+            const numericValue =
+              typeof tickValue === 'number' ? tickValue : parseFloat(tickValue);
+            const normalizedValue: number = isNaN(numericValue)
+              ? 130
+              : numericValue;
+
+            const hours = Math.floor(normalizedValue / 60); // 'normalizedValue'를 시간으로 변환
+            const minutes = normalizedValue % 60; // 'normalizedValue'를 분으로 변환
+            return `${hours}시 ${minutes}분`;
           },
         },
       },
     },
     datasets: {
       bar: {
-          categoryPercentage: 0.9, // 카테고리에서 막대가 차지하는 비율 조정
-          barPercentage: 0.7, // 막대 너비 비율 조정
-      }
-    }
+        categoryPercentage: 0.9, // 카테고리에서 막대가 차지하는 비율 조정
+        barPercentage: 0.7, // 막대 너비 비율 조정
+      },
+    },
   };
 
   const chartStyle = {
     height: '250px', // 차트의 세로 크기를 600px로 설정
-    width: '100%',   // 차트의 가로 크기는 100%로 설정
+    width: '100%', // 차트의 가로 크기는 100%로 설정
   };
 
   ///////////////////////////////////////////////////////
-
-  const categoryData: ChartData<'bar' | 'line', number[], string> = {
-    labels: categories,
-    datasets: [
-      {
-        type: 'bar' as const,
-        label: 'Problems Solved',
-        data: problemsSolved,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-        yAxisID: 'y',
-      },
-      {
-        type: 'line' as const,
-        label: 'My Accuracy (%)',
-        data: myAccuracy,
-        borderColor: 'rgba(54, 162, 235, 1)',
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        fill: false,
-        tension: 0.1,
-        yAxisID: 'y1',
-      },
-      {
-        type: 'line' as const,
-        label: 'Top 30% Accuracy (%)',
-        data: top30Accuracy,
-        borderColor: 'rgba(255, 99, 132, 1)',
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        fill: false,
-        tension: 0.1,
-        yAxisID: 'y1',
-      },
-    ],
-  };
-
-  const categoryOptions: ChartOptions<'bar' | 'line'> = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: 'Category-wise Performance',
-      },
-      legend: {
-        position: 'top' as const,
-      },
-    },
-    scales: {
-      x: {
-        type: 'category',
-        position: 'bottom',
-        
-      },
-      y: {
-        type: 'linear' as const,
-        position: 'left' as const,
-        title: {
-          display: true,
-          text: 'Problems Solved',
-        },
-        beginAtZero: true,
-      },
-      y1: {
-        type: 'linear' as const,
-        position: 'right' as const,
-        title: {
-          display: true,
-          text: 'Accuracy (%)',
-        },
-        beginAtZero: true,
-        grid: {
-          drawOnChartArea: false,
-        },
-      },
-    },
-  };
 
   return (
     <div className={styles.dashboardContainer}>
       <div className={styles.mainContent}>
         <div className={styles.topSection}>
-          <div className={styles.welcomeSection}>
+          <div className={styles.leftColumn}>
             <div className={styles.greeting}>안녕! {nickname}아</div>
-
             <div className={styles.badgeSection}>
               {existingBadges.slice(0, 2).map((badge, index) => (
                 <div key={index} className={styles.badgeWrapper}>
@@ -726,7 +816,9 @@ const Dashboard: React.FC = () => {
                 <div className={styles.badgeTitle}>더 보기</div>
               </div>
             </div>
+          </div>
 
+          <div className={styles.centerColumn}>
             <div className={styles.competitionSection}>
               <h3 className={styles.sectionTitle}>주간 경쟁전</h3>
               <div className={styles.competitionBox}>
@@ -737,56 +829,62 @@ const Dashboard: React.FC = () => {
                     className={styles.competitionButton}
                     onClick={() => navigate('/main/competition')}
                   >
-                  1등 도전하기
+                    1등 도전하기
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className={styles.rightSection}>
+          <div className={styles.rightColumn}>
             <button
               className={styles.studyButton}
               onClick={() => navigate('/setting')}
             >
               학습하기
             </button>
-            <div className={styles.calendarWrapper}>
-              <ResponsiveCalendar
+            <div className={styles.timeRangeWrapper}>
+              <ResponsiveTimeRange
                 data={calendarData}
-                from="2024-08-01"
-                to="2024-12-31"
+                from="2024-01-01"
+                to="2024-08-31"
                 emptyColor="#eeeeee"
-                colors={['#d6e685', '#1e6823']}
-                margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-                yearSpacing={40}
-                monthBorderColor="#ffffff"
+                colors={colorScale}
+                margin={{ top: 20, right: 20, bottom: 40, left: 40 }}
                 dayBorderWidth={2}
                 dayBorderColor="#ffffff"
+                weekdayTicks={[0, 2, 4, 6]}
               />
             </div>
+            <p className={styles.timeRangeDescription}>
+              점수 : 집중도, 푼 문제 수, 목표 시간 달성률 기준
+            </p>
           </div>
         </div>
 
         <div className={styles.chartSection}>
-          <div className={styles.leftColumn}>
+          <div className={styles.chartColumn}>
             <div className={styles.chartWrapper}>
-              <h3 className={styles.chartTitle}>주간 리포트 - 문제 푼 수</h3>
-              <Chart
-                type="bar"
-                data={solvedData}
-                options={solvedChartOptions}
-              />
+              <h3 className={styles.sectionTitle}>주간 리포트</h3>
+              <div className={styles.weeklyCharts}>
+                <div className={styles.chartItem}>
+                  <Chart
+                    type="bar"
+                    data={solvedData}
+                    options={solvedChartOptions}
+                  />
+                </div>
+                <div className={styles.chartItem}>
+                  <Chart
+                    type="bar"
+                    data={studyTimeData}
+                    options={studyTimeChartOptions}
+                  />
+                </div>
+              </div>
             </div>
-            {/* <div className={styles.chartWrapper}>
-              <h3 className={styles.chartTitle}>주간 리포트 - 공부 시간</h3>
-              <Chart
-                type="bar"
-                data={studyTimeData}
-                options={studyTimeChartOptions}
-              />
-            </div> */}
           </div>
+
           <div className={styles.centerColumn}>
             <div
               className={`${styles.chartWrapper} ${styles.focusChartWrapper}`}
