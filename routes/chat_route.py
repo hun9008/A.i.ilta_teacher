@@ -136,6 +136,8 @@ async def decide_user_wrong(websocket: WebSocket):
                 prob_num = response["prob_num"]
             else:
                 print("warning (unexpected type) :", type(response))
+                prob_num = -1
+            
             problem_index = 0
             if prob_num != -1:
                 problem_index = prob_num
@@ -336,7 +338,13 @@ async def process_message(chat: ChatRequest):
         response = "문제를 해결했어! 다른 문제를 풀어볼까?"
         
     elif user_vars.user_status == "doing":
-        response = ''
+        # response = ''
+        if user_text:
+            response = await call_openai_api(user_text)
+            user_context[user_id]["prev_chat"] = user_text + "\n" + "나의 답변 : " + response + "\n"
+            return response
+        else:
+            return ''
         
     else:
         response = "Invalid state."
