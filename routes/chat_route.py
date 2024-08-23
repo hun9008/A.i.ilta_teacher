@@ -190,16 +190,19 @@ async def websocket_endpoint(websocket: WebSocket):
             # await websocket.send_text(response)
             
             for solution in solutions_storage:
-                steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', solution)
-                steps_array = [step.strip() for step in steps[1:] if step.strip()]
+                if type(solution) == list:
+                    print("warning : solution is list")
+                else:
+                    steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', solution)
+                    steps_array = [step.strip() for step in steps[1:] if step.strip()]
 
-                if len(steps_array) > 0:
-                    steps_array[-1] = f"Answer: {steps_array[-1]}"
+                    if len(steps_array) > 0:
+                        steps_array[-1] = f"Answer: {steps_array[-1]}"
 
-                # for i, step in enumerate(steps_array):
-                #     print(f"Step {i+1}: {step}")
+                    # for i, step in enumerate(steps_array):
+                    #     print(f"Step {i+1}: {step}")
 
-                step_elements.append(steps_array)
+                    step_elements.append(steps_array)
         else:
             print("test) WebSocket connection not opened or already open")
         
