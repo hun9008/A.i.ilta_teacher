@@ -172,7 +172,7 @@ async def decide_user_wrong(websocket: WebSocket):
 
                 user_vars.user_status = hand_ocr.json().get("determinants")
             else:
-                print("warning : prob_num is -1")
+                print("@@@ warning : prob_num is -1")
                 hand_ocr = {
                     "determinants": "solve_delay"
                 }
