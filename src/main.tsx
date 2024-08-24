@@ -17,13 +17,13 @@ const PCControlPage = lazy(() => import('./PCControlPage'));
 const Game = lazy(() => import('./Game'));
 const ImageCropTest = lazy(() => import('./imageCropTest'));
 const OcrCheck = lazy(() => import('./OcrCheck'));
-
 const Dashboard = lazy(() => import('./Dashboard'));
 const Report = lazy(() => import('./Report'));
 const Competition = lazy(() => import('./Competition'));
 const ProblemSetGenerator = lazy(() => import('./ProblemSetGenerator'));
 const DifficultySelectPage = lazy(() => import('./DifficultySelect'));
 const AnswerPage = lazy(() => import('./AnswerPage'));
+const SchoolRank = lazy(() => import('./SchoolRank'));
 
 import './css/index.css';
 import './css/tailwind.css';
@@ -42,6 +42,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/main" element={<MainPage />}>
                 <Route index element={<Dashboard />} />
                 <Route path="report" element={<Report />} />
+                <Route path="school-ranking" element={<SchoolRank />} />
                 <Route path="competition" element={<Competition />} />
                 <Route
                   path="/main/competition/difficulty-select"

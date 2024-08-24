@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Chart } from 'react-chartjs-2';
 import { ResponsiveTimeRange } from '@nivo/calendar';
 import styles from './css/MainPage.module.css';
+import DashboardSchoolRanking from './SchoolRank';
 
 import {
   Chart as ChartJS,
@@ -832,6 +833,9 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
+            </div>
+            <div className="p-6">
+              <DashboardSchoolRanking />
             </div>
           </div>
 
