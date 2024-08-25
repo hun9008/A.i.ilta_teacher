@@ -86,9 +86,31 @@
 }
 
 .competitionBox {
+  width: 100%;
   background-color: #f3f4f6;
   border-radius: 10px;
   padding: 15px;
+  text-align: center; /* Center align text */
+}
+
+.competitionInfo {
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center align button */
+  justify-content: center;
+}
+
+.competitionButton {
+  width: 60%; /* Reduce the width of the button */
+  background-color: #7c3aed;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px; /* Add space above the button */
 }
 
 .competitionTable {
@@ -108,27 +130,6 @@
   font-weight: bold;
 }
 
-.competitionInfo {
-  background-color: #f9f9f9;
-}
-
-.competitionInfo:last-child td {
-  border-bottom: none;
-}
-
-.competitionInfo td {
-  padding: 10px 0;
-}
-.competitionButton {
-  background-color: #7c3aed;
-  color: white;
-  padding: 8px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-left: 10px;
-}
 .enterButton {
   padding: 8px 15px;
   background-color: #cccccc;
@@ -228,7 +229,7 @@
 }
 
 .studyButton {
-  width: 100%;
+  width: 50%; /* Set the width of the button to 70% */
   background-color: #7c3aed;
   color: white;
   padding: 15px;
@@ -236,7 +237,13 @@
   border-radius: 5px;
   cursor: pointer;
   font-size: 18px;
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the icon and text */
+  margin: 0 auto 20px auto; /* Center the button horizontally */
+}
+.studyButton .icon {
+  margin-left: 10px; /* Add space between the text and icon */
 }
 
 .timeRangeWrapper {
@@ -256,19 +263,26 @@
 .leftColumn,
 .centerColumn,
 .rightColumn {
-  width: 33%;
+  width: 100%; /* Ensure each column takes full width */
+  flex: 1;
+  max-width: 100%; /* Ensure no overflow */
 }
 
-.leftColumn {
+.leftSection {
+  flex: 1; /* 이 섹션이 가로 공간을 균등하게 차지하도록 합니다. */
+}
+
+.rightSection {
+  flex: 1; /* 이 섹션이 가로 공간을 균등하게 차지하도록 합니다. */
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  justify-content: flex-end; /* 섹션 내부 요소를 오른쪽으로 정렬합니다. */
 }
 
 .chartSection {
   display: flex;
   gap: 20px;
   margin-top: 20px;
+  flex-wrap: wrap;
 }
 
 .chartColumn {
@@ -283,13 +297,14 @@
   height: 600px; /* 고정 높이 지정 */
   display: flex;
   flex-direction: column;
+  overflow: visible;
 }
 
 .sectionTitle,
 .chartTitle {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   text-align: center;
 }
 
@@ -521,4 +536,74 @@
   display: flex;
   flex-direction: row;
   gap: 20px;
+}
+.experienceContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.experienceBarWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 20px; /* Space between bar and details */
+}
+
+.experienceBarVertical {
+  width: 25px;
+  height: 300px; /* Adjust height for the experience bar */
+  background-color: #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.experienceProgressVertical {
+  width: 100%;
+  background-color: #f9d835; /* Gold color for the progress bar */
+  position: absolute;
+  bottom: 0;
+}
+
+.experienceDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align text and images to the left */
+}
+
+.experienceDetailItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px; /* Space between each tier and points */
+}
+
+.tierImage {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px; /* Space between image and text */
+}
+
+.experienceInput {
+  width: 60px;
+  margin: 5px 0;
+  text-align: center;
+}
+
+.experienceRemainingText {
+  font-size: 16px;
+  color: #666;
+  margin-top: 10px;
+}
+
+.greetingSection {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tierIcon {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
 }

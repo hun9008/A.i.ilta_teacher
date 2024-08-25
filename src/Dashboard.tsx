@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Chart } from 'react-chartjs-2';
 import { ResponsiveTimeRange } from '@nivo/calendar';
 import styles from './css/MainPage.module.css';
+import { StepForward } from 'lucide-react';
+import silverTier from './assets/silver_tier.png';
+import goldTier from './assets/gold_tier.png';
 
 import {
   Chart as ChartJS,
@@ -285,7 +288,7 @@ const Dashboard: React.FC = () => {
   };
   const solvedChartOptions: ChartOptions<'bar'> = {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: false, // Allow the chart to stretch and fit its container
     plugins: {
       legend: {
         position: 'top' as const,
@@ -305,7 +308,7 @@ const Dashboard: React.FC = () => {
 
   const studyTimeChartOptions: ChartOptions<'bar'> = {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: false, // Allow the chart to stretch and fit its container
     plugins: {
       legend: {
         position: 'top' as const,
@@ -422,8 +425,7 @@ const Dashboard: React.FC = () => {
 
   const categoryOptions: ChartOptions<'bar' | 'line'> = {
     responsive: true,
-    maintainAspectRatio: true,
-    aspectRatio: 2,
+    maintainAspectRatio: false, // Allow the chart to stretch and fit its container
     plugins: {
       title: {
         display: true,
@@ -436,7 +438,6 @@ const Dashboard: React.FC = () => {
         position: 'bottom' as const,
       },
     },
-
     scales: {
       x: {
         type: 'category',
@@ -700,8 +701,9 @@ const Dashboard: React.FC = () => {
   };
 
   const focusChartOptions: ChartOptions<'bar'> = {
-    indexAxis: 'x', // 가로 방향 차트
+    indexAxis: 'x',
     responsive: true,
+    maintainAspectRatio: false, // Allow the chart to stretch and fit its container
     plugins: {
       legend: {
         position: 'top' as const,
@@ -737,7 +739,6 @@ const Dashboard: React.FC = () => {
           text: '시간 (1 day)',
         },
         ticks: {
-          // stepSize: 20,
           callback: function (tickValue: string | number) {
             const numericValue =
               typeof tickValue === 'number' ? tickValue : parseFloat(tickValue);
@@ -754,8 +755,8 @@ const Dashboard: React.FC = () => {
     },
     datasets: {
       bar: {
-        categoryPercentage: 0.9, // 카테고리에서 막대가 차지하는 비율 조정
-        barPercentage: 0.7, // 막대 너비 비율 조정
+        categoryPercentage: 0.9,
+        barPercentage: 0.7,
       },
     },
   };
@@ -765,6 +766,16 @@ const Dashboard: React.FC = () => {
     width: '100%', // 차트의 가로 크기는 100%로 설정
   };
 
+  // 경험치 바 생성하기
+
+  const startExperience = 1000; // Starting value for the experience bar
+  const endExperience = 4900; // Ending value for the experience bar
+  const currentExperience = 1700; // Your current experience points
+
+  const totalExperienceNeeded = endExperience - startExperience;
+  const experienceGained = currentExperience - startExperience;
+  const experiencePercentage = (experienceGained / totalExperienceNeeded) * 100;
+
   ///////////////////////////////////////////////////////
 
   return (
@@ -772,31 +783,85 @@ const Dashboard: React.FC = () => {
       <div className={styles.mainContent}>
         <div className={styles.topSection}>
           <div className={styles.leftColumn}>
-            <div className={styles.greeting}>안녕! {nickname}아</div>
+            <div className={styles.greetingSection}>
+              <img
+                src={silverTier}
+                alt="Silver Tier"
+                className={styles.tierIcon}
+              />
+              <div className={styles.greeting}>안녕! {nickname}아</div>
+            </div>
+            <div className={styles.leftSection}>
+              <div className={styles.badgeSection}>
+                <h3 className={styles.sectionTitle}>뱃지 목록</h3>
 
-            <div className={styles.badgeSection}>
-              <h3 className={styles.sectionTitle}>뱃지 목록</h3>
-
-              {existingBadges.slice(0, 2).map((badge, index) => (
-                <div key={index} className={styles.badgeWrapper}>
-                  <div
-                    className={styles.badgeCircle}
-                    title={`${badge.title}: ${badge.description}`}
-                  >
-                    <img src={badge.image || ''} alt={badge.title || 'Badge'} />
+                {existingBadges.slice(0, 4).map((badge, index) => (
+                  <div key={index} className={styles.badgeWrapper}>
+                    <div
+                      className={styles.badgeCircle}
+                      title={`${badge.title}: ${badge.description}`}
+                    >
+                      <img
+                        src={badge.image || ''}
+                        alt={badge.title || 'Badge'}
+                      />
+                    </div>
+                    <div className={styles.badgeTitle}>{badge.title}</div>
                   </div>
-                  <div className={styles.badgeTitle}>{badge.title}</div>
+                ))}
+                <div className={styles.badgeWrapper}>
+                  <div
+                    className={`${styles.badgeCircle} ${styles.badgeCircleClickable}`}
+                    title="추가 배지"
+                    onClick={handleBadgeClick}
+                  >
+                    <div className={styles.plusIcon}>+</div>
+                  </div>
+                  <div className={styles.badgeTitle}>더 보기</div>
                 </div>
-              ))}
-              <div className={styles.badgeWrapper}>
-                <div
-                  className={`${styles.badgeCircle} ${styles.badgeCircleClickable}`}
-                  title="추가 배지"
-                  onClick={handleBadgeClick}
-                >
-                  <div className={styles.plusIcon}>+</div>
+              </div>
+              <div className={styles.rightSection}>
+                <div className={styles.experienceContainer}>
+                  <div className={styles.experienceBarWrapper}>
+                    <div className={styles.experienceBarVertical}>
+                      <div
+                        className={styles.experienceProgressVertical}
+                        style={{ height: `${experiencePercentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className={styles.experienceDetails}>
+                    <div className={styles.experienceDetailItem}>
+                      <img
+                        src={goldTier}
+                        alt="Gold Tier"
+                        className={styles.tierImage}
+                      />
+                      <span>{endExperience} pts</span>
+                    </div>
+
+                    <div className={styles.experienceDetailItem}>
+                      <input
+                        type="number"
+                        value={currentExperience}
+                        className={styles.experienceInput}
+                      />
+                    </div>
+                    <div className={styles.experienceRemainingText}>
+                      {`골드 티어까지 ${
+                        endExperience - currentExperience
+                      } 경험치 남았습니다`}
+                    </div>
+                    <div className={styles.experienceDetailItem}>
+                      <img
+                        src={silverTier}
+                        alt="Silver Tier"
+                        className={styles.tierImage}
+                      />
+                      <span>{startExperience} pts</span>
+                    </div>
+                  </div>
                 </div>
-                <div className={styles.badgeTitle}>더 보기</div>
               </div>
             </div>
           </div>
@@ -805,7 +870,7 @@ const Dashboard: React.FC = () => {
             <div className={styles.competitionSection}>
               <h3 className={styles.sectionTitle}>주간 경쟁전</h3>
               <div className={styles.competitionBox}>
-                <p>2024-08-28 20:00 오픈</p>
+                <p>2024-08-30 20:00 오픈</p>
                 <div className={styles.competitionInfo}>
                   <span>범위 : {competitionRange}</span>
                   <button
@@ -834,8 +899,11 @@ const Dashboard: React.FC = () => {
               className={styles.studyButton}
               onClick={() => navigate('/setting')}
             >
-              학습하기
+              학습하기 <StepForward size={30} className="icon" />
             </button>
+            <p className={styles.timeRangeDescription}>
+              점수 : 집중도, 푼 문제 수, 목표 시간 달성률 기준
+            </p>
             <div className={styles.timeRangeWrapper}>
               <ResponsiveTimeRange
                 data={calendarData}
@@ -849,9 +917,6 @@ const Dashboard: React.FC = () => {
                 weekdayTicks={[0, 2, 4, 6]}
               />
             </div>
-            <p className={styles.timeRangeDescription}>
-              점수 : 집중도, 푼 문제 수, 목표 시간 달성률 기준
-            </p>
           </div>
         </div>
 
