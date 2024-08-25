@@ -113,14 +113,14 @@ function SettingPage() {
     (currentStep === 4 && !isOcrSubmitted);
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">스터디 설정</h1>
-      <div className="mb-8">
-        <ol className="flex items-center">
+      <div className="mb-8 overflow-x-auto">
+        <ol className="flex items-center whitespace-nowrap min-w-full">
           {steps.map((step, index) => (
-            <li key={step.id} className="flex items-center">
+            <li key={step.id} className="flex items-center flex-shrink-0">
               <div
-                className={`flex items-center justify-center w-7 h-7 rounded-full border-2 ${
+                className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
                   index <= currentStep
                     ? 'bg-primary-400 border-primary-400 text-white'
                     : 'border-gray-300'
@@ -128,7 +128,6 @@ function SettingPage() {
               >
                 {completed[step.id] ? <Check size={16} /> : index + 1}
               </div>
-
               <span
                 className={`ml-2 text-sm ${
                   index <= currentStep
@@ -139,7 +138,10 @@ function SettingPage() {
                 {step.title}
               </span>
               {index < steps.length - 1 && (
-                <ChevronRight className="mx-2 text-gray-400" size={16} />
+                <ChevronRight
+                  className="mx-2 text-gray-400 flex-shrink-0"
+                  size={16}
+                />
               )}
             </li>
           ))}
