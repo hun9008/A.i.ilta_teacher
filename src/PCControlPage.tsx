@@ -308,6 +308,9 @@ const PCControlPage: React.FC = () => {
                 className="bg-white p-5 rounded-lg relative"
                 onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
               >
+                <p className="text-center mb-4 font-semibold">
+                  문제 영역에 맞게 모서리를 조정해주세요.
+                </p>
                 <div className="absolute top-[-9999px] left-[-9999px]">
                   <canvas ref={canvasRef} />
                 </div>
@@ -324,15 +327,15 @@ const PCControlPage: React.FC = () => {
                     onMouseUp={handleCanvasInteraction}
                   />
                 </div>
-                <button onClick={detectCorners}>Detect Corners</button>
+                <button onClick={detectCorners}>모서리 찾기</button>
                 <button onClick={cropImage} disabled={points.length !== 4}>
-                  Crop Image
+                  이미지 자르기
                 </button>
               </div>
             </div>
           )}
 
-          {croppedImage && (
+          {/* {croppedImage && (
             <div>
               <h3>Cropped Image:</h3>
               <img
@@ -341,10 +344,10 @@ const PCControlPage: React.FC = () => {
                 style={{ maxWidth: '750%' }}
               />
             </div>
-          )}
+          )} */}
         </>
       ) : (
-        <p>No image data received</p>
+        <p>모바일 카메라 정보를 받아들이고 있습니다!</p>
       )}
     </div>
   );

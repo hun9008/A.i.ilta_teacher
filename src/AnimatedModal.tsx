@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send,  BookOpen, User } from 'lucide-react';
+import { Send, BookOpen, User } from 'lucide-react';
 import { useWebSocket } from './WebSocketContext';
 import { handleTTS, TTSAudioPlayer } from './TTS';
 import logo from './assets/logo.svg';
@@ -14,6 +14,7 @@ interface AnimatedModalProps {
   chatOnly?: boolean;
   onSolve: () => void;
   enableTTS: boolean;
+  onMoveToNext: () => void;
 }
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
@@ -30,6 +31,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   chatOnly = false,
   onSolve,
   enableTTS,
+  onMoveToNext,
 }) => {
   const { getSocket, sendMessage, connectWebSocket, isConnected } =
     useWebSocket();
@@ -82,13 +84,17 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         socket.onmessage = async (event: MessageEvent) => {
           const data = event.data;
           console.log('Received WebSocket message:', data);
-
+          if (data === 'status : solve') {
+            onSolve();
+            onMoveToNext();
+            return;
+          }
           if (data.startsWith('status :')) {
             console.log('Ignoring status message:', data);
             return;
           }
-
-          const newMessage = { text: data, sender: 'bot' as const };
+          const processedText = preprocessMessage(data);
+          const newMessage = { text: processedText, sender: 'bot' as const };
           setMessages((prevMessages) => {
             const updatedMessages = [...prevMessages, newMessage];
             globalMessages = updatedMessages;
@@ -114,7 +120,15 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         }
       };
     }
-  }, [isOpen, getSocket, connectWebSocket, isConnected, sendMessage]);
+  }, [
+    isOpen,
+    getSocket,
+    connectWebSocket,
+    isConnected,
+    sendMessage,
+    onSolve,
+    onMoveToNext,
+  ]);
 
   const handleSendMessage = () => {
     if (inputMessage.trim() && socketReady) {
@@ -172,12 +186,35 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
 
   const cleanedProblem = cleanText(selectedProblem);
   const cleanedConcept = cleanText(selectedConcept);
+  const preprocessMessage = (message: string): string => {
+    message = message.replace(
+      /\\\((.*?)\\\)/g,
+      '<span class="math inline">$1</span>'
+    );
+    message = message.replace(
+      /\\\[(.*?)\\\]/g,
+      '<span class="math display">$1</span>'
+    );
+
+    message = message.replace(
+      /(\d+)\.\s+\*\*(.*?)\*\*:/g,
+      '<br><strong>$1. $2:</strong>'
+    );
+
+    message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    message = message.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    message = message.replace(/\n/g, '<br>');
+    return message;
+  };
 
   return (
     <AnimatePresence>
       <motion.div
         key="modal"
-        className="fixed inset-x-0 top-28 flex items-start justify-end pointer-events-none"        variants={overlayVariants}
+        className="fixed inset-x-0 top-28 flex items-start justify-end pointer-events-none"
+        variants={overlayVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
@@ -193,26 +230,31 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               transition={{ type: 'spring', damping: 20 }}
             >
               <div className="h-full flex flex-col">
-              <h1 className="text-2xl font-bold mb-4 text-gray-900">
-                    문제 {selectedFloe}{' '}
-                  </h1>
-              <div className="bg-gradient-to-t from-blue-50 to-purple-50 rounded-xl p-5 mb-6 flex-grow overflow-y-auto">
-                  
+                <h1 className="text-2xl font-bold mb-4 text-gray-900">
+                  문제 {selectedFloe}{' '}
+                </h1>
+                <div className="bg-gradient-to-t from-blue-50 to-purple-50 rounded-xl p-5 mb-6 flex-grow overflow-y-auto">
                   <h2 className="text-xl font-bold mb-4 text-gray-800">
                     <p dangerouslySetInnerHTML={{ __html: cleanedProblem }} />
                   </h2>
                 </div>
                 <div className="bg-gray-50 p-5 rounded-xl mb-4">
-                <h1 className="text-xl font-bold mb-4 text-gray-900">이 문제에 대한 정보</h1>
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                  {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
-                </h3>
-                <h3 className="text-xl font-bold mb-4 text-gray-900">관련 개념들</h3>
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">{cleanedConcept}</h3>
+                  <h1 className="text-xl font-bold mb-4 text-gray-900">
+                    이 문제에 대한 정보
+                  </h1>
+                  <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                    {gradeInfo ? `${gradeInfo}학년` : '학년 정보 없음'}
+                  </h3>
+                  <h3 className="text-xl font-bold mb-4 text-gray-900">
+                    관련 개념들
+                  </h3>
+                  <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                    {cleanedConcept}
+                  </h3>
                 </div>
-                <div className="flex justify-end">              
-                <button
-                  className="
+                <div className="flex justify-end">
+                  <button
+                    className="
                     px-4 py-2 bg-blue-500 text-white rounded-full
                     hover:from-blue-400 hover:to-purple-400 active:from-blue-600 active:to-purple-600
                     transition-all duration-200
@@ -221,11 +263,11 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                     border-b-8 border-blue-600 active:border-b-0
                     font-bold text-base
                   "
-                  onClick={handleSolveClick}
-                >
-                  <BookOpen className="inline-block mr-2" size={20} />
-                  풀었음
-                </button>
+                    onClick={handleSolveClick}
+                  >
+                    <BookOpen className="inline-block mr-2" size={20} />
+                    풀었음
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -252,7 +294,11 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   }`}
                 >
                   {message.sender !== 'user' && (
-                    <img src={logo} alt="m.AI Tutor" className="w-8 h-8 mr-4 flex-shrink-0" />
+                    <img
+                      src={logo}
+                      alt="m.AI Tutor"
+                      className="w-8 h-8 mr-4 flex-shrink-0"
+                    />
                   )}
                   <div
                     className={`max-w-3/4 p-2.5 pr-5 pl-5 rounded-2xl ${
@@ -261,7 +307,10 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                         : 'bg-gray-200 text-black'
                     }`}
                   >
-                    <div className="break-words">{message.text}</div>
+                    <div
+                      className="break-words"
+                      dangerouslySetInnerHTML={{ __html: message.text }}
+                    />
                   </div>
                   {message.sender === 'user' && (
                     <User className="w-8 h-8 ml-2 text-primary-600 flex-shrink-0" />
@@ -282,7 +331,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 onClick={handleSendMessage}
                 className="round-full bg-blue-500 text-white hover:bg-blue-600"
               >
-                <Send size={16} className='mx-4' />
+                <Send size={16} className="mx-4" />
               </button>
             </div>
             {/*

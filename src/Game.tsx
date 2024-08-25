@@ -43,6 +43,7 @@ function Game() {
     []
   );
   const [showSolvedMessage, setShowSolvedMessage] = useState(false);
+  const [currentProblemIndex, setCurrentProblemIndex] = useState<number>(0);
 
   const [studyTime, setStudyTime] = useState<{
     hours: number;
@@ -169,6 +170,24 @@ function Game() {
     setTimeout(() => setShowSolvedMessage(false), 2000);
     console.log('이 문제 풀었음!', selectedFloe);
   }, [selectedFloe]);
+
+  const moveToNextProblem = useCallback(() => {
+    const problemNumbers = Object.keys(problemTexts).map(Number);
+    const nextIndex = (currentProblemIndex + 1) % problemNumbers.length;
+    setCurrentProblemIndex(nextIndex);
+    const nextProblemNumber = problemNumbers[nextIndex];
+
+    // 다음 문제의 위치로 펭귄 이동
+    const newPosition = new THREE.Vector3(...icePositions[nextIndex]);
+    newPosition.y = 0.5;
+    penguinTargetPosition.current = newPosition;
+
+    // 다음 문제의 모달 표시
+    setSelectedFloe(nextProblemNumber);
+    setSelectedProblem(problemTexts[nextProblemNumber] || '');
+    setSelectedConcept(concepts[nextProblemNumber] || 'No concept available');
+    setShowModal(true);
+  }, [currentProblemIndex, problemTexts, concepts, icePositions]);
 
   useEffect(() => {
     console.log(solvedProblems);
@@ -328,6 +347,7 @@ function Game() {
             selectedConcept={selectedConcept}
             onSolve={handleSolveProblem}
             enableTTS={enableTTS}
+            onMoveToNext={moveToNextProblem}
           />
         )}
       </AnimatePresence>
@@ -342,6 +362,7 @@ function Game() {
             chatOnly={true}
             onSolve={handleSolveProblem}
             enableTTS={enableTTS}
+            onMoveToNext={moveToNextProblem}
           />
         )}
       </AnimatePresence>
