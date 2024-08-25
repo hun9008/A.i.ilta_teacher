@@ -85,12 +85,6 @@
   margin: 20px 0;
 }
 
-.sectionTitle {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
 .competitionBox {
   background-color: #f3f4f6;
   border-radius: 10px;
@@ -245,15 +239,18 @@
   margin-bottom: 20px;
 }
 
-.calendarWrapper {
+.timeRangeWrapper {
   width: 100%;
-  height: 200px;
+  height: 200px; /* 명시적인 높이 지정 */
+  margin-bottom: 5px; /* 이 값을 줄여서 설명과의 간격을 좁힘 */
 }
 
-.chartSection {
-  display: flex;
-  gap: 20px;
-  margin-top: 20px;
+.timeRangeDescription {
+  margin-top: 0; /* 상단 마진 제거 */
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  padding-bottom: 10px; /* 하단에 약간의 패딩 추가 */
 }
 
 .leftColumn,
@@ -268,18 +265,53 @@
   gap: 20px;
 }
 
+.chartSection {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.chartColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 .chartWrapper {
   background-color: #f3f4f6;
   border-radius: 10px;
   padding: 20px;
-  min-height: 350px;
+  height: 600px; /* 고정 높이 지정 */
   display: flex;
   flex-direction: column;
 }
 
+.sectionTitle,
 .chartTitle {
-  font-size: 16px;
-  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.weeklyCharts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-grow: 1;
+}
+
+.chartItem {
+  flex: 1;
+  min-height: 0;
+  max-height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chartItem > canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .plusIcon {
@@ -483,4 +515,10 @@
   left: 0;
   background-color: rgba(255, 99, 132, 0.6);
   width: 100%;
+}
+
+.weeklyCharts {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
 }

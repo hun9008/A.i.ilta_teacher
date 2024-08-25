@@ -29,8 +29,8 @@ const CameraController: React.FC<CameraControllerProps> = ({
     const widthRatio = size.width / 1920;
     
     // 비율에 따라 x와 z 값 조정 (1을 기준으로)
-    const x = 2.9 * widthRatio;
-    const z = 3.5 * widthRatio;
+    const x = 2.2 * widthRatio;
+    const z = 3.3 * widthRatio;
     
     return new THREE.Vector3(x, 0, z);
   };
