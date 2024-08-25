@@ -81,24 +81,18 @@ const schoolNames = [
   '유선중학교',
 ];
 
-const DashboardSchoolRanking: React.FC = () => {
-  const [userSchoolData, setUserSchoolData] = useState<SchoolData | null>(null);
+const SchoolRanking: React.FC = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rankedData, setRankedData] = useState<SchoolData[]>([]);
+  const [userSchool, setUserSchool] = useState<string | null>(null);
+  const schoolsPerPage = 10;
 
   useEffect(() => {
-    const userSchool = localStorage.getItem('school');
-    if (!userSchool) return;
-
-    const allSchoolsData: SchoolData[] = schoolNames.map((name, index) =>
+    const dummyData: SchoolData[] = schoolNames.map((name, index) =>
       generateRandomSchoolData(name, index)
     );
 
-    if (!schoolNames.includes(userSchool)) {
-      allSchoolsData.push(
-        generateRandomSchoolData(userSchool, schoolNames.length)
-      );
-    }
-
-    const rankedData = allSchoolsData
+    const ranked = dummyData
       .map((school) => ({ ...school, score: calculateScore(school) }))
       .sort((a, b) => (b.score || 0) - (a.score || 0))
       .map((school, index) => ({
@@ -106,41 +100,120 @@ const DashboardSchoolRanking: React.FC = () => {
         rank: `${index + 1}${index < 3 ? ['🥇', '🥈', '🥉'][index] : ''}`,
       }));
 
-    const userSchoolRanking = rankedData.find(
-      (school) => school.name === userSchool
+    setRankedData(ranked);
+
+    // 사용자의 학교 정보를 localStorage에서 가져옴
+    const storedSchool = localStorage.getItem('school');
+    setUserSchool(storedSchool);
+
+    // 사용자의 학교가 목록에 없다면 추가
+    if (storedSchool && !schoolNames.includes(storedSchool)) {
+      const userSchoolData = generateRandomSchoolData(
+        storedSchool,
+        schoolNames.length
+      );
+      const userSchoolWithScore = {
+        ...userSchoolData,
+        score: calculateScore(userSchoolData),
+      };
+      setRankedData((prev) =>
+        [...prev, userSchoolWithScore]
+          .sort((a, b) => (b.score || 0) - (a.score || 0))
+          .map((school, index) => ({
+            ...school,
+            rank: `${index + 1}${index < 3 ? ['🥇', '🥈', '🥉'][index] : ''}`,
+          }))
+      );
+    }
+    const userSchoolData = ranked.find(
+      (school) => school.name === storedSchool
     );
-    setUserSchoolData(userSchoolRanking || null);
+    if (userSchoolData) {
+      localStorage.setItem(
+        'userSchoolRank',
+        JSON.stringify({
+          name: userSchoolData.name,
+          rank: userSchoolData.rank,
+          score: userSchoolData.score,
+        })
+      );
+    }
   }, []);
 
-  if (!userSchoolData) {
-    return <div>학교 정보를 불러오는 중...</div>;
-  }
+  const indexOfLastSchool = currentPage * schoolsPerPage;
+  const indexOfFirstSchool = indexOfLastSchool - schoolsPerPage;
+  const currentSchools = rankedData.slice(
+    indexOfFirstSchool,
+    indexOfLastSchool
+  );
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-      <h2 className="text-xl font-bold mb-4">우리 학교 랭킹</h2>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <p className="text-gray-600">학교명</p>
-          <p className="text-lg font-semibold">{userSchoolData.name}</p>
-        </div>
-        <div>
-          <p className="text-gray-600">순위</p>
-          <p className="text-lg font-semibold">{userSchoolData.rank}</p>
-        </div>
-        <div>
-          <p className="text-gray-600">점수</p>
-          <p className="text-lg font-semibold">{userSchoolData.score}</p>
-        </div>
-        <div>
-          <p className="text-gray-600">평균 대회 정답률</p>
-          <p className="text-lg font-semibold">
-            {userSchoolData.avgCompetitionAccuracy.toFixed(1)}%
-          </p>
-        </div>
+    <div className="p-6 w-full">
+      <h1 className="text-2xl font-bold mb-4">학교별 랭킹</h1>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-2 text-left">순위</th>
+              <th className="px-4 py-2 text-left">학교명</th>
+              <th className="px-4 py-2 text-right">점수</th>
+              <th className="px-4 py-2 text-right">평균 대회 정답률</th>
+              <th className="px-4 py-2 text-right">평균 공부 시간</th>
+              <th className="px-4 py-2 text-right">평균 문제 푼 수</th>
+              <th className="px-4 py-2 text-right">평균 정답률</th>
+              <th className="px-4 py-2 text-right">평균 집중도</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentSchools.map((school) => (
+              <tr
+                key={school.rank}
+                className={`border-b ${
+                  school.name === userSchool ? 'bg-yellow-100' : ''
+                }`}
+              >
+                <td className="px-4 py-2">{school.rank}</td>
+                <td className="px-4 py-2">{school.name}</td>
+                <td className="px-4 py-2 text-right">{school.score}</td>
+                <td className="px-4 py-2 text-right">
+                  {school.avgCompetitionAccuracy.toFixed(1)}%
+                </td>
+                <td className="px-4 py-2 text-right">
+                  {Math.round(school.avgStudyTime)}분
+                </td>
+                <td className="px-4 py-2 text-right">
+                  {school.avgProblemsSolved}
+                </td>
+                <td className="px-4 py-2 text-right">
+                  {school.avgAccuracy.toFixed(1)}%
+                </td>
+                <td className="px-4 py-2 text-right">
+                  {school.avgConcentration.toFixed(1)}%
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="mt-4 flex justify-center">
+        {[...Array(Math.ceil(rankedData.length / schoolsPerPage))].map(
+          (_, i) => (
+            <button
+              key={i}
+              onClick={() => paginate(i + 1)}
+              className={`mx-1 px-3 py-1 border rounded ${
+                currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-white'
+              }`}
+            >
+              {i + 1}
+            </button>
+          )
+        )}
       </div>
     </div>
   );
 };
 
-export default DashboardSchoolRanking;
+export default SchoolRanking;
