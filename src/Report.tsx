@@ -1,10 +1,18 @@
-import React , { useState } from 'react';
+import React, { useState } from 'react';
 import styles from './css/MainPage.module.css';
 import { Button } from "./button"
-import { FileText, Plus, X, Download } from "lucide-react"
+import { FileText, Plus, X, Download, Loader } from "lucide-react"
 import jsPDF from 'jspdf'
 import 'jspdf-autotable';  // 테이블을 포함한 다양한 기능을 추가로 지원
 import font from './font.txt'
+
+import { OpenAI } from 'openai';
+const apiKey = process.env.VITE_OPENAI_API_KEY;
+
+const client = new OpenAI({
+  apiKey: apiKey,
+  dangerouslyAllowBrowser: true,
+});
 
 type Report = {
   id: string;
@@ -15,23 +23,60 @@ type Report = {
 
 const Report: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([
-    { id: '1', title: '수학 학습 리포트', content: '수학 학습 내용입니다. 이번 주에는 미적분의 기초에 대해 학습했습니다. 극한과 연속성, 미분의 정의와 기본 법칙들을 다루었고, 다항함수의 미분을 연습했습니다. 특히 상품 가격 결정과 같은 실생활 문제에 미분을 적용하는 방법을 배웠습니다.', date: '2023-06-01' },
-    { id: '2', title: '영어 학습 리포트', content: '영어 학습 내용입니다. 이번 주 영어 학습은 비즈니스 영어에 초점을 맞추었습니다. 이메일 작성법, 회의 진행 용어, 프레젠테이션 기술 등을 학습했습니다. 또한, 영어로 된 TED 강연을 듣고 요약하는 연습을 통해 청취 능력과 요약 능력을 향상시켰습니다.', date: '2023-06-02' },
-    { id: '3', title: '과학 학습 리포트', content: '과학 학습 내용입니다. 이번 주에는 생태계와 환경에 대해 학습했습니다. 기후 변화가 생태계에 미치는 영향, 생물 다양성의 중요성, 지속 가능한 발전 등의 주제를 다루었습니다. 특히 지역 하천의 수질 오염 문제를 조사하고 개선 방안을 제시하는 프로젝트를 수행했습니다.', date: '2023-06-03' },
-    { id: '4', title: 'eng study report', content: 'It is the report for english. You are doing good', date: '2023-06-03' },
+    // Example reports
+    { id: '1', title: 'Study Report ex 3', content: 'This week, we focused on the basics of calculus in our math study. We covered topics such as limits, continuity, the definition of derivatives, and basic differentiation rules. We also practiced differentiating polynomial functions and applied derivatives to real-life problems, such as determining product pricing.', date: '2023-06-01' },
+    { id: '2', title: 'Study Report ex 2', content: 'This week’s English study focused on business English. We learned about email writing, meeting terminology, and presentation skills. Additionally, we practiced summarizing by listening to TED talks in English, which helped improve our listening and summarization abilities.', date: '2023-06-02' },
+    { id: '3', title: 'Study Report ex 1', content: 'This week’s science study was about ecosystems and the environment. We studied the impact of climate change on ecosystems, the importance of biodiversity, and sustainable development. We also conducted a project investigating the water pollution problem in a local river and proposed improvement measures.', date: '2023-06-03' },
   ]);
 
+  const [loading, setLoading] = useState(false); // Add loading state
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
-  const createNewReport = () => {
-    const newReport: Report = {
-      id: Date.now().toString(),
-      title: `새 학습 리포트 ${reports.length + 1}`,
-      content: '새로 생성된 리포트 내용입니다. 이 부분은 실제 학습 데이터와 ChatGPT API를 통해 자동으로 생성될 예정입니다.',
-      date: new Date().toISOString().split('T')[0],
-    };
+  const createNewReport = async () => {
+    setLoading(true); // Start loading
 
-    setReports([newReport, ...reports]);
+    const weekly_reports = localStorage.getItem('weekly_reports');
+    const z_log = localStorage.getItem('z_log');
+    const progress_unit = localStorage.getItem('progress_unit');
+    const not_focusing_list = localStorage.getItem('not_focusing_list');
+
+    const prompt = `
+      Here is the weekly study report data:
+      1. Weekly Reports: ${weekly_reports}
+      2. Z Log: ${z_log}
+      3. Progress Unit: ${progress_unit}
+      4. Not Focusing List: ${not_focusing_list}
+
+      Please summarize the student's performance, highlight key achievements, and identify areas that need improvement. Structure the report in a narrative format.
+    `;
+
+    try {
+      const response = await client.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "system", content: "You are a helpful assistant." }, { role: "user", content: prompt }],
+        max_tokens: 1500,
+        temperature: 0.7,
+      });
+
+      const messageContent = response.choices[0].message?.content?.trim() || 'Report generation failed.';
+
+      const newReport: Report = {
+        id: Date.now().toString(),
+        title: `Study Report ${reports.length + 1} ${new Date().toLocaleDateString('ko-KR', {
+          year: '2-digit',
+          month: '2-digit',
+          day: '2-digit',
+        }).replace(/ /g, '').replace(/\./g, '.')}`,
+        content: messageContent,
+        date: new Date().toISOString().split('T')[0],
+      };
+
+      setReports([newReport, ...reports]);
+    } catch (error) {
+      console.error("Error generating report:", error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
   const savePDF = (report: Report) => {
@@ -42,10 +87,6 @@ const Report: React.FC = () => {
         format: "a4", // 포맷 (페이지 크기).
     });
 
-    // // 외부 글꼴 사용 예제
-    // doc.addFileToVFS('NotoSansKR-Regular.ttf', font);
-    // doc.addFont('NotoSansKR-Regular.ttf', 'NotoSansKR', 'normal');
-    // doc.setFont('NotoSansKR');
     console.log("font list: ", doc.getFontList());
 
     doc.setFontSize(18);
@@ -62,50 +103,60 @@ const Report: React.FC = () => {
   };
 
   return (
-    <div className = {styles.reportContent}>
+    <div className={styles.reportContent}>
       <div className={styles.reportContainer}>
-        {/* <h1>File Text Page</h1> */}
-
         <Button 
           onClick={createNewReport}
           className={styles.createReportButton}
+          disabled={loading} // Disable button while loading
         >
-          <Plus className="mr-2 h-4 w-4" /> 리포트 만들기
+          {loading ? (
+            <Loader className="animate-spin mr-2 h-4 w-4" />
+          ) : (
+            <Plus className="mr-2 h-4 w-4" />
+          )}
+          {loading ? '리포트 만드는 중...' : '리포트 만들기'}
         </Button>
 
-        <div className={styles.reportContainer}>
-          {reports.map((report, index) => {
-            const angle = (index - (reports.length - 1) / 2) * 15;
-            // const radius = 300; // Radius of the semicircle
-            const radiusX = 400; // X축 방향의 반지름 (가로로 더 길게 설정)
-            const radiusY = 200; // Y축 방향의 반지름 (세로로 더 짧게 설정)
-            const x = radiusX * Math.sin(angle * Math.PI / 180);
-            const y = radiusY * Math.cos(angle * Math.PI / 180);
-            
-            return (
-              <div
-                key={report.id}
-                className={styles.reportCard}
-                style={{
-                  transform: `translate(calc(-50% + ${x}px), ${-Math.abs(y)}px)`, // y 값을 항상 음수로 하여 위쪽에만 위치시킴
-                  zIndex: reports.length - index,
-                }}
-                onClick={() => setSelectedReport(report)}
-              >
-                <div className="bg-white rounded-lg shadow-md p-4 w-40 h-60 flex flex-col justify-between transform hover:scale-105 transition duration-300">
-                  <div>
-                    <h3 className="font-bold text-sm mb-2 truncate">{report.title}</h3>
-                    <p className="text-xs text-gray-600 line-clamp-3">{report.content}</p>
-                  </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-xs text-gray-500">{report.date}</span>
-                    <FileText className="h-4 w-4 text-gray-400" />
+        {loading ? (
+          <div className="flex justify-center items-center mt-8">
+            <Loader className="animate-spin h-8 w-8 text-blue-500" />
+            <span className="ml-4 text-blue-500">리포트 만드는 중...</span>
+          </div>
+        ) : (
+          <div className={styles.reportContainer}>
+            {reports.map((report, index) => {
+              const angle = (index - (reports.length - 1) / 2) * 15;
+              const radiusX = 400; // X축 방향의 반지름 (가로로 더 길게 설정)
+              const radiusY = 200; // Y축 방향의 반지름 (세로로 더 짧게 설정)
+              const x = radiusX * Math.sin(angle * Math.PI / 180);
+              const y = radiusY * Math.cos(angle * Math.PI / 180);
+              
+              return (
+                <div
+                  key={report.id}
+                  className={styles.reportCard}
+                  style={{
+                    transform: `translate(calc(-50% + ${x}px), ${-Math.abs(y)}px)`, // y 값을 항상 음수로 하여 위쪽에만 위치시킴
+                    zIndex: reports.length - index,
+                  }}
+                  onClick={() => setSelectedReport(report)}
+                >
+                  <div className="bg-white rounded-lg shadow-md p-4 w-40 h-60 flex flex-col justify-between transform hover:scale-105 transition duration-300">
+                    <div>
+                      <h3 className="font-bold text-sm mb-2 truncate">{report.title}</h3>
+                      <p className="text-xs text-gray-600 line-clamp-3">{report.content}</p>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-xs text-gray-500">{report.date}</span>
+                      <FileText className="h-4 w-4 text-gray-400" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}ㄴ
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {selectedReport && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -128,9 +179,7 @@ const Report: React.FC = () => {
         )}
       </div>
     </div>
-
   );
 };
 
 export default Report;
-
