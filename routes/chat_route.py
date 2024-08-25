@@ -113,20 +113,20 @@ async def decide_user_wrong(websocket: WebSocket):
                         include_hand = base64.b64encode(target_img.read()).decode('utf-8')
                     
                     problem_detect_json = {
-                        "image_clean" : origin_image_storage[0],
-                        "image_hand" : include_hand
+                        "origin_image" : origin_image_storage[0],
+                        "hand_image" : include_hand
                     }
 
-                    url = "http://model.maitutor.site/prob_areas_which_prob"
+                    url = "http://model.maitutor.site/hand_determinant"
 
                     headers = {'Content-Type': 'application/json'}
                     response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
 
-                    decode_image = base64.b64decode(include_hand)
-                    image = Image.open(io.BytesIO(decode_image))
-                    if image.mode == 'RGBA':
-                        image = image.convert('RGB')
-                    image_array = np.array(image)
+                    # decode_image = base64.b64decode(include_hand)
+                    # image = Image.open(io.BytesIO(decode_image))
+                    # if image.mode == 'RGBA':
+                    #     image = image.convert('RGB')
+                    # image_array = np.array(image)
 
                     if isinstance(response, requests.models.Response):
                         try:
@@ -139,40 +139,53 @@ async def decide_user_wrong(websocket: WebSocket):
                     else:
                         print("warning (unexpected type) :", type(response))
                         prob_num = -1
-                    
-                    problem_index = 0
-                    if prob_num != -1:
-                        # print("len solution_storage :", len(solutions_storage))
-                        # print("solution_storage : ", solutions_storage)
-                        # print("solution_storage[0] : ", solutions_storage[0])
-                        # print("solution_storage[0][0] : ", solutions_storage[0][0])
-                        # print("prob_num : ", prob_num)
-                        print("len solution_storage[0] : ", len(solutions_storage[0]))
-                        problem_index = prob_num
-                        prob_area = response_json.get("prob_area")
-                        this_prob_area = prob_area[problem_index]
-                        x, y, w, h = this_prob_area
 
-                        crop_image = image_array[y:y+h, x:x+w]
-                        pil_img = Image.fromarray(crop_image)
-                        buffered = io.BytesIO()
-                        pil_img.save(buffered, format="JPEG")
-                        img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-
-                        solution = solutions_storage[0][problem_index]
-                        print("##### start hand_ocr #####")
-                        hand_ocr = await perform_handwrite_ocr(img_str, solution)
-                        print("##### end hand_ocr #####")
-                        if hand_ocr.status_code == 200:
-                            user_vars.user_status = hand_ocr.json().get("determinants")
-                        else:
-                            print("warning: hand_ocr request failed")
-                            user_vars.user_status = "solve_delay"
+                    if prob_num == -1:
+                        user_vars.user_status = "doing"
                     else:
-                        hand_ocr = {
-                            "determinants": "solve_delay"
-                        }
-                        user_vars.user_status = hand_ocr.get("determinants")
+                        hand_write = response_json.get("hand_write")
+                        solution = solutions_storage[0][prob_num]
+
+                        hand_response = await perform_handwrite_ocr(hand_write, solution)
+
+                        if hand_response.status_code == 200:
+                            user_vars.user_status = hand_response.json().get("determinants")
+                        else:
+                            user_vars.user_status = "doing"
+                    
+                    # problem_index = 0
+                    # if prob_num != -1:
+                    #     # print("len solution_storage :", len(solutions_storage))
+                    #     # print("solution_storage : ", solutions_storage)
+                    #     # print("solution_storage[0] : ", solutions_storage[0])
+                    #     # print("solution_storage[0][0] : ", solutions_storage[0][0])
+                    #     # print("prob_num : ", prob_num)
+                    #     print("len solution_storage[0] : ", len(solutions_storage[0]))
+                    #     problem_index = prob_num
+                    #     prob_area = response_json.get("prob_area")
+                    #     this_prob_area = prob_area[problem_index]
+                    #     x, y, w, h = this_prob_area
+
+                    #     crop_image = image_array[y:y+h, x:x+w]
+                    #     pil_img = Image.fromarray(crop_image)
+                    #     buffered = io.BytesIO()
+                    #     pil_img.save(buffered, format="JPEG")
+                    #     img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+                    #     solution = solutions_storage[0][problem_index]
+                    #     print("##### start hand_ocr #####")
+                    #     hand_ocr = await perform_handwrite_ocr(img_str, solution)
+                    #     print("##### end hand_ocr #####")
+                    #     if hand_ocr.status_code == 200:
+                    #         user_vars.user_status = hand_ocr.json().get("determinants")
+                    #     else:
+                    #         print("warning: hand_ocr request failed")
+                    #         user_vars.user_status = "solve_delay"
+                    # else:
+                    #     hand_ocr = {
+                    #         "determinants": "solve_delay"
+                    #     }
+                    #     user_vars.user_status = hand_ocr.get("determinants")
 
             except Exception as e:
                 print(f"Error in decide_user_wrong loop: {str(e)}")
@@ -180,14 +193,14 @@ async def decide_user_wrong(websocket: WebSocket):
     except Exception as e:
         print(f"Critical error in decide_user_wrong: {str(e)}")
         
-async def perform_handwrite_ocr(frame_data, solution):
+async def perform_handwrite_ocr(hand_write, solution):
     
     print("test) Decide user status by handwrite OCR")
     
     url = "http://model.maitutor.site/hand_ocr"
     
     payload = {
-        "image": frame_data,
+        "hand_write": hand_write,
         "solution": solution 
     }
     headers = {'Content-Type': 'application/json'} 
