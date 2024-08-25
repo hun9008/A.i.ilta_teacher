@@ -7,7 +7,7 @@ import 'jspdf-autotable';  // 테이블을 포함한 다양한 기능을 추가�
 import font from './font.txt'
 
 import { OpenAI } from 'openai';
-const apiKey = process.env.VITE_OPENAI_API_KEY;
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
 const client = new OpenAI({
   apiKey: apiKey,
