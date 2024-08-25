@@ -621,7 +621,7 @@ const Dashboard: React.FC = () => {
   ///////////////////////////////////////////////////////
 
   const categoryData: ChartData<'bar' | 'line', number[], string> = {
-    labels: categories,
+    // labels: categories,
     datasets: [
       {
         type: 'bar' as const,

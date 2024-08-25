@@ -12,12 +12,17 @@
   "dependencies": {
     "@nivo/bar": "^0.87.0",
     "@nivo/calendar": "^0.87.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "@react-three/drei": "^9.109.5",
     "@react-three/fiber": "^8.17.5",
     "@types/three": "^0.167.1",
     "better-react-mathjax": "^2.0.3",
     "chart.js": "^4.4.3",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "framer-motion": "^11.3.26",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "lucide-react": "^0.427.0",
     "openai": "^4.56.0",
     "qrcode.react": "^3.1.0",
@@ -27,6 +32,8 @@
     "react-router-dom": "^6.26.0",
     "react-webcam": "^7.2.0",
     "styled-components": "^6.1.12",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7",
     "three": "^0.167.1"
   },
   "devDependencies": {
