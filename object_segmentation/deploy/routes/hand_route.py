@@ -504,6 +504,7 @@ def print_ocr_response(image):
 @hand_router.post("/hand_determinant")
 async def hand_determinant(image_input: ImageInput):
     
+    user_ocr_result.clear()
     problem_image = image_input.get_origin_image()
 
     origin_right, origin_left = imtrim(problem_image)
