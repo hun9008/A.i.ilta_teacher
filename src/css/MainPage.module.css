@@ -19,7 +19,8 @@
   font-weight: bold; /* Equivalent to font-bold */
   padding: 0.5rem 1rem; /* Equivalent to py-2 px-4 */
   border-radius: 9999px; /* Equivalent to rounded-full */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Equivalent to shadow-lg */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Equivalent to shadow-lg */
   transition: all 0.3s ease-in-out; /* Equivalent to transition duration-300 ease-in-out */
   transform: translateY(0); /* Set initial transform state */
 }
@@ -41,8 +42,6 @@
 .reportCard:hover {
   transform: translateX(-50%) scale(1.5); /* hover:scale-110 */
 }
-
-
 
 /* --------------- */
 
@@ -82,27 +81,28 @@
 }
 
 .competitionSection {
-  margin: 20px 0;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px; /* 패딩을 15px에서 20px로 증가 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 섹션에 그림자 추가 */
 }
 
 .competitionBox {
-  width: 100%;
-  background-color: #f3f4f6;
-  border-radius: 10px;
+  background-color: #ffffff; /* 배경색을 흰색으로 변경 */
+  border-radius: 8px; /* 모서리를 더 둥글게 */
   padding: 15px;
-  text-align: center; /* Center align text */
+  margin-top: 10px; /* 상단 여백 추가 */
 }
 
 .competitionInfo {
   background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center align button */
+  align-items: center;
   justify-content: center;
 }
-
 .competitionButton {
-  width: 60%; /* Reduce the width of the button */
+  width: 60%;
   background-color: #7c3aed;
   color: white;
   padding: 8px 15px;
@@ -110,7 +110,7 @@
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
-  margin-top: 10px; /* Add space above the button */
+  margin-top: 10px;
 }
 
 .competitionTable {
@@ -154,7 +154,7 @@
   flex-grow: 1;
 }
 
-.mainReportContent{
+.mainReportContent {
   flex-grow: 1;
   padding: 20px;
   margin-left: 50px;
@@ -171,38 +171,44 @@
 .topSection {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
 }
 
 .welcomeSection {
   flex: 1;
 }
 
-.greeting {
-  font-size: 24px;
-  margin-bottom: 10px;
+.badgeSection {
+  width: 35%;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.badgeSection {
+.badgeContainer {
   display: flex;
-  gap: 20px;
-  margin-top: 20px;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
 .badgeWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 30%;
+  text-align: center;
+  margin-bottom: 15px;
 }
 
 .badgeCircle {
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   border: 2px solid #ccc;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  margin: 0 auto;
 }
 
 .badgeCircle img {
@@ -211,16 +217,50 @@
   object-fit: cover;
 }
 
-.badgeCircleClickable {
-  cursor: pointer;
-}
-
 .badgeTitle {
-  margin-top: 5px;
+  margin-top: 8px;
   font-size: 14px;
   text-align: center;
 }
 
+.badgeCircleClickable {
+  cursor: pointer;
+}
+.badgeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.badgeCircleModal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.badgeImageWrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+
+.badgeImageWrapperEarned {
+  border-color: #ffd700;
+  background-color: #fffdf0;
+}
+
+.badgeImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .rightSection {
   flex: 1;
   display: flex;
@@ -232,7 +272,7 @@
   width: 50%; /* Set the width of the button to 70% */
   background-color: #7c3aed;
   color: white;
-  padding: 15px;
+  padding: 100px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -249,7 +289,7 @@
 .timeRangeWrapper {
   width: 100%;
   height: 200px; /* 명시적인 높이 지정 */
-  margin-bottom: 5px; /* 이 값을 줄여서 설명과의 간격을 좁힘 */
+  margin-bottom: 0px; /* 이 값을 줄여서 설명과의 간격을 좁힘 */
 }
 
 .timeRangeDescription {
@@ -266,16 +306,23 @@
   width: 100%; /* Ensure each column takes full width */
   flex: 1;
   max-width: 100%; /* Ensure no overflow */
+  gap: 20px;
 }
 
 .leftSection {
-  flex: 1; /* 이 섹션이 가로 공간을 균등하게 차지하도록 합니다. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-.rightSection {
-  flex: 1; /* 이 섹션이 가로 공간을 균등하게 차지하도록 합니다. */
+.greeting {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
   display: flex;
-  justify-content: flex-end; /* 섹션 내부 요소를 오른쪽으로 정렬합니다. */
+  align-items: center;
 }
 
 .chartSection {
@@ -294,13 +341,17 @@
   background-color: #f3f4f6;
   border-radius: 10px;
   padding: 20px;
-  height: 600px; /* 고정 높이 지정 */
+  height: 400px; /* 고정 높이 지정 */
   display: flex;
   flex-direction: column;
   overflow: visible;
 }
 
-.sectionTitle,
+.sectionTitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
 .chartTitle {
   font-size: 18px;
   font-weight: bold;
@@ -318,7 +369,7 @@
 .chartItem {
   flex: 1;
   min-height: 0;
-  max-height: 500px;
+  max-height: 300px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -361,42 +412,6 @@
   right: 10px;
   font-size: 20px;
   cursor: pointer;
-}
-
-.badgeGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.badgeCircleModal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.badgeImageWrapper {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 2px solid #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background-color: #f0f0f0;
-}
-
-.badgeImageWrapperEarned {
-  border-color: #ffd700;
-  background-color: #fffdf0;
-}
-
-.badgeImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .placeholderText {
@@ -537,73 +552,163 @@
   flex-direction: row;
   gap: 20px;
 }
-.experienceContainer {
+.experienceBarContainer {
   display: flex;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 10px;
 }
 
-.experienceBarWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-right: 20px; /* Space between bar and details */
-}
-
-.experienceBarVertical {
-  width: 25px;
-  height: 300px; /* Adjust height for the experience bar */
-  background-color: #ddd;
+.experienceBar {
+  flex-grow: 1;
+  height: 24px;
+  background-color: #e0e0e0;
   border-radius: 12px;
+  margin: 0 10px;
+  position: relative;
   overflow: hidden;
+}
+
+.experienceProgress {
+  height: 100%;
+  background-color: #8f5ee2;
+  border-radius: 12px;
   position: relative;
 }
 
-.experienceProgressVertical {
-  width: 100%;
-  background-color: #f9d835; /* Gold color for the progress bar */
+.currentExperience {
   position: absolute;
-  bottom: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
 }
 
-.experienceDetails {
+.experienceValues {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Align text and images to the left */
-}
-
-.experienceDetailItem {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px; /* Space between each tier and points */
-}
-
-.tierImage {
-  width: 30px;
-  height: 30px;
-  margin-right: 10px; /* Space between image and text */
-}
-
-.experienceInput {
-  width: 60px;
-  margin: 5px 0;
-  text-align: center;
-}
-
-.experienceRemainingText {
+  justify-content: space-between;
   font-size: 16px;
   color: #666;
-  margin-top: 10px;
+}
+.experienceText {
+  font-size: 16px; /* Slightly larger text for visibility */
+  color: #666;
+  margin-top: 5px;
 }
 
-.greetingSection {
+.tierAndBadgeSection {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
+  /* background-color: #f8f9fa; */
+  border-radius: 10px;
+  padding: 20px;
   margin-bottom: 20px;
+}
+
+.tierSection {
+  width: 60%;
+  padding-right: 20px;
+  background-color: #f8f9fa;
+}
+
+.tierTitle {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 15px;
 }
 
 .tierIcon {
   width: 40px;
   height: 40px;
   margin-right: 10px;
+}
+
+.tierImage {
+  width: 48px;
+  height: 48px;
+}
+
+.schoolRankingSection {
+  background-color: #f0f4f8;
+  border-radius: 10px;
+  padding: 20px; /* 패딩을 15px에서 20px로 증가 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 섹션에 그림자 추가 */
+}
+
+.schoolRankingTitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.schoolRankingInfo {
+  background-color: #ffffff; /* 배경색을 흰색으로 변경 */
+  border-radius: 8px; /* 모서리를 더 둥글게 */
+  padding: 15px;
+  margin-top: 10px; /* 상단 여백 추가 */
+}
+
+.schoolName {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.rankScoreContainer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.rankInfo,
+.scoreInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 45%;
+}
+
+.rankLabel,
+.scoreLabel {
+  font-size: 14px;
+  color: #666;
+}
+
+.rankValue,
+.scoreValue {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+.studyStatsContainer {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.studyStatsTitle {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.studyStats {
+  text-align: center;
+}
+
+.studyStats p {
+  font-size: 24px;
+  margin: 15px 0;
+}
+
+.statNumber {
+  font-size: 32px;
+  font-weight: bold;
+  color: #7c3aed;
 }

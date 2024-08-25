@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { FileText, Trophy, School } from 'lucide-react';
+import { FileText, Trophy, School, Settings } from 'lucide-react';
 import logo from './assets/logo.svg';
 
 const MainPage: React.FC = () => {
@@ -40,7 +40,7 @@ const MainPage: React.FC = () => {
           <Trophy size={30} className="mx-auto" />
         </button>
         <button
-          className={`mb-8 w-16 h-20 rounded-r-none py-2 ${
+          className={`mb-0 w-16 h-20 rounded-r-none py-2 ${
             isActive('/main/school-ranking')
               ? 'bg-white text-gray-500'
               : 'text-white'
@@ -48,6 +48,14 @@ const MainPage: React.FC = () => {
           onClick={() => navigate('/main/school-ranking')}
         >
           <School size={30} className="mx-auto" />
+        </button>
+        <button
+          className={`mb-0 w-16 h-20 rounded-r-none py-2 ${
+            isActive('/main/my-info') ? 'bg-white text-gray-500' : 'text-white'
+          }`}
+          onClick={() => navigate('/main/my-info')}
+        >
+          <Settings size={30} className="mx-auto" />
         </button>
       </div>
       <div className="flex bg-white rounded-2xl flex-grow h-full m-4 ml-[4.5rem]">

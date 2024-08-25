@@ -48,11 +48,6 @@ const Dashboard: React.FC = () => {
   const not_focusing_list = localStorage.getItem('not_focusing_list');
 
   const [competitionRange, setCompetitionRange] = useState('중등 수학 0');
-  const [userSchoolRank, setUserSchoolRank] = useState<{
-    name: string;
-    rank: string;
-    score: number;
-  } | null>(null);
 
   const [modalVisible, setModalVisible] = useState(false);
   const handleBadgeClick = () => {
@@ -62,6 +57,11 @@ const Dashboard: React.FC = () => {
   const closeModal = () => {
     setModalVisible(false);
   };
+  // const tier = '실버'; // 실제 티어 정보로 대체해야 합니다
+  const solvedProblems = 15; // 실제 데이터로 대체해야 합니다
+  const correctProblems = 10; // 실제 데이터로 대체해야 합니다
+  const studyTime = 40;
+
   // 경쟁전 부분
   useEffect(() => {
     const birthday = localStorage.getItem('birthday');
@@ -73,10 +73,6 @@ const Dashboard: React.FC = () => {
       if (age === 14) setCompetitionRange('중등 수학 1');
       else if (age === 15) setCompetitionRange('중등 수학 2');
       else if (age === 16) setCompetitionRange('중등 수학 3');
-    }
-    const storedUserSchoolRank = localStorage.getItem('userSchoolRank');
-    if (storedUserSchoolRank) {
-      setUserSchoolRank(JSON.parse(storedUserSchoolRank));
     }
   }, []);
 
@@ -783,83 +779,88 @@ const Dashboard: React.FC = () => {
       <div className={styles.mainContent}>
         <div className={styles.topSection}>
           <div className={styles.leftColumn}>
-            <div className={styles.greetingSection}>
+            <h1 className={styles.greeting}>
+              안녕 {nickname}아! 오늘도 화이팅!!
               <img
                 src={silverTier}
                 alt="Silver Tier"
                 className={styles.tierIcon}
               />
-              <div className={styles.greeting}>안녕! {nickname}아</div>
+            </h1>
+            <div className={styles.studyStatsContainer}>
+              <h2 className={styles.studyStatsTitle}>오늘의 학습량</h2>
+              <div className={styles.studyStats}>
+                <p>
+                  <span className={styles.statNumber}>{solvedProblems}</span>{' '}
+                  문제를 풀었고,{' '}
+                  <span className={styles.statNumber}>{correctProblems}</span>{' '}
+                  문제를 맞혔어요!
+                </p>
+                <p>
+                  오늘 총 <span className={styles.statNumber}>{studyTime}</span>{' '}
+                  분 공부했어요.
+                </p>
+              </div>
             </div>
-            <div className={styles.leftSection}>
-              <div className={styles.badgeSection}>
-                <h3 className={styles.sectionTitle}>뱃지 목록</h3>
-
-                {existingBadges.slice(0, 4).map((badge, index) => (
-                  <div key={index} className={styles.badgeWrapper}>
+            <div className={styles.tierAndBadgeSection}>
+              <div className={styles.tierSection}>
+                <h3 className={styles.tierTitle}>
+                  골드 티어 승급까지 {endExperience - currentExperience}점
+                  남았습니다.
+                </h3>
+                <div className={styles.experienceBarContainer}>
+                  <img
+                    src={silverTier}
+                    alt="Silver Tier"
+                    className={styles.tierImage}
+                  />
+                  <div className={styles.experienceBar}>
                     <div
-                      className={styles.badgeCircle}
-                      title={`${badge.title}: ${badge.description}`}
+                      className={styles.experienceProgress}
+                      style={{ width: `${experiencePercentage}%` }}
                     >
-                      <img
-                        src={badge.image || ''}
-                        alt={badge.title || 'Badge'}
-                      />
+                      <span className={styles.currentExperience}>
+                        {currentExperience}
+                      </span>
                     </div>
-                    <div className={styles.badgeTitle}>{badge.title}</div>
                   </div>
-                ))}
-                <div className={styles.badgeWrapper}>
-                  <div
-                    className={`${styles.badgeCircle} ${styles.badgeCircleClickable}`}
-                    title="추가 배지"
-                    onClick={handleBadgeClick}
-                  >
-                    <div className={styles.plusIcon}>+</div>
-                  </div>
-                  <div className={styles.badgeTitle}>더 보기</div>
+                  <img
+                    src={goldTier}
+                    alt="Gold Tier"
+                    className={styles.tierImage}
+                  />
+                </div>
+                <div className={styles.experienceValues}>
+                  <span>{startExperience}</span>
+                  <span>{endExperience}</span>
                 </div>
               </div>
-              <div className={styles.rightSection}>
-                <div className={styles.experienceContainer}>
-                  <div className={styles.experienceBarWrapper}>
-                    <div className={styles.experienceBarVertical}>
+              <div className={styles.badgeSection}>
+                <h3 className={styles.sectionTitle}>뱃지 목록</h3>
+                <div className={styles.badgeContainer}>
+                  {existingBadges.slice(0, 3).map((badge, index) => (
+                    <div key={index} className={styles.badgeWrapper}>
                       <div
-                        className={styles.experienceProgressVertical}
-                        style={{ height: `${experiencePercentage}%` }}
-                      ></div>
+                        className={styles.badgeCircle}
+                        title={`${badge.title}: ${badge.description}`}
+                      >
+                        <img
+                          src={badge.image || ''}
+                          alt={badge.title || 'Badge'}
+                        />
+                      </div>
+                      <div className={styles.badgeTitle}>{badge.title}</div>
                     </div>
-                  </div>
-                  <div className={styles.experienceDetails}>
-                    <div className={styles.experienceDetailItem}>
-                      <img
-                        src={goldTier}
-                        alt="Gold Tier"
-                        className={styles.tierImage}
-                      />
-                      <span>{endExperience} pts</span>
+                  ))}
+                  <div className={styles.badgeWrapper}>
+                    <div
+                      className={`${styles.badgeCircle} ${styles.badgeCircleClickable}`}
+                      title="추가 배지"
+                      onClick={handleBadgeClick}
+                    >
+                      <div className={styles.plusIcon}>+</div>
                     </div>
-
-                    <div className={styles.experienceDetailItem}>
-                      <input
-                        type="number"
-                        value={currentExperience}
-                        className={styles.experienceInput}
-                      />
-                    </div>
-                    <div className={styles.experienceRemainingText}>
-                      {`골드 티어까지 ${
-                        endExperience - currentExperience
-                      } 경험치 남았습니다`}
-                    </div>
-                    <div className={styles.experienceDetailItem}>
-                      <img
-                        src={silverTier}
-                        alt="Silver Tier"
-                        className={styles.tierImage}
-                      />
-                      <span>{startExperience} pts</span>
-                    </div>
+                    <div className={styles.badgeTitle}>더 보기</div>
                   </div>
                 </div>
               </div>
@@ -881,16 +882,30 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
-              {userSchoolRank && (
-                <div className={styles.schoolRankingSection}>
-                  <h4 className={styles.schoolRankingTitle}>내 학교 순위</h4>
-                  <p>
-                    <strong>{userSchoolRank.name}</strong> -{' '}
-                    <strong>{userSchoolRank.rank}</strong> (점수:{' '}
-                    {userSchoolRank.score})
+            </div>
+            <div className={styles.schoolRankingSection}>
+              <h4 className={styles.schoolRankingTitle}>내 학교 순위</h4>
+              <div className={styles.schoolRankingInfo}>
+                <p className={styles.schoolName}>
+                  {localStorage.getItem('school')}
+                </p>
+                <div className={styles.rankScoreContainer}>
+                  <p className={styles.rankInfo}>
+                    <span className={styles.rankLabel}>랭킹</span>
+                    <span className={styles.rankValue}>{13}등</span>
                   </p>
+                  <p className={styles.scoreInfo}>
+                    <span className={styles.scoreLabel}>점수</span>
+                    <span className={styles.scoreValue}>{7426}점</span>
+                  </p>
+                  <button
+                    className={styles.competitionButton}
+                    onClick={() => navigate('/main/school-ranking')}
+                  >
+                    순위 확인하기
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
@@ -901,22 +916,23 @@ const Dashboard: React.FC = () => {
             >
               학습하기 <StepForward size={30} className="icon" />
             </button>
-            <p className={styles.timeRangeDescription}>
-              점수 : 집중도, 푼 문제 수, 목표 시간 달성률 기준
-            </p>
+
             <div className={styles.timeRangeWrapper}>
               <ResponsiveTimeRange
                 data={calendarData}
                 from="2024-01-01"
-                to="2024-08-31"
+                to="2024-06-30"
                 emptyColor="#eeeeee"
                 colors={colorScale}
-                margin={{ top: 20, right: 20, bottom: 40, left: 40 }}
+                margin={{ top: 10, right: 20, bottom: 20, left: 40 }}
                 dayBorderWidth={2}
                 dayBorderColor="#ffffff"
                 weekdayTicks={[0, 2, 4, 6]}
               />
             </div>
+            <p className={styles.timeRangeDescription}>
+              점수 : 집중도, 푼 문제 수, 목표 시간 달성률 기준
+            </p>
           </div>
         </div>
 

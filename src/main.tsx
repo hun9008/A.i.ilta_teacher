@@ -24,6 +24,7 @@ const ProblemSetGenerator = lazy(() => import('./ProblemSetGenerator'));
 const DifficultySelectPage = lazy(() => import('./DifficultySelect'));
 const AnswerPage = lazy(() => import('./AnswerPage'));
 const SchoolRank = lazy(() => import('./SchoolRank'));
+const MyInfo = lazy(() => import('./MyInfo'));
 
 import './css/index.css';
 import './css/tailwind.css';
@@ -44,6 +45,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="report" element={<Report />} />
                 <Route path="school-ranking" element={<SchoolRank />} />
                 <Route path="competition" element={<Competition />} />
+                <Route path="my-info" element={<MyInfo />} />
+
                 <Route
                   path="/main/competition/difficulty-select"
                   element={<DifficultySelectPage />}
