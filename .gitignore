@@ -14,9 +14,7 @@ keys
 deploy_env
 .venv
 cv_which_prob/*
-<<<<<<< HEAD
 temp_success
 temp/*
-=======
 segment_anything_/*
->>>>>>> 4a813554746ce6a0e14e32abc16a661b768cb903
+hand_data
