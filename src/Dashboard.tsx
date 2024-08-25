@@ -43,9 +43,13 @@ const Dashboard: React.FC = () => {
   const nickname = localStorage.getItem('nickname');
 
   const not_focusing_list = localStorage.getItem('not_focusing_list');
-  console.log('First not_focusing_list: ', not_focusing_list);
 
   const [competitionRange, setCompetitionRange] = useState('중등 수학 0');
+  const [userSchoolRank, setUserSchoolRank] = useState<{
+    name: string;
+    rank: string;
+    score: number;
+  } | null>(null);
 
   const [modalVisible, setModalVisible] = useState(false);
   const handleBadgeClick = () => {
@@ -66,6 +70,10 @@ const Dashboard: React.FC = () => {
       if (age === 14) setCompetitionRange('중등 수학 1');
       else if (age === 15) setCompetitionRange('중등 수학 2');
       else if (age === 16) setCompetitionRange('중등 수학 3');
+    }
+    const storedUserSchoolRank = localStorage.getItem('userSchoolRank');
+    if (storedUserSchoolRank) {
+      setUserSchoolRank(JSON.parse(storedUserSchoolRank));
     }
   }, []);
 
@@ -481,7 +489,6 @@ const Dashboard: React.FC = () => {
 
   const parseNotFocusingList = (notFocusingList: string | null) => {
     if (!notFocusingList || notFocusingList === '[]') {
-      console.log('No valid not_focusing_list data');
       return [];
     }
 
@@ -493,26 +500,13 @@ const Dashboard: React.FC = () => {
       !Array.isArray(parsedNotFocusingList) ||
       parsedNotFocusingList.length === 0
     ) {
-      console.log('Parsed list is empty or not valid');
       return [];
     }
 
     // 예상된 데이터 구조가 아닌 경우를 처리
     if (!parsedNotFocusingList[0]?.not_focusing_time) {
-      console.log('No not_focusing_time data available');
       return [];
     }
-
-    console.log(
-      'Original not_focusing_list 0 idx:',
-      parsedNotFocusingList[0],
-      'len not_focusing_list: ',
-      parsedNotFocusingList.length
-    );
-    console.log(
-      'Original not_focusing_time: ',
-      parsedNotFocusingList[0]['not_focusing_time']
-    );
 
     const notFocusingData: NotFocusingTime[] = [];
 
@@ -528,23 +522,18 @@ const Dashboard: React.FC = () => {
       });
     });
 
-    // console.log('Parsed not_focusing_list:', parsed);
     return notFocusingData;
   };
 
   const notFocusingData = parseNotFocusingList(not_focusing_list);
-  // console.log('Parsed not focusing time list data: ', notFocusingData)
 
   // 모든 세션에 대한 데이터 사용
   const allSessions = [
     ...new Set(notFocusingData.map((item) => item.sessionId)),
   ];
-  // console.log('Result of allSessions: ', allSessions)
-  // console.log('notFocusingData after allSessions: ', notFocusingData)
 
   const recentSessions =
     allSessions.length >= 9 ? allSessions.slice(-9) : allSessions;
-  // console.log("recent Sessions", recentSessions);
 
   interface NotFocusingDataItem {
     id: string;
@@ -620,7 +609,6 @@ const Dashboard: React.FC = () => {
       // 해당 세션의 StackData를 배열에 추가
       stackDataArray.push(sessionStackData);
     });
-    // console.log("stackDataArray: ", stackDataArray)
     return stackDataArray;
   }
 
@@ -675,21 +663,14 @@ const Dashboard: React.FC = () => {
 
   const minMinutes = timeToMinutes(minTime);
   const maxMinutes = timeToMinutes(maxTime);
-  // console.log("max: ", maxMinutes, "min: ", minMinutes)
-  // console.log("maxMin - minMin: ", maxMinutes-minMinutes)
 
   // StackData 생성
   const stackDataArray = createStackData(notFocusingData, recentSessions);
   stackDataArray.forEach((sessionData, index) => {
-    // if (sessionData.length > 0 && sessionData[0].dur) {
-    //   const tmpDur = parseFloat(sessionData[0].dur) - minMinutes + 1;
-    //   stackDataArray[index][0].dur = tmpDur.toString();
-    // }
     if (sessionData.length > 0) {
       stackDataArray[index] = sessionData.slice(0, -1); // 마지막 요소를 제거한 새로운 배열로 교체
     }
   });
-  // console.log("%%%% stackDataArray: ", stackDataArray);
 
   const focusChartData = {
     labels: recentSessions.map((_, index) => `Day ${9 - index}`),
@@ -792,7 +773,10 @@ const Dashboard: React.FC = () => {
         <div className={styles.topSection}>
           <div className={styles.leftColumn}>
             <div className={styles.greeting}>안녕! {nickname}아</div>
+
             <div className={styles.badgeSection}>
+              <h3 className={styles.sectionTitle}>뱃지 목록</h3>
+
               {existingBadges.slice(0, 2).map((badge, index) => (
                 <div key={index} className={styles.badgeWrapper}>
                   <div
@@ -832,6 +816,16 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
+              {userSchoolRank && (
+                <div className={styles.schoolRankingSection}>
+                  <h4 className={styles.schoolRankingTitle}>내 학교 순위</h4>
+                  <p>
+                    <strong>{userSchoolRank.name}</strong> -{' '}
+                    <strong>{userSchoolRank.rank}</strong> (점수:{' '}
+                    {userSchoolRank.score})
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -862,7 +856,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className={styles.chartSection}>
-          <div className={styles.chartColumn}>
+          <div className={styles.leftColumn}>
             <div className={styles.chartWrapper}>
               <h3 className={styles.sectionTitle}>주간 리포트</h3>
               <div className={styles.weeklyCharts}>

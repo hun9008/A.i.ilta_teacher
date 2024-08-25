@@ -30,7 +30,7 @@ const calculateScore = (school: SchoolData): number => {
 
 const generateRandomSchoolData = (name: string, seed: number): SchoolData => {
   const random = () => {
-    seed = (seed * 9301 + 49297) % 233280;
+    seed = (seed * 9301 + 49278) % 233280;
     return seed / 233280;
   };
 
