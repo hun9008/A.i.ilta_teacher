@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 
-function StudyGoals() {
+interface StudyGoalsProps {
+  onGoalsSubmit: () => void;
+}
+
+const StudyGoals: React.FC<StudyGoalsProps> = ({ onGoalsSubmit }) => {
   const baseUrl = import.meta.env.VITE_BASE_URL;
   const [goals, setGoals] = useState({
     goal1: false,
@@ -25,7 +29,6 @@ function StudyGoals() {
     }
 
     if (name === 'problems') {
-      // goal1 입력 값에 대해 최소값 1로 설정
       if (validatedValue < 1) {
         validatedValue = 1;
       }
@@ -46,7 +49,9 @@ function StudyGoals() {
     const totalMinutes = hoursInMinutes + parseInt(minutes || '0', 10);
     return totalMinutes;
   };
+
   const u_id = localStorage.getItem('u_id');
+
   const sendTimeToServer = async () => {
     const studyTime = convertToMinutes(time.goal2Hours, time.goal2Minutes);
     const breakTime = convertToMinutes(time.goal3Hours, time.goal3Minutes);
@@ -77,6 +82,9 @@ function StudyGoals() {
       // Save times to localStorage
       localStorage.setItem('studyTime', studyTime.toString());
       localStorage.setItem('breakTime', breakTime.toString());
+
+      // 모든 작업이 완료된 후 다음 단계로 이동
+      onGoalsSubmit();
     } catch (error) {
       console.error('Error sending time to server:', error);
     }
@@ -245,6 +253,6 @@ function StudyGoals() {
       </button>
     </div>
   );
-}
+};
 
 export default StudyGoals;

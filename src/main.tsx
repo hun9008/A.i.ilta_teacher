@@ -70,10 +70,15 @@ createRoot(document.getElementById('root')!).render(
                       <Routes>
                         <Route path="/qrpage" element={<QrPage />} />
                         <Route path="/camera" element={<CameraPage />} />
-                        <Route path="/studygoals" element={<StudyGoals />} />
+                        <Route
+                          path="/studygoals"
+                          element={<StudyGoals onGoalsSubmit={() => {}} />}
+                        />{' '}
                         <Route path="/setting" element={<SettingPage />} />
-                        <Route path="/ocrcheck" element={<OcrCheck />} />
-
+                        <Route
+                          path="/ocrcheck"
+                          element={<OcrCheck onOcrSubmit={() => {}} />}
+                        />{' '}
                         <Route
                           path="/mobilescreen"
                           element={<PCControlPage />}

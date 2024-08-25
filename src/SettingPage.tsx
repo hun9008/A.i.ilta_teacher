@@ -7,7 +7,7 @@ import CameraPage from './camera.tsx';
 import PCControlPage from './PCControlPage.tsx';
 import StudyGoals from './StudyGoals.tsx';
 import LoadingPage from './LoadingPage';
-import OcrCheck from './OcrCheck.tsx';
+import OcrResultPage from './OcrCheck.tsx';
 
 interface Step {
   id: string;
@@ -19,8 +19,7 @@ const steps: Step[] = [
   { id: 'qr', title: '모바일 연결' },
   { id: 'mobcam', title: '모바일 카메라 설정' },
   { id: 'goals', title: '공부 목표 설정' },
-  { id: 'ocr-check', title: 'OCR 결과 확인' }, // 위치 조정
-
+  { id: 'ocr-check', title: 'OCR 결과 확인' },
   { id: 'complete', title: '설정 완료' },
 ];
 
@@ -28,6 +27,8 @@ function SettingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoalsSubmitted, setIsGoalsSubmitted] = useState(false);
+  const [isOcrSubmitted, setIsOcrSubmitted] = useState(false);
   const navigate = useNavigate();
   const { solutionResponse } = useWebSocket();
 
@@ -57,9 +58,19 @@ function SettingPage() {
     }
   };
 
+  const handleGoalsSubmit = () => {
+    setIsGoalsSubmitted(true);
+    nextStep();
+  };
+
+  const handleOcrSubmit = () => {
+    setIsOcrSubmitted(true);
+    nextStep();
+  };
+
   const goToGamePage = () => {
     if (!solutionResponse) {
-      setIsLoading(true); // OCR Response를 기다리는 동안 로딩 상태로 설정
+      setIsLoading(true);
     } else {
       navigate('/game');
     }
@@ -81,9 +92,9 @@ function SettingPage() {
       case 'mobcam':
         return <PCControlPage />;
       case 'goals':
-        return <StudyGoals />;
+        return <StudyGoals onGoalsSubmit={handleGoalsSubmit} />;
       case 'ocr-check':
-        return <OcrCheck />; // OCR 확인 페이지 표시
+        return <OcrResultPage onOcrSubmit={handleOcrSubmit} />;
       case 'complete':
         return (
           <p>모든 설정이 완료되었습니다. 공부를 시작할 준비가 되었습니다.</p>
@@ -94,8 +105,12 @@ function SettingPage() {
   };
 
   if (isLoading) {
-    return <LoadingPage />; // OCR 데이터를 기다리는 동안 로딩 화면을 표시
+    return <LoadingPage />;
   }
+
+  const isNextButtonDisabled =
+    (currentStep === 3 && !isGoalsSubmitted) ||
+    (currentStep === 4 && !isOcrSubmitted);
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -118,7 +133,7 @@ function SettingPage() {
                 className={`ml-2 text-sm ${
                   index <= currentStep
                     ? 'text-primary-400 font-medium'
-                    : 'text-gray-500'
+                    : 'text-gray-300'
                 }`}
               >
                 {step.title}
@@ -148,7 +163,12 @@ function SettingPage() {
         </button>
         <button
           onClick={currentStep === steps.length - 1 ? goToGamePage : nextStep}
-          className="px-4 py-2 bg-primary-400 text-white rounded-2xl hover:bg-primary-500 disabled:bg-gray-300"
+          disabled={isNextButtonDisabled}
+          className={`px-4 py-2 ${
+            isNextButtonDisabled
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-primary-400 text-white hover:bg-primary-500'
+          } rounded-2xl`}
         >
           {currentStep === steps.length - 1 ? '완료' : '다음'}
         </button>

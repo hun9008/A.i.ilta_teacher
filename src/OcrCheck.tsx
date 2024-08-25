@@ -5,7 +5,11 @@ interface OcrResponse {
   ocrs: string[];
 }
 
-const OcrResultPage: React.FC = () => {
+interface OcrResultPageProps {
+  onOcrSubmit: () => void;
+}
+
+const OcrResultPage: React.FC<OcrResultPageProps> = ({ onOcrSubmit }) => {
   const { ocrResponse, sendMessage, imageData } = useWebSocket();
   const [editableProblems, setEditableProblems] = useState<{
     [key: number]: string;
@@ -67,6 +71,8 @@ const OcrResultPage: React.FC = () => {
 
       // 수정된 문제를 로컬 스토리지에 저장
       localStorage.setItem('editedProblems', JSON.stringify(editableProblems));
+
+      onOcrSubmit(); // OCR 제출 완료 콜백 호출
     } else {
       console.error('Image data or OCR response is missing or invalid.');
     }

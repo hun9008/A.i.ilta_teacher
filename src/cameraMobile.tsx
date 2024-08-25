@@ -14,7 +14,7 @@ function MobileCameraPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const { connectWebSocket, disconnectWebSocket, sendMessage } = useWebSocket();
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  // const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   const startCapturing = useCallback(async () => {
     setIsCapturing(true);
@@ -52,7 +52,7 @@ function MobileCameraPage() {
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const imageSrc = canvas.toDataURL('image/png', 1.0); // Use maximum quality
-        setCapturedImage(imageSrc);
+        // setCapturedImage(imageSrc);
         const imageData = imageSrc.split(',')[1];
         const message = {
           u_id: u_id,
@@ -107,7 +107,7 @@ function MobileCameraPage() {
           </button>
         )}
       </div>
-      {capturedImage && (
+      {/* {capturedImage && (
         <div className="mt-4">
           <h2 className="text-lg font-semibold text-center mb-2">
             Captured Image
@@ -118,7 +118,7 @@ function MobileCameraPage() {
             className="border rounded-lg"
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 }
