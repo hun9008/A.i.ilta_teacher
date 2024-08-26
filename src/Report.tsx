@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import styles from './css/MainPage.module.css';
 import { Button } from './button';
 import { FileText, Plus, X, Download, Loader } from 'lucide-react';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable'; // 테이블을 포함한 다양한 기능을 추가로 지원
-// import font from './font.txt'
+import { PDFDocument, rgb, PDFFont } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 
 import { OpenAI } from 'openai';
 const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
@@ -26,23 +25,23 @@ const Report: React.FC = () => {
     // Example reports
     {
       id: '1',
-      title: 'Study Report ex 3',
+      title: '수학 학습 보고서',
       content:
-        'This week, we focused on the basics of calculus in our math study. We covered topics such as limits, continuity, the definition of derivatives, and basic differentiation rules. We also practiced differentiating polynomial functions and applied derivatives to real-life problems, such as determining product pricing.',
+        '이번 주 우리는 수학 공부에서 미적분의 기초에 집중했습니다. 우리는 극한, 연속성, 미분의 정의 및 기본 미분 규칙과 같은 주제를 다루었습니다. 또한 다항식 함수의 미분 연습을 하고, 파생 상품 가격 결정과 같은 실제 문제에 미분을 적용했습니다.',
       date: '2023-06-01',
     },
     {
       id: '2',
-      title: 'Study Report ex 2',
+      title: '영어 학습 보고서',
       content:
-        'This week’s English study focused on business English. We learned about email writing, meeting terminology, and presentation skills. Additionally, we practiced summarizing by listening to TED talks in English, which helped improve our listening and summarization abilities.',
+        '이번 주의 영어 공부는 비즈니스 영어에 중점을 두었습니다. 이메일 작성, 회의 용어, 프레젠테이션 기술에 대해 배웠습니다. 또한 TED 강연을 듣고 요약하는 연습을 하여 듣기와 요약 능력을 향상시켰습니다.',
       date: '2023-06-02',
     },
     {
       id: '3',
-      title: 'Study Report ex 1',
+      title: '과학 학습 보고서',
       content:
-        'This week’s science study was about ecosystems and the environment. We studied the impact of climate change on ecosystems, the importance of biodiversity, and sustainable development. We also conducted a project investigating the water pollution problem in a local river and proposed improvement measures.',
+        '이번 주의 과학 공부는 생태계와 환경에 관한 것이었습니다. 우리는 기후 변화가 생태계에 미치는 영향, 생물 다양성의 중요성 및 지속 가능한 개발에 대해 공부했습니다. 또한 지역 하천의 수질 오염 문제를 조사하고 개선 방안을 제안하는 프로젝트를 수행했습니다.',
       date: '2023-06-03',
     },
   ]);
@@ -53,39 +52,41 @@ const Report: React.FC = () => {
   const createNewReport = async () => {
     setLoading(true); // Start loading
 
+    const nickname = localStorage.getItem('nickname');
     const weekly_reports = localStorage.getItem('weekly_reports');
     const z_log = localStorage.getItem('z_log');
     const progress_unit = localStorage.getItem('progress_unit');
     const not_focusing_list = localStorage.getItem('not_focusing_list');
 
     const prompt = `
-      Here is the weekly study report data:
-      1. Weekly Reports: ${weekly_reports}
-      2. Z Log: ${z_log}
-      3. Progress Unit: ${progress_unit}
-      4. Not Focusing List: ${not_focusing_list}
+      주간 학습 보고서 데이터는 다음과 같습니다:
+      0. 학생 이름: ${nickname}
+      1. 주간 보고서: ${weekly_reports}
+      2. Z 로그: ${z_log}
+      3. 진행 단위: ${progress_unit}
+      4. 집중하지 않는 목록: ${not_focusing_list}
 
-      Please summarize the student's performance, highlight key achievements, and identify areas that need improvement. Structure the report in a narrative format.
+      학생의 성과를 요약하고, 주요 성취 사항을 강조하며, 개선이 필요한 영역을 식별해줘. 보고서는 서술 형식으로 작성해줘. 반드시 한글로 작성해줘.
     `;
 
     try {
       const response = await client.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'system', content: '당신은 도움을 주는 어시스턴트입니다.' },
           { role: 'user', content: prompt },
         ],
         max_tokens: 1500,
         temperature: 0.7,
       });
-
+      console.log("gpt result: ", response)
       const messageContent =
         response.choices[0].message?.content?.trim() ||
-        'Report generation failed.';
+        '보고서 생성에 실패했습니다.';
 
       const newReport: Report = {
         id: Date.now().toString(),
-        title: `Study Report ${reports.length + 1} ${new Date()
+        title: `학습 보고서 ${reports.length + 1} ${new Date()
           .toLocaleDateString('ko-KR', {
             year: '2-digit',
             month: '2-digit',
@@ -99,34 +100,101 @@ const Report: React.FC = () => {
 
       setReports([newReport, ...reports]);
     } catch (error) {
-      console.error('Error generating report:', error);
+      console.error('보고서 생성 오류:', error);
     } finally {
       setLoading(false); // Stop loading
     }
   };
 
-  const savePDF = (report: Report) => {
-    console.log(`Saving report as PDF: ${report.title}`);
-    const doc = new jsPDF({
-      orientation: 'p', // p: 가로(기본), l: 세로
-      unit: 'mm', // 단위 : "pt" (points), "mm", "cm", "m", "in" or "px" 등)
-      format: 'a4', // 포맷 (페이지 크기).
+  const savePDF = async (report: Report) => {
+    const pdfDoc = await PDFDocument.create();
+    pdfDoc.registerFontkit(fontkit);
+  
+    const fontUrl = '/NotoSansKR-Regular.ttf';
+    const fontBytes = await fetch(fontUrl).then((res) => res.arrayBuffer());
+  
+    const customFont = await pdfDoc.embedFont(fontBytes);
+  
+    const page = pdfDoc.addPage([595.28, 841.89]); // A4 사이즈
+    const { width, height } = page.getSize();
+    
+    const fontSize = 18;
+    const margin = 50;
+    const maxWidth = width - 4 * margin;
+    const lineHeight = fontSize + 8; // 줄 간격 조정
+  
+    // 타이틀 추가
+    page.drawText(report.title, {
+      x: margin,
+      y: height - 4 * fontSize,
+      size: fontSize,
+      font: customFont,
+      color: rgb(0, 0, 0),
     });
-
-    console.log('font list: ', doc.getFontList());
-
-    doc.setFontSize(18);
-    doc.text(report.title, 10, 20);
-
-    doc.setFontSize(12);
-    doc.text(`Date: ${report.date}`, 10, 30);
-
-    // 줄바꿈을 지원하는 text 메서드 호출
-    const splitText = doc.splitTextToSize(report.content, 180); // 180은 페이지 너비에서 마진을 제외한 텍스트 최대 너비
-    doc.text(splitText, 10, 40);
-
-    doc.save(`${report.title}.pdf`);
+  
+    // 날짜 추가
+    page.drawText(`날짜: ${report.date}`, {
+      x: margin,
+      y: height - 6 * fontSize,
+      size: 12,
+      font: customFont,
+      color: rgb(0, 0, 0),
+    });
+  
+    // 본문 텍스트 추가
+    const contentFontSize = 12;
+    const contentLineHeight = contentFontSize + 6; // 본문 텍스트의 줄 간격
+  
+    // 입력 텍스트를 줄 단위로 분리하여 줄바꿈 적용
+    const lines = report.content.split('\n').flatMap(line => 
+      splitTextToLines(line, maxWidth, customFont, contentFontSize)
+    );
+  
+    let yOffset = height - 8 * fontSize - lineHeight; // 타이틀과 날짜 사이 간격
+    lines.forEach((line) => {
+      page.drawText(line, {
+        x: margin,
+        y: yOffset,
+        size: contentFontSize,
+        font: customFont,
+        color: rgb(0, 0, 0),
+      });
+      yOffset -= contentLineHeight; // 줄 간격을 포함하여 yOffset 조정
+    });
+  
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${report.title}.pdf`;
+    a.click();
   };
+  
+  // 텍스트를 줄바꿈하여 페이지 너비에 맞추는 함수
+  function splitTextToLines(text: string, maxWidth: number, font: PDFFont, fontSize: number): string[] {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+  
+    words.forEach((word) => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const testLineWidth = font.widthOfTextAtSize(testLine, fontSize);
+      if (testLineWidth < maxWidth) {
+        currentLine = testLine;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    });
+  
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+  
+    return lines;
+  }
+  
 
   return (
     <div className={styles.reportContent}>
