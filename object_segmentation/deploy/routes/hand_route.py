@@ -581,6 +581,7 @@ async def hand_determinant(image_input: ImageInput):
     
     print("@@@@@@@@@@@@@@@@@@@@@")
 
+    left_flag = True
     handwrite_num = -1
     left_max_num = 0
     for i in range(len(inter_question_areas_left)):
@@ -589,16 +590,20 @@ async def hand_determinant(image_input: ImageInput):
         print(f"Cropped Left {i} - Is handwriting: {is_handwriting}")
         if is_handwriting:
             left_max_num = i + 1
+        else:
+            left_flag = False
+            break
 
     print("@@@@@@@@@@@@@@@@@@@@@")
 
     right_max_num = 0
-    for i in range(len(inter_question_areas_right)):
-        cropped_right = cv2.imread(f"./temp/cropped_right_{i}.png")
-        is_handwriting = detect_handwriting(cropped_right, problem_ocr_texts_right[i])
-        print(f"Cropped Right {i} - Is handwriting: {is_handwriting}")
-        if is_handwriting:
-            right_max_num = i + 1
+    if left_flag:
+        for i in range(len(inter_question_areas_right)):
+            cropped_right = cv2.imread(f"./temp/cropped_right_{i}.png")
+            is_handwriting = detect_handwriting(cropped_right, problem_ocr_texts_right[i])
+            print(f"Cropped Right {i} - Is handwriting: {is_handwriting}")
+            if is_handwriting:
+                right_max_num = i + 1
     
     if right_max_num > 0:
         handwrite_num += len(inter_question_areas_left)
