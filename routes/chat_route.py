@@ -159,6 +159,8 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                         if hand_response.status_code == 200:
                             if (user_id not in delay_block_list) and (user_id not in wrong_block_list):
                                 user_vars.user_status = hand_response.json().get("determinants")
+                            else:
+                                print("This time is Locked")
                         else:
                             user_vars.user_status = "doing"
                     
@@ -338,6 +340,7 @@ async def process_message(chat: ChatRequest):
             response = await call_openai_api(prompt)
             user_context[user_id]["prev_chat"] = prompt + "\n" + "나의 답변 : " + response + "\n"
             delay_block_list.remove(user_id)
+            print("$$$$$ end delay block $$$$$$")
             return response
         else:
             print("not exist user text")
@@ -368,6 +371,7 @@ async def process_message(chat: ChatRequest):
                 response = "모든 단계를 설명했어. 다른 질문이 있으면 물어봐."
                 user_step_cnt += 1
                 wrong_block_list.remove(user_id)
+                print("$$$$$ end wrong block $$$$$$")
             return response
     else:
 
