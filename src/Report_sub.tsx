@@ -213,10 +213,10 @@ const Report: React.FC = () => {
         </Button>
 
         {loading ? (
-        <div className={styles.loadingMessage}>
-          <Loader className="animate-spin h-8 w-8 text-blue-500" />
-          <span className="ml-4 text-blue-500">리포트를 만드는 중...</span>
-        </div>
+          <div className="flex justify-center items-center mt-8">
+            <Loader className="animate-spin h-8 w-8 text-blue-500" />
+            <span className="ml-4 text-blue-500">리포트 만드는 중...</span>
+          </div>
         ) : (
           <div className={styles.reportContainer}>
             {reports.map((report, index) => {

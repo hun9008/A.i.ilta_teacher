@@ -14,6 +14,10 @@
 }
 
 .createReportButton {
+  position: absolute;
+  top: 20%; /* 화면의 20% 아래에 위치시킴 */
+  left: 50%; /* 가로축 가운데 정렬 */
+  transform: translateX(-50%); /* 가운데 정렬 보정 */
   background-color: #3b82f6; /* Equivalent to bg-blue-500 */
   color: white; /* Equivalent to text-white */
   font-weight: bold; /* Equivalent to font-bold */
@@ -22,12 +26,19 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Equivalent to shadow-lg */
   transition: all 0.3s ease-in-out; /* Equivalent to transition duration-300 ease-in-out */
-  transform: translateY(0); /* Set initial transform state */
 }
 
 .createReportButton:hover {
   background-color: #2563eb; /* Equivalent to hover:bg-blue-600 */
-  transform: translateY(-4px) scale(1.1); /* Equivalent to hover:-translate-y-1 hover:scale-110 */
+  transform: translateY(-50%, -4px) scale(1.1); /* Equivalent to hover:-translate-y-1 hover:scale-110 */
+}
+
+.loadingMessage {
+  margin-top: 10px; /* 버튼 아래에 여백 추가 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #3b82f6;
 }
 
 .reportCard {
