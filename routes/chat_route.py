@@ -165,7 +165,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # response = await process_message(chat_request)
             # await websocket.send_text(response)
             
-            for solution in solutions_storage:
+            for solution in solutions_storage[0]:
                 if type(solution) == list:
                     print("right solution type")
                     net_solution = solution[0]
@@ -178,6 +178,19 @@ async def websocket_endpoint(websocket: WebSocket):
                     step_elements.append(steps_array)
                     print("step_elements : ", step_elements)
                     print("len(step_elements) : ", len(step_elements))
+                    
+                elif type(solution) == str:
+                    print("right solution type")
+                    steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', solution)
+                    steps_array = [step.strip() for step in steps[1:] if step.strip()]
+
+                    if len(steps_array) > 0:
+                        steps_array[-1] = f"Answer: {steps_array[-1]}"
+                    
+                    step_elements.append(steps_array)
+                    print("step_elements : ", step_elements)
+                    print("len(step_elements) : ", len(step_elements))
+
                 else:
                     # print("I deal with solution!")
                     print("Unexpected solution")
