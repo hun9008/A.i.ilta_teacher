@@ -32,7 +32,7 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # websocket 연결 관리 
 connections = []
 
-sleep_time = 5
+sleep_time = 1
 
 # (assume) define user_status
 user_vars.user_status = "doing"
@@ -167,7 +167,7 @@ async def websocket_endpoint(websocket: WebSocket):
             
             for solution in solutions_storage[0]:
                 if type(solution) == list:
-                    print("right solution type")
+                    print("right solution type : list")
                     net_solution = solution[0]
                     steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', net_solution)
                     steps_array = [step.strip() for step in steps[1:] if step.strip()]
@@ -178,10 +178,11 @@ async def websocket_endpoint(websocket: WebSocket):
                     step_elements.append(steps_array)
                     print("step_elements : ", step_elements)
                     print("len(step_elements) : ", len(step_elements))
-                    
+
                 elif type(solution) == str:
-                    print("right solution type")
-                    steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', solution)
+                    print("right solution type : str")
+                    net_solution = solution[0]
+                    steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', net_solution)
                     steps_array = [step.strip() for step in steps[1:] if step.strip()]
 
                     if len(steps_array) > 0:
