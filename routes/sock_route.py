@@ -126,6 +126,8 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
         "ocrs": ocr_result.get("ocrs", [])
     }
 
+    print("@@@@@@@@ net_ocrs len : ", len(output_json.get("ocrs")))
+
     ocrs_storage.clear()
     ocrs_storage.append(output_json.get("ocrs"))
     
