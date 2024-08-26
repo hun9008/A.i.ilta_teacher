@@ -181,7 +181,8 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 elif type(solution) == str:
                     print("right solution type : str")
-                    net_solution = solution[0]
+                    net_solution = solution
+                    print("net_solution : ", net_solution)
                     steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', net_solution)
                     steps_array = [step.strip() for step in steps[1:] if step.strip()]
 
