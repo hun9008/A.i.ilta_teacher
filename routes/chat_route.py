@@ -143,15 +143,15 @@ async def decide_user_wrong(websocket: WebSocket):
                     if prob_num == -1:
                         user_vars.user_status = "doing"
                     else:
-                        hand_write = response_json.get("user_ocr_result")
-                        if hand_write is None:
+                        hand_write_image = response_json.get("user_handwrite_image")
+                        if hand_write_image is None:
                             print("Warning: hand_write is None")
                             continue
                         solution = solutions_storage[0][prob_num]
 
                         print("solution : ", solution)
 
-                        hand_response = await perform_handwrite_ocr(hand_write, solution)
+                        hand_response = await perform_handwrite_ocr(hand_write_image, solution)
 
                         if hand_response.status_code == 200:
                             user_vars.user_status = hand_response.json().get("determinants")
@@ -198,17 +198,14 @@ async def decide_user_wrong(websocket: WebSocket):
     except Exception as e:
         print(f"Critical error in decide_user_wrong: {str(e)}")
         
-async def perform_handwrite_ocr(hand_write, solution):
+async def perform_handwrite_ocr(hand_write_image, solution):
     
     print("test) Decide user status by handwrite OCR")
     
     url = "http://model.maitutor.site/hand_ocr"
-
-    print("씨발 타입 : ", type(hand_write))
-    print("씨발 타입 : ", type(solution))
     
     payload = {
-        "hand_write": hand_write,
+        "hand_write_image": hand_write_image,
         "solution": solution 
     }
     headers = {'Content-Type': 'application/json'} 
