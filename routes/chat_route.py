@@ -156,7 +156,7 @@ async def decide_user_wrong(websocket: WebSocket):
                         if hand_response.status_code == 200:
                             user_vars.user_status = hand_response.json().get("determinants")
                         else:
-                            user_vars.user_status = "doing"
+                            user_vars.user_status = "wrong"
                     
                     # problem_index = 0
                     # if prob_num != -1:
