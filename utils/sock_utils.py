@@ -74,7 +74,7 @@ def detect_motion(saved_images):
         _, thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
         motion = cv2.countNonZero(thresh) # 움직인 픽셀 수 측정 
 
-        if motion > 5000:  # 임계값 조정 필요
+        if motion > 500000:  # 임계값 조정 필요
             motion_detected = True
             break
             

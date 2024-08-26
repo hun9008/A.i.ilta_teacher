@@ -40,6 +40,9 @@ user_context = {}  # 사용자의 상태와 관련된 데이터를 저장
 step_elements = []
 user_step_cnt = 0
 
+wrong_block_list = []
+delay_block_list = []
+
 hand_detect_dummy = {
   "prob_area": [
     [
@@ -321,16 +324,8 @@ async def process_message(chat: ChatRequest):
         
     prev_chat = user_context[user_id].get("prev_chat", "")
     
-    # print("test) OCR : "+ ocr)
-    # print("test) PREV_CHAT : "+ prev_chat)
-    
-    # user_vars.user_status = ""
-    if user_vars.user_status == "solve_delay":
-
-        if not user_context[user_id].get("solve_delay"):
-            user_context[user_id] = {"solve_delay": True, "prev_chat": ""}
-            return "문제에서 어디가 이해가 안돼?" 
-        
+    # delay_block_list에 u_id가 있다면
+    if user_id in delay_block_list:
         concept = concepts_storage[problem_index]
 
         if user_text:
@@ -342,13 +337,7 @@ async def process_message(chat: ChatRequest):
         else:
             print("not exist user text")
             return ''
-
-    elif user_vars.user_status == "wrong":
-
-        if not user_context[user_id].get("wrong"):
-            user_context[user_id] = {"wrong": True, "prev_chat": ""}
-            return "방금 풀이에서 틀린 부분 없는지 체크해볼래?"
-
+    if user_id in wrong_block_list:
         solution = step_elements[problem_index]
 
         if user_text:
@@ -367,34 +356,87 @@ async def process_message(chat: ChatRequest):
                 response = solution[user_step_cnt]
                 user_step_cnt += 1
             elif user_step_cnt == len(solution) + 1:
-                return ''
+                response = ''
             else:
                 response = "모든 단계를 설명했어. 다른 질문이 있으면 물어봐."
                 user_step_cnt += 1
-
-    elif user_vars.user_status == "solve":
-        user_context[user_id]["solve_delay"] = False 
-        user_context[user_id]["wrong"] = False
-        
-        #한 문제 풀었으면 prev_chat init
-        user_context[user_id] = {"prev_chat": ""} 
-        
-        ## DB에 state 저장
-        response = "문제를 해결했어! 다른 문제를 풀어볼까?"
-        
-    elif user_vars.user_status == "doing":
-        # response = ''
-        if user_text:
-            response = await call_openai_api(user_text)
-            user_context[user_id]["prev_chat"] = user_text + "\n" + "나의 답변 : " + response + "\n"
             return response
-        else:
-            return ''
-        
     else:
-        response = "Invalid state."
-    
-    return response
+
+        if user_vars.user_status == "solve_delay":
+
+            if not user_context[user_id].get("solve_delay"):
+                user_context[user_id] = {"solve_delay": True, "prev_chat": ""}
+                delay_block_list.append(user_id)
+                return "문제에서 어디가 이해가 안돼?" 
+            
+            concept = concepts_storage[problem_index]
+
+            if user_text:
+                print("user text")
+                prompt = prompt_delay(ocr, concept, user_text, prev_chat)
+                response = await call_openai_api(prompt)
+                user_context[user_id]["prev_chat"] = prompt + "\n" + "나의 답변 : " + response + "\n"
+                return response
+            else:
+                print("not exist user text")
+                return ''
+
+        elif user_vars.user_status == "wrong":
+
+            if not user_context[user_id].get("wrong"):
+                user_context[user_id] = {"wrong": True, "prev_chat": ""}
+                wrong_block_list.append(user_id)
+                return "방금 풀이에서 틀린 부분 없는지 체크해볼래?"
+
+            solution = step_elements[problem_index]
+
+            if user_text:
+                print("user text")
+                all_solution = '\n'.join(solution)
+                prompt = prompt_wrong(ocr, all_solution, user_text, prev_chat)
+                response = await call_openai_api(prompt)
+                user_context[user_id]["prev_chat"] = prompt + "\n" + "나의 답변 : " + response + "\n"
+                return response
+            else:
+                print("not exist user text")
+                if user_step_cnt < len(solution) - 1:
+                    response = solution[user_step_cnt] + '\n이해했다면, 다음 단계를 설명해줄게.'
+                    user_step_cnt += 1
+                elif user_step_cnt == len(solution) - 1:
+                    response = solution[user_step_cnt]
+                    user_step_cnt += 1
+                elif user_step_cnt == len(solution) + 1:
+                    response = ''
+                else:
+                    response = "모든 단계를 설명했어. 다른 질문이 있으면 물어봐."
+                    user_step_cnt += 1
+                    wrong_block_list.remove(user_id)
+                return response
+
+        elif user_vars.user_status == "solve":
+            user_context[user_id]["solve_delay"] = False 
+            user_context[user_id]["wrong"] = False
+            
+            #한 문제 풀었으면 prev_chat init
+            user_context[user_id] = {"prev_chat": ""} 
+            
+            ## DB에 state 저장
+            response = "문제를 해결했어! 다른 문제를 풀어볼까?"
+            
+        elif user_vars.user_status == "doing":
+            # response = ''
+            if user_text:
+                response = await call_openai_api(user_text)
+                user_context[user_id]["prev_chat"] = user_text + "\n" + "나의 답변 : " + response + "\n"
+                return response
+            else:
+                return ''
+            
+        else:
+            response = "Invalid state."
+        
+        return response
 
 # OpenAI API 호출 함수
 async def call_openai_api(prompt):
