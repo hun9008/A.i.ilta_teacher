@@ -35,7 +35,7 @@ connections = []
 sleep_time = 1
 
 # (assume) define user_status
-user_vars.user_status = "doing"
+user_vars.user_status = "wrong"
 user_context = {}  # 사용자의 상태와 관련된 데이터를 저장
 step_elements = []
 user_step_cnt = 0
@@ -141,7 +141,7 @@ async def decide_user_wrong(websocket: WebSocket):
                         prob_num = -1
 
                     if prob_num == -1:
-                        user_vars.user_status = "doing"
+                        user_vars.user_status = "wrong"
                     else:
                         hand_write = response_json.get("user_ocr_result")
                         if hand_write is None:
