@@ -238,7 +238,7 @@ async def perform_ocr(frame_data):
     print("Performing OCR")
     url = "http://model.maitutor.site/problems_ocr"
     
-    print("frame_data : ", frame_data)
+    # print("frame_data : ", frame_data)
 
     payload = {'image': frame_data}
     # print(payload)
