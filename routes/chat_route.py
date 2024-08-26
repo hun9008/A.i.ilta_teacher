@@ -131,7 +131,7 @@ async def decide_user_wrong(websocket: WebSocket):
                     if isinstance(response, requests.models.Response):
                         try:
                             response_json = response.json()
-                            prob_num = response_json.get("prob_num")
+                            prob_num = response_json.get("handwrite_num")
                             print("I deal with prob_position : ", prob_num)
                         except json.JSONDecodeError:
                             print("warning: JSON decoding failed")
@@ -143,7 +143,7 @@ async def decide_user_wrong(websocket: WebSocket):
                     if prob_num == -1:
                         user_vars.user_status = "doing"
                     else:
-                        hand_write = response_json.get("hand_write")
+                        hand_write = response_json.get("user_ocr_result")
                         if hand_write is None:
                             print("Warning: hand_write is None")
                             continue
