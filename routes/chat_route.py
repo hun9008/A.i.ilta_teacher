@@ -335,11 +335,9 @@ async def process_message(chat: ChatRequest):
         if user_text:
             print("user text")
             prompt = prompt_delay(ocr, concept, user_text, prev_chat)
-            if user_text == '':
-                delay_block_list.remove(user_id)
-                return ''
             response = await call_openai_api(prompt)
             user_context[user_id]["prev_chat"] = prompt + "\n" + "나의 답변 : " + response + "\n"
+            delay_block_list.remove(user_id)
             return response
         else:
             print("not exist user text")
