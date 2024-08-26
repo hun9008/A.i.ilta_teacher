@@ -539,6 +539,14 @@ async def hand_determinant(image_input: ImageInput):
     inter_question_areas_left = calculate_inter_question_areas(problem_locations_left, image_height_left)
     inter_question_areas_right = calculate_inter_question_areas(problem_locations_right, image_height_right)
 
+    inter_question_areas_right_adjusted = []
+    for i_r in inter_question_areas_right:
+        x, y, w, h = i_r
+        x = x + origin_left.shape[1] // 2
+        inter_question_areas_right_adjusted.append((x, y, w, h))
+    
+    inter_position = inter_question_areas_left + inter_question_areas_right_adjusted
+    print("inter position : ", inter_position)
     print("inter left : ", inter_question_areas_left)
     print("inter right : ", inter_question_areas_right)
 
@@ -626,9 +634,16 @@ async def hand_determinant(image_input: ImageInput):
             "user_ocr_result": "No handwriting detected."
         }
     else:
+        user_handwrite_position = inter_position[handwrite_num]
+        user_handwrite_image = target_image[user_handwrite_position[1]:user_handwrite_position[1] + user_handwrite_position[3], user_handwrite_position[0]:user_handwrite_position[0] + user_handwrite_position[2]]
+
+        # to base64
+        _, buffer = cv2.imencode('.jpg', user_handwrite_image)
+        user_handwrite_image_base64 = base64.b64encode(buffer).decode('utf-8')
+
         output_json = {
             "handwrite_num": handwrite_num,
-            "user_ocr_result": user_ocr_result[handwrite_num]
+            "user_handwrite_image": user_handwrite_image_base64,
         }
     
     return output_json

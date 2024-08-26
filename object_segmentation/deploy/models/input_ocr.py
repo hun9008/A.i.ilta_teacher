@@ -7,5 +7,5 @@ class SolverInput(BaseModel):
     ocrs: list
 
 class Determinent(BaseModel):
-    hand_write: str
+    hand_write_image : str
     solution : str
