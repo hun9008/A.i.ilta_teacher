@@ -286,7 +286,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     elif response == '문제를 해결했어! 다른 문제를 풀어볼까?':
                         await websocket.send_text(response)
                         await websocket.send_text("status : " + user_vars.user_status)
-                        break
+                        # break
                     else:
                         await websocket.send_text(response)
                         await websocket.send_text("status : " + user_vars.user_status)
