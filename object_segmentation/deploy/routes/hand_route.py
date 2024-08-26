@@ -435,7 +435,7 @@ def detect_handwriting(image, problem_texts):
     crop_right = int(w * (1 - percentage))
     image = image[crop_top:crop_bottom, crop_left:crop_right]
 
-    content = cv2.imencode('.jpg', image)[1].tobytes()
+    content = cv2.imencode('.png', image)[1].tobytes()
     image_vision = vision.Image(content=content)
     
     response = client.document_text_detection(image=image_vision)
