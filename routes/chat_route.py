@@ -138,6 +138,20 @@ async def perform_handwrite_ocr(hand_write_image, solution):
     headers = {'Content-Type': 'application/json'} 
     response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)
     return response
+
+def parse_solution(solution):
+    # Step이나 Answer, 정답이 포함된 패턴을 유연하게 매칭
+    steps = re.split(r'(Step \d+:|Answer:|정답:)', solution)
+    
+    # 결과를 담을 리스트
+    steps_array = []
+    
+    # 스텝이나 정답 키워드를 앞에 붙여서 저장
+    for i in range(1, len(steps), 2):  # 홀수 인덱스가 키워드
+        current_step = steps[i] + steps[i+1].strip()
+        steps_array.append(current_step)
+    
+    return steps_array
      
 @route.websocket("/ws/chat")
 async def websocket_endpoint(websocket: WebSocket):
@@ -168,12 +182,11 @@ async def websocket_endpoint(websocket: WebSocket):
             for solution in solutions_storage[0]:
                 if type(solution) == list:
                     print("right solution type : list")
-                    net_solution = solution[0]
-                    steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', net_solution)
-                    steps_array = [step.strip() for step in steps[1:] if step.strip()]
-
-                    if len(steps_array) > 0:
-                        steps_array[-1] = f"Answer: {steps_array[-1]}"
+                    net_solution = solution
+                    print("net_solution : ", net_solution)
+                    
+                    # 수정된 파싱 방법 적용
+                    steps_array = parse_solution(net_solution)
                     
                     step_elements.append(steps_array)
                     print("step_elements : ", step_elements)
@@ -183,11 +196,9 @@ async def websocket_endpoint(websocket: WebSocket):
                     print("right solution type : str")
                     net_solution = solution
                     print("net_solution : ", net_solution)
-                    steps = re.split(r'\*\*Step \d+:\*\*|\*\*Answer:\*\*', net_solution)
-                    steps_array = [step.strip() for step in steps[1:] if step.strip()]
-
-                    if len(steps_array) > 0:
-                        steps_array[-1] = f"Answer: {steps_array[-1]}"
+                    
+                    # 수정된 파싱 방법 적용
+                    steps_array = parse_solution(net_solution)
                     
                     step_elements.append(steps_array)
                     print("step_elements : ", step_elements)
