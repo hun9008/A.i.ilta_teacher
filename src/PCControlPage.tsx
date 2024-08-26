@@ -290,7 +290,7 @@ const PCControlPage: React.FC = () => {
 
   return (
     <div>
-      <h1>PC Control Page</h1>
+      <h1>모바일 이미지 확인</h1>
       {imageData ? (
         <>
           <img
