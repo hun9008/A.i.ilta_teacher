@@ -85,7 +85,7 @@ hand_detect_dummy = {
   "prob_num": 1
 }
 
-async def decide_user_wrong(websocket: WebSocket):
+async def decide_user_wrong(websocket: WebSocket, user_id: str):
     try:
         while True:
             await asyncio.sleep(sleep_time)  
@@ -157,7 +157,8 @@ async def decide_user_wrong(websocket: WebSocket):
                         hand_response = await perform_handwrite_ocr(hand_write_image, solution)
 
                         if hand_response.status_code == 200:
-                            user_vars.user_status = hand_response.json().get("determinants")
+                            if (user_id not in delay_block_list) and (user_id not in wrong_block_list):
+                                user_vars.user_status = hand_response.json().get("determinants")
                         else:
                             user_vars.user_status = "doing"
                     
@@ -219,7 +220,7 @@ async def perform_handwrite_ocr(hand_write_image, solution):
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 
-    background_task = asyncio.create_task(decide_user_wrong(websocket))
+    # background_task = asyncio.create_task(decide_user_wrong(websocket))
 
     try:
         data = await websocket.receive_text()
@@ -232,6 +233,8 @@ async def websocket_endpoint(websocket: WebSocket):
         print("chat_request : ", chat_request)
         if chat_request.status == "open":
             connections.append(websocket)
+
+            background_task = asyncio.create_task(decide_user_wrong(websocket, chat_request.u_id))
 
             await websocket.send_text("문제를 풀어보자! 내가 잘못된 부분이 있으면 알려줄게.")
             await websocket.send_text("status : " + user_vars.user_status)
@@ -332,12 +335,14 @@ async def process_message(chat: ChatRequest):
         if user_text:
             print("user text")
             prompt = prompt_delay(ocr, concept, user_text, prev_chat)
+            if user_text == '':
+                delay_block_list.remove(user_id)
+                return ''
             response = await call_openai_api(prompt)
             user_context[user_id]["prev_chat"] = prompt + "\n" + "나의 답변 : " + response + "\n"
             return response
         else:
             print("not exist user text")
-            delay_block_list.remove(user_id)
             return ''
         
     if user_id in wrong_block_list:
