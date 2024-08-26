@@ -176,6 +176,8 @@ async def websocket_endpoint(websocket: WebSocket):
                         steps_array[-1] = f"Answer: {steps_array[-1]}"
                     
                     step_elements.append(steps_array)
+                    print("step_elements : ", step_elements)
+                    print("len(step_elements) : ", len(step_elements))
                 else:
                     # print("I deal with solution!")
                     print("Unexpected solution")
@@ -285,6 +287,7 @@ async def process_message(chat: ChatRequest):
             return response
         else:
             print("not exist user text")
+            print("len(solution) : ", len(solution))
             if user_step_cnt < len(solution) - 1:
                 response = solution[user_step_cnt] + '\n이해했다면, 다음 단계를 설명해줄게.'
                 user_step_cnt += 1
