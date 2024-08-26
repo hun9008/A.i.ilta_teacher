@@ -42,6 +42,8 @@ user_step_cnt = 0
 
 wrong_block_list = []
 delay_block_list = []
+user_look = {}
+solve_problem = []
 
 async def decide_user_wrong(websocket: WebSocket, user_id: str):
     try:
@@ -83,17 +85,12 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                     headers = {'Content-Type': 'application/json'}
                     response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
 
-                    # decode_image = base64.b64decode(include_hand)
-                    # image = Image.open(io.BytesIO(decode_image))
-                    # if image.mode == 'RGBA':
-                    #     image = image.convert('RGB')
-                    # image_array = np.array(image)
-
                     if isinstance(response, requests.models.Response):
                         try:
                             response_json = response.json()
                             prob_num = response_json.get("handwrite_num")
                             print("I deal with prob_position : ", prob_num)
+                            user_look[user_id] = prob_num
                         except json.JSONDecodeError:
                             print("warning: JSON decoding failed")
                             prob_num = -1
@@ -121,40 +118,6 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                                 print("This time is Locked")
                         else:
                             user_vars.user_status = "doing"
-                    
-                    # problem_index = 0
-                    # if prob_num != -1:
-                    #     # print("len solution_storage :", len(solutions_storage))
-                    #     # print("solution_storage : ", solutions_storage)
-                    #     # print("solution_storage[0] : ", solutions_storage[0])
-                    #     # print("solution_storage[0][0] : ", solutions_storage[0][0])
-                    #     # print("prob_num : ", prob_num)
-                    #     print("len solution_storage[0] : ", len(solutions_storage[0]))
-                    #     problem_index = prob_num
-                    #     prob_area = response_json.get("prob_area")
-                    #     this_prob_area = prob_area[problem_index]
-                    #     x, y, w, h = this_prob_area
-
-                    #     crop_image = image_array[y:y+h, x:x+w]
-                    #     pil_img = Image.fromarray(crop_image)
-                    #     buffered = io.BytesIO()
-                    #     pil_img.save(buffered, format="JPEG")
-                    #     img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-
-                    #     solution = solutions_storage[0][problem_index]
-                    #     print("##### start hand_ocr #####")
-                    #     hand_ocr = await perform_handwrite_ocr(img_str, solution)
-                    #     print("##### end hand_ocr #####")
-                    #     if hand_ocr.status_code == 200:
-                    #         user_vars.user_status = hand_ocr.json().get("determinants")
-                    #     else:
-                    #         print("warning: hand_ocr request failed")
-                    #         user_vars.user_status = "solve_delay"
-                    # else:
-                    #     hand_ocr = {
-                    #         "determinants": "solve_delay"
-                    #     }
-                    #     user_vars.user_status = hand_ocr.get("determinants")
 
             except Exception as e:
                 print(f"Error in decide_user_wrong loop: {str(e)}")
@@ -198,6 +161,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             await websocket.send_text("문제를 풀어보자! 내가 잘못된 부분이 있으면 알려줄게.")
             await websocket.send_text("status : " + user_vars.user_status)
+            solve_problem.clear()
             # response = await process_message(chat_request)
             # await websocket.send_text(response)
             
@@ -249,9 +213,12 @@ async def websocket_endpoint(websocket: WebSocket):
                 if response:
                     if response == 'Invalid state.':
                         break
-                    elif response == '문제를 해결했어! 다른 문제를 풀어볼까?':
-                        await websocket.send_text(response)
-                        await websocket.send_text("status : " + user_vars.user_status)
+                    elif "문제를 해결했어! 다른문제를 풀어볼까?" in response:
+                        if user_look.get(chat_request.u_id, 0) in solve_problem:
+                            print("Already solved problem")
+                        else:
+                            await websocket.send_text(response)
+                            await websocket.send_text("status : " + user_vars.user_status)
                         # break
                     else:
                         await websocket.send_text(response)
@@ -392,8 +359,11 @@ async def process_message(chat: ChatRequest):
             #한 문제 풀었으면 prev_chat init
             user_context[user_id] = {"prev_chat": ""} 
             
+            solve_problem.append(user_look[user_id])
+            print("solve_problem : ", solve_problem)
+
             ## DB에 state 저장
-            response = "문제를 해결했어! 다른 문제를 풀어볼까?"
+            response = "{}번째 문제를 해결했어! 다른문제를 풀어볼까?".format(solve_problem)
             
         elif user_vars.user_status == "doing":
             # response = ''

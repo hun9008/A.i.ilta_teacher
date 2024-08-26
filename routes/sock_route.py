@@ -101,6 +101,7 @@ async def handle_ws_solution(user_ocrs, websocket, u_id, device):
 async def handle_ws_position(position, websocket, u_id, device):
     
     mobile_key = f'{u_id}_mobile'
+    print("sended position : ", position)
 
     user_position_pair_dict[u_id] = position
 
