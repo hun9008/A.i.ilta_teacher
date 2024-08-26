@@ -397,12 +397,16 @@ async def hand_ocr(input: Determinent):
 
     determinent = "None"
     if "##1##" in openai_result:
+        print("solve")
         determinent = "solve"
     elif "##2##" in openai_result:
+        print("wrong")
         determinent = "wrong"
     elif "##3##" in openai_result:
+        print("doing")
         determinent = "doing"
     else:
+        print("None")
         determinent = "None"
 
     output_json = {
