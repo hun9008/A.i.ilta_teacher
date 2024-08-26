@@ -144,7 +144,12 @@ async def decide_user_wrong(websocket: WebSocket):
                         user_vars.user_status = "doing"
                     else:
                         hand_write = response_json.get("hand_write")
+                        if hand_write is None:
+                            print("Warning: hand_write is None")
+                            continue
                         solution = solutions_storage[0][prob_num]
+
+                        print("solution : ", solution)
 
                         hand_response = await perform_handwrite_ocr(hand_write, solution)
 
