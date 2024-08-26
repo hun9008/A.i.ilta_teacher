@@ -35,7 +35,7 @@ connections = []
 sleep_time = 1
 
 # (assume) define user_status
-user_vars.user_status = "wrong"
+user_vars.user_status = "doing"
 user_context = {}  # 사용자의 상태와 관련된 데이터를 저장
 step_elements = []
 user_step_cnt = 0
@@ -141,7 +141,7 @@ async def decide_user_wrong(websocket: WebSocket):
                         prob_num = -1
 
                     if prob_num == -1:
-                        user_vars.user_status = "wrong"
+                        user_vars.user_status = "doing"
                     else:
                         hand_write = response_json.get("user_ocr_result")
                         if hand_write is None:
@@ -156,7 +156,7 @@ async def decide_user_wrong(websocket: WebSocket):
                         if hand_response.status_code == 200:
                             user_vars.user_status = hand_response.json().get("determinants")
                         else:
-                            user_vars.user_status = "wrong"
+                            user_vars.user_status = "doing"
                     
                     # problem_index = 0
                     # if prob_num != -1:
@@ -203,6 +203,9 @@ async def perform_handwrite_ocr(hand_write, solution):
     print("test) Decide user status by handwrite OCR")
     
     url = "http://model.maitutor.site/hand_ocr"
+
+    print("씨발 타입 : ", type(hand_write))
+    print("씨발 타입 : ", type(solution))
     
     payload = {
         "hand_write": hand_write,
