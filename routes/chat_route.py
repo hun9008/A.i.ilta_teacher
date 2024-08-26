@@ -326,6 +326,7 @@ async def process_message(chat: ChatRequest):
     
     # delay_block_list에 u_id가 있다면
     if user_id in delay_block_list:
+        print("$$$$$ delay block state $$$$$$")
         concept = concepts_storage[problem_index]
 
         if user_text:
@@ -336,8 +337,11 @@ async def process_message(chat: ChatRequest):
             return response
         else:
             print("not exist user text")
+            delay_block_list.remove(user_id)
             return ''
+        
     if user_id in wrong_block_list:
+        print("$$$$$ wrong block state $$$$$$")
         solution = step_elements[problem_index]
 
         if user_text:
@@ -360,6 +364,7 @@ async def process_message(chat: ChatRequest):
             else:
                 response = "모든 단계를 설명했어. 다른 질문이 있으면 물어봐."
                 user_step_cnt += 1
+                wrong_block_list.remove(user_id)
             return response
     else:
 
@@ -368,6 +373,7 @@ async def process_message(chat: ChatRequest):
             if not user_context[user_id].get("solve_delay"):
                 user_context[user_id] = {"solve_delay": True, "prev_chat": ""}
                 delay_block_list.append(user_id)
+                print("$$$$$$ start delay block $$$$$$")
                 return "문제에서 어디가 이해가 안돼?" 
             
             concept = concepts_storage[problem_index]
@@ -387,6 +393,7 @@ async def process_message(chat: ChatRequest):
             if not user_context[user_id].get("wrong"):
                 user_context[user_id] = {"wrong": True, "prev_chat": ""}
                 wrong_block_list.append(user_id)
+                print("$$$$$$ start wrong block $$$$$$")
                 return "방금 풀이에서 틀린 부분 없는지 체크해볼래?"
 
             solution = step_elements[problem_index]
@@ -411,7 +418,6 @@ async def process_message(chat: ChatRequest):
                 else:
                     response = "모든 단계를 설명했어. 다른 질문이 있으면 물어봐."
                     user_step_cnt += 1
-                    wrong_block_list.remove(user_id)
                 return response
 
         elif user_vars.user_status == "solve":
