@@ -118,8 +118,9 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
     origin_image_storage.append(frame_data)
 
     if user_position_pair_dict.get(u_id) is not None:
-
+        print("position exists!")
         position = user_position_pair_dict[u_id]
+        print("position : ", position)
 
         image_data = base64.b64decode(frame_data)
         nparr = np.frombuffer(image_data, np.uint8)
@@ -132,10 +133,10 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
         preprocess_data = base64.b64encode(buffer).decode('utf-8')
 
     else:
+        print("position does not exist!")
         preprocess_data = frame_data
 
-    print("position : ", user_position_pair_dict[u_id])
-    
+
     ocr_result = await perform_ocr(preprocess_data)
     # performing_ocr = False
     
