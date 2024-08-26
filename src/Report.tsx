@@ -172,7 +172,10 @@ const Report: React.FC = () => {
                 >
                   <div className="bg-white rounded-lg shadow-md p-4 w-40 h-60 flex flex-col justify-between transform hover:scale-105 transition duration-300">
                     <div>
-                      <h3 className="font-bold text-sm mb-2 truncate">
+                      <h3
+                        className="font-bold text-sm mb-2 truncate"
+                        style={{ backgroundColor: '#E6E6FA', padding: '1px', borderRadius: '1px' }} // 연보라색 배경 추가
+                      >
                         {report.title}
                       </h3>
                       <p className="text-xs text-gray-600 line-clamp-3">
