@@ -9,11 +9,15 @@ from config import user_vars
 import os
 from datetime import datetime
 import base64
+import numpy as np
+import cv2
 
 route = APIRouter()
 
 connections = {}
 performing_ocr = False
+
+user_position_pair_dict = {}
 
 @route.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -97,6 +101,9 @@ async def handle_ws_solution(user_ocrs, websocket, u_id, device):
 async def handle_ws_position(position, websocket, u_id, device):
     
     mobile_key = f'{u_id}_mobile'
+
+    user_position_pair_dict[u_id] = position
+
     if mobile_key in connections:
         mobile_websocket = connections[mobile_key]
         response = {'type': 'position', 'payload': position}
@@ -110,7 +117,26 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
     origin_image_storage.clear()
     origin_image_storage.append(frame_data)
 
-    ocr_result = await perform_ocr(frame_data)
+    if user_position_pair_dict.get(u_id) is not None:
+
+        position = user_position_pair_dict[u_id]
+
+        image_data = base64.b64decode(frame_data)
+        nparr = np.frombuffer(image_data, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        x, y, w, h = position['x'], position['y'], position['w'], position['h']
+        roi = img[y:y+h, x:x+w]  
+
+        _, buffer = cv2.imencode('.jpg', roi)
+        preprocess_data = base64.b64encode(buffer).decode('utf-8')
+
+    else:
+        preprocess_data = frame_data
+
+    print("position : ", user_position_pair_dict[u_id])
+    
+    ocr_result = await perform_ocr(preprocess_data)
     # performing_ocr = False
     
     # concepts.extend(ocr_result.get("concepts", []))

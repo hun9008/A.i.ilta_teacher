@@ -43,48 +43,6 @@ user_step_cnt = 0
 wrong_block_list = []
 delay_block_list = []
 
-hand_detect_dummy = {
-  "prob_area": [
-    [
-      47,
-      40,
-      496,
-      428
-    ],
-    [
-      45,
-      471,
-      498,
-      474
-    ],
-    [
-      47,
-      948,
-      499,
-      401
-    ],
-    [
-      595,
-      35,
-      494,
-      486
-    ],
-    [
-      599,
-      524,
-      490,
-      429
-    ],
-    [
-      602,
-      956,
-      490,
-      393
-    ]
-  ],
-  "prob_num": 1
-}
-
 async def decide_user_wrong(websocket: WebSocket, user_id: str):
     try:
         while True:
