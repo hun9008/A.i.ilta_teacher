@@ -32,7 +32,7 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # websocket 연결 관리 
 connections = []
 
-sleep_time = 1
+sleep_time = 5
 
 # (assume) define user_status
 user_vars.user_status = "doing"
@@ -273,6 +273,7 @@ async def process_message(chat: ChatRequest):
         
     if user_id in wrong_block_list:
         print("$$$$$ wrong block state $$$$$$")
+        print("user_step_cnt : ", user_step_cnt)
         solution = step_elements[problem_index]
 
         if user_text:
