@@ -39,11 +39,12 @@ const OcrResultPage: React.FC<OcrResultPageProps> = ({ onOcrSubmit }) => {
     const parsedProblems: { [key: number]: string } = {};
 
     ocrs.forEach((ocr) => {
-      const problems = ocr.split(/\*([0-9]+)\*/).slice(1);
-      for (let i = 0; i < problems.length; i += 2) {
-        const problemNumber = parseInt(problems[i], 10);
-        const problemText =
-          problems[i + 1]?.trim().replace(/^\\n+|\\n+$/g, '') || '';
+      const problemRegex = /\*(\d+)[\.\s]*\*([\s\S]*?)(?=\*\d+[\.\s]*\*|$)/g;
+      let match;
+
+      while ((match = problemRegex.exec(ocr)) !== null) {
+        const problemNumber = parseInt(match[1], 10);
+        const problemText = match[2].trim().replace(/^\\n+|\\n+$/g, '');
         parsedProblems[problemNumber] = problemText;
       }
     });

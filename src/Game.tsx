@@ -156,23 +156,115 @@ function Game() {
         setShowModal(true);
       } else {
         penguinTargetPosition.current = newPosition;
+        setIsPenguinMoving(true);
+        setIsMovingToNextProblem(false);
+        nextProblemRef.current = null;
       }
     },
     [icePositions, penguinPosition, problemTexts, concepts]
   );
 
+  const findNextUnsolved = useCallback(() => {
+    const problemNumbers = Object.keys(problemTexts).map(Number);
+    const currentIndex = problemNumbers.indexOf(selectedFloe);
+    for (let i = 1; i <= problemNumbers.length; i++) {
+      const nextIndex = (currentIndex + i) % problemNumbers.length;
+      const nextProblem = problemNumbers[nextIndex];
+      if (!solvedProblems[nextProblem]) {
+        return nextProblem;
+      }
+    }
+    return null; // 모든 문제가 해결된 경우
+  }, [problemTexts, selectedFloe, solvedProblems]);
+  const [isPenguinMoving, setIsPenguinMoving] = useState(false);
+  // const [isMovingToNextProblem, setIsMovingToNextProblem] = useState(false);
+  const nextProblemRef = useRef<number | null>(null);
+  // const [shouldShowModalAfterMovement, setShouldShowModalAfterMovement] =
+  //   useState(false);
+
+  // const moveToNextProblem = useCallback(() => {
+  //   const nextProblem = findNextUnsolved();
+  //   if (nextProblem !== null) {
+  //     const nextIndex = Object.keys(problemTexts)
+  //       .map(Number)
+  //       .indexOf(nextProblem);
+  //     const newPosition = new THREE.Vector3(...icePositions[nextIndex]);
+  //     newPosition.y = 0.5;
+  //     penguinTargetPosition.current = newPosition;
+  //     nextProblemRef.current = nextProblem;
+  //     setIsPenguinMoving(true);
+  //     setIsMovingToNextProblem(true);
+  //   } else {
+  //     console.log('모든 문제를 해결했습니다!');
+  //   }
+  // }, [findNextUnsolved, icePositions, problemTexts]);
+
   const handleSolveProblem = useCallback(() => {
-    console.log(selectedFloe);
+    console.log('이 문제 풀었음!', selectedFloe);
     setSolvedProblems((prev) => ({ ...prev, [selectedFloe]: true }));
     setShowModal(false);
-    setShowSolvedMessage(true); // "Solved!" 메시지 표시
-    setTimeout(() => setShowSolvedMessage(false), 2000);
-    console.log('이 문제 풀었음!', selectedFloe);
-  }, [selectedFloe]);
+    setShowSolvedMessage(true);
 
+    setTimeout(() => {
+      setShowSolvedMessage(false);
+      const nextProblem = findNextUnsolved();
+      if (nextProblem !== null) {
+        setSelectedFloe(nextProblem);
+        setSelectedProblem(problemTexts[nextProblem] || '');
+        setSelectedConcept(concepts[nextProblem] || 'No concept available');
+        setShowModal(true);
+
+        // 모달이 표시된 후 펭귄 이동
+        setTimeout(() => {
+          const nextIndex = Object.keys(problemTexts)
+            .map(Number)
+            .indexOf(nextProblem);
+          const newPosition = new THREE.Vector3(...icePositions[nextIndex]);
+          newPosition.y = 0.5;
+          penguinTargetPosition.current = newPosition;
+          setIsPenguinMoving(true);
+        }, 500); // 모달이 표시되고 0.5초 후에 펭귄 이동 시작
+      } else {
+        console.log('모든 문제를 해결했습니다!');
+      }
+    }, 2000);
+  }, [selectedFloe, findNextUnsolved, problemTexts, concepts, icePositions]);
   useEffect(() => {
-    console.log(solvedProblems);
-  }, [solvedProblems]);
+    if (
+      isPenguinMoving &&
+      penguinPosition.equals(penguinTargetPosition.current)
+    ) {
+      setIsPenguinMoving(false);
+    }
+  }, [penguinPosition, isPenguinMoving]);
+  // useEffect(() => {
+  //   if (
+  //     isPenguinMoving &&
+  //     penguinPosition.equals(penguinTargetPosition.current)
+  //   ) {
+  //     setIsPenguinMoving(false);
+  //     if (isMovingToNextProblem && nextProblemRef.current !== null) {
+  //       setSelectedFloe(nextProblemRef.current);
+  //       setSelectedProblem(problemTexts[nextProblemRef.current] || '');
+  //       setSelectedConcept(
+  //         concepts[nextProblemRef.current] || 'No concept available'
+  //       );
+  //       if (shouldShowModalAfterMovement) {
+  //         setShowModal(true);
+  //         setShouldShowModalAfterMovement(false);
+  //       }
+  //       setIsMovingToNextProblem(false);
+  //       nextProblemRef.current = null;
+  //     }
+  //   }
+  // }, [
+  //   penguinPosition,
+  //   isPenguinMoving,
+  //   isMovingToNextProblem,
+  //   problemTexts,
+  //   concepts,
+  //   shouldShowModalAfterMovement,
+  // ]);
 
   /* 아래부턴 타이머 부분 */
   useEffect(() => {
