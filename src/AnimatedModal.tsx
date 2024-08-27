@@ -82,17 +82,13 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         socket.onmessage = async (event: MessageEvent) => {
           const data = event.data;
           console.log('Received WebSocket message:', data);
-          if (data === 'status : solve') {
-            onSolve();
-            onMoveToNext();
-            return;
-          }
+
           if (data.startsWith('status :')) {
             console.log('Ignoring status message:', data);
             return;
           }
-          const processedText = preprocessMessage(data);
-          const newMessage = { text: processedText, sender: 'bot' as const };
+
+          const newMessage = { text: data, sender: 'bot' as const };
           setMessages((prevMessages) => {
             const updatedMessages = [...prevMessages, newMessage];
             globalMessages = updatedMessages;
@@ -118,15 +114,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         }
       };
     }
-  }, [
-    isOpen,
-    getSocket,
-    connectWebSocket,
-    isConnected,
-    sendMessage,
-    onSolve,
-    onMoveToNext,
-  ]);
+  }, [isOpen, getSocket, connectWebSocket, isConnected, sendMessage]);
 
   const handleSendMessage = () => {
     if (inputMessage.trim() && socketReady) {
@@ -184,28 +172,6 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
 
   const cleanedProblem = cleanText(selectedProblem);
   const cleanedConcept = cleanText(selectedConcept);
-  const preprocessMessage = (message: string): string => {
-    message = message.replace(
-      /\\\((.*?)\\\)/g,
-      '<span class="math inline">$1</span>'
-    );
-    message = message.replace(
-      /\\\[(.*?)\\\]/g,
-      '<span class="math display">$1</span>'
-    );
-
-    message = message.replace(
-      /(\d+)\.\s+\*\*(.*?)\*\*:/g,
-      '<br><strong>$1. $2:</strong>'
-    );
-
-    message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    message = message.replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-    message = message.replace(/\n/g, '<br>');
-    return message;
-  };
 
   return (
     <AnimatePresence>
@@ -305,10 +271,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                         : 'bg-gray-200 text-black'
                     }`}
                   >
-                    <div
-                      className="break-words"
-                      dangerouslySetInnerHTML={{ __html: message.text }}
-                    />
+                    <div className="break-words">{message.text}</div>
                   </div>
                   {message.sender === 'user' && (
                     <User className="w-8 h-8 ml-2 text-primary-600 flex-shrink-0" />

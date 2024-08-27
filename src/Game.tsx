@@ -90,15 +90,6 @@ function Game() {
 
       // Ice positions 생성
       generateCircularIcePositions(Object.keys(editedProblems).length);
-      const lowestProblemNumber = Math.min(
-        ...Object.keys(editedProblems).map(Number)
-      );
-      setSelectedFloe(lowestProblemNumber);
-      setSelectedProblem(editedProblems[lowestProblemNumber] || '');
-      setSelectedConcept(
-        concepts[lowestProblemNumber] || 'No concept available'
-      );
-      setShowModal(true);
     }
   }, []);
 
