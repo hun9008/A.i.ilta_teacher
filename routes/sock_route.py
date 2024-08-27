@@ -121,6 +121,7 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
     if user_position_pair_dict.get(u_id) is not None:
         print("position exists!")
         position = user_position_pair_dict[u_id]
+        position = json.loads(position)
         print("position : ", position)
 
         image_data = base64.b64decode(frame_data)
