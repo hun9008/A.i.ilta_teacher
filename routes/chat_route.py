@@ -83,11 +83,7 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                     url = "http://model.maitutor.site/hand_determinant"
 
                     headers = {'Content-Type': 'application/json'}
-                    # response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
-                    response = {
-                        "handwrite_num": 0,
-                        "user_handwrite_image": include_hand
-                    }
+                    response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
 
                     if isinstance(response, requests.models.Response):
                         try:
@@ -113,13 +109,8 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
 
                         print("solution : ", solution)
 
-                        # hand_response = await perform_handwrite_ocr(hand_write_image, solution)
-                        hand_response = {
-                            "status_code": 200,
-                            "json": {
-                                "determinants": "wrong"
-                            }
-                        }
+                        hand_response = await perform_handwrite_ocr(hand_write_image, solution)
+
                         if hand_response.status_code == 200:
                             if (user_id not in delay_block_list) and (user_id not in wrong_block_list):
                                 user_vars.user_status = hand_response.json().get("determinants")

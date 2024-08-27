@@ -47,14 +47,14 @@ async def websocket_endpoint(websocket: WebSocket):
                 await handle_ws_video(image, websocket, u_id, device)
                 if device == 'mobile':
                     await handle_ws_rtc(image, websocket, u_id, device)
-                    await handle_ws_ocr(image, websocket, u_id, device)
                     await handle_ws_position(position, websocket, u_id, device)
+                    await handle_ws_ocr(image, websocket, u_id, device)
             elif type == 'solution':
                 await handle_ws_video(image, websocket, u_id, device)
                 if device == 'mobile':
                     await handle_ws_rtc(image, websocket, u_id, device)
-                    await handle_ws_solution(ocrs, websocket, u_id, device)
                     await handle_ws_position(position, websocket, u_id, device)
+                    await handle_ws_solution(ocrs, websocket, u_id, device)
             elif type == 'hi':
                 response = {'type': 'response', 'message': 'Hello!'}
                 await websocket.send_json(response)
