@@ -138,7 +138,7 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
             x, y = coord_str.strip("()").split(',')
             return float(x), float(y)
         
-        def resize_image_if_needed(image, max_size=8000):
+        def resize_image_if_needed(image, max_size=7000):
             """
             이미지 크기를 8000 픽셀 이하로 줄이기 위한 함수.
             :param image: OpenCV 이미지
