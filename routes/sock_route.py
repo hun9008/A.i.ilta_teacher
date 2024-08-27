@@ -127,10 +127,10 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
         nparr = np.frombuffer(image_data, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        left_top = position.get("left_top")
-        right_top = position.get("right_top")
-        right_bottom = position.get("right_bottom")
-        left_bottom = position.get("left_bottom")
+        left_top = position["left_top"]
+        right_top = position["right_top"]
+        right_bottom = position["right_bottom"]
+        left_bottom = position["left_bottom"]
 
         pts = np.array([left_top, right_top, right_bottom, left_bottom], dtype=np.float32)
 
