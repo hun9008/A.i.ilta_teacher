@@ -287,7 +287,15 @@ const PCControlPage: React.FC = () => {
     window.cv.imshow(tempCanvas, dst);
     setCroppedImage(tempCanvas.toDataURL('image/jpeg', 0.8));
 
-    const positionString = `${tl.x},${tl.y};${tr.x},${tr.y};${br.x},${br.y};${bl.x},${bl.y}`;
+    const positionObject = {
+      left_top: `(${Math.round(tl.x)},${Math.round(tl.y)})`,
+      right_top: `(${Math.round(tr.x)},${Math.round(tr.y)})`,
+      right_bottom: `(${Math.round(br.x)},${Math.round(br.y)})`,
+      left_bottom: `(${Math.round(bl.x)},${Math.round(bl.y)})`,
+    };
+
+    // position 객체를 JSON 문자열로 변환
+    const positionString = JSON.stringify(positionObject);
     setCapturedPosition(positionString); // Save the position string
 
     [src, dst, srcTri, dstTri, M].forEach((mat) => mat.delete());
