@@ -921,7 +921,7 @@ const Dashboard: React.FC = () => {
               <ResponsiveTimeRange
                 data={calendarData}
                 from="2024-01-01"
-                to="2024-06-30"
+                to="2024-08-31"
                 emptyColor="#eeeeee"
                 colors={colorScale}
                 margin={{ top: 10, right: 20, bottom: 20, left: 40 }}

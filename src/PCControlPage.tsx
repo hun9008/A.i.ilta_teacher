@@ -7,6 +7,19 @@ const PCControlPage: React.FC = () => {
   const { sendMessage, isConnected, imageData, setImageData } = useWebSocket();
   const u_id = localStorage.getItem('u_id');
 
+  const [capturedPosition, setCapturedPosition] = useState<string | null>(null); // capturedPosition 상태 정의
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [scale, setScale] = useState(0);
+  const [draggingPointIndex, setDraggingPointIndex] = useState<number | null>(
+    null
+  );
+  const [points, setPoints] = useState<{ x: number; y: number }[]>([]);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const editCanvasRef = useRef<HTMLCanvasElement>(null);
+
   const handleCaptureRequest = async () => {
     // 캡처 버튼이 눌렸을 때 현재의 imageData를 고정
     if (imageData) {
@@ -14,6 +27,7 @@ const PCControlPage: React.FC = () => {
       setShowPopup(true); // 팝업 열기
     }
   };
+
   const sendRequest = async () => {
     if (!isConnected(wsUrl)) {
       console.error('WebSocket is not connected. Cannot send message.');
@@ -31,26 +45,21 @@ const PCControlPage: React.FC = () => {
         type: 'ocr',
         device: 'mobile',
         payload: base64Image,
-        position: '',
+        position: capturedPosition, // Include the captured position here
         ocrs: '',
       };
       sendMessage(wsUrl, message);
-      console.log('Cropped image sent from PC');
+      console.log('Cropped image and position sent from PC');
     } catch (error) {
-      console.error('Error sending cropped image:', error);
+      console.error('Error sending cropped image and position:', error);
     }
   };
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const editCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [scale, setScale] = useState(0);
-  const [draggingPointIndex, setDraggingPointIndex] = useState<number | null>(
-    null
-  );
-  const [points, setPoints] = useState<{ x: number; y: number }[]>([]);
-  const [showPopup, setShowPopup] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  useEffect(() => {
+    if (croppedImage) {
+      sendRequest();
+    }
+  }, [croppedImage]);
 
   useEffect(() => {
     if (
@@ -278,15 +287,13 @@ const PCControlPage: React.FC = () => {
     window.cv.imshow(tempCanvas, dst);
     setCroppedImage(tempCanvas.toDataURL('image/jpeg', 0.8));
 
+    const positionString = `${tl.x},${tl.y};${tr.x},${tr.y};${br.x},${br.y};${bl.x},${bl.y}`;
+    setCapturedPosition(positionString); // Save the position string
+
     [src, dst, srcTri, dstTri, M].forEach((mat) => mat.delete());
 
     setShowPopup(false);
   };
-  useEffect(() => {
-    if (croppedImage) {
-      sendRequest();
-    }
-  }, [croppedImage]);
 
   return (
     <div>
@@ -334,17 +341,6 @@ const PCControlPage: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* {croppedImage && (
-            <div>
-              <h3>Cropped Image:</h3>
-              <img
-                src={croppedImage}
-                alt="Cropped"
-                style={{ maxWidth: '750%' }}
-              />
-            </div>
-          )} */}
         </>
       ) : (
         <p>모바일 카메라 정보를 받아들이고 있습니다!</p>

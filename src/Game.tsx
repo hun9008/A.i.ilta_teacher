@@ -43,7 +43,7 @@ function Game() {
     []
   );
   const [showSolvedMessage, setShowSolvedMessage] = useState(false);
-  const [currentProblemIndex, setCurrentProblemIndex] = useState<number>(0);
+  // const [currentProblemIndex, setCurrentProblemIndex] = useState<number>(0);
 
   const [studyTime, setStudyTime] = useState<{
     hours: number;
@@ -67,6 +67,37 @@ function Game() {
     concepts: string[];
   }
 
+  const [problemOrder, setProblemOrder] = useState<number[]>([]);
+
+  const moveToNextProblem = useCallback(() => {
+    const currentIndex = problemOrder.indexOf(selectedFloe);
+    const nextIndex = (currentIndex + 1) % problemOrder.length;
+    const nextProblemNumber = problemOrder[nextIndex];
+
+    // 다음 문제의 위치로 펭귄 이동
+    if (icePositions[nextIndex]) {
+      const newPosition = new THREE.Vector3(...icePositions[nextIndex]);
+      newPosition.y = 0.5;
+      penguinTargetPosition.current = newPosition;
+    }
+
+    // 다음 문제의 모달 표시
+    setSelectedFloe(nextProblemNumber);
+    setSelectedProblem(problemTexts[nextProblemNumber] || '');
+    setSelectedConcept(concepts[nextProblemNumber] || 'No concept available');
+    setShowModal(true);
+  }, [selectedFloe, problemOrder, problemTexts, concepts, icePositions]);
+
+  const handleSolveProblem = useCallback(() => {
+    console.log(selectedFloe);
+    setSolvedProblems((prev) => ({ ...prev, [selectedFloe]: true }));
+    setShowModal(false);
+    setShowSolvedMessage(true);
+    setTimeout(() => setShowSolvedMessage(false), 2000);
+    console.log('이 문제 풀었음!', selectedFloe);
+    moveToNextProblem();
+  }, [selectedFloe, moveToNextProblem]);
+
   useEffect(() => {
     // 로컬 스토리지에서 수정된 문제 불러오기
     const editedProblemsJSON = localStorage.getItem('editedProblems');
@@ -74,10 +105,18 @@ function Game() {
       const editedProblems = JSON.parse(editedProblemsJSON);
       setProblemTexts(editedProblems);
       setIceCount(Object.keys(editedProblems).length);
+
+      // 문제 순서 설정
+      const order = Object.keys(editedProblems)
+        .map(Number)
+        .sort((a, b) => a - b);
+      setProblemOrder(order);
+
       console.log(
         'Edited problems loaded from localStorage:',
         editedProblemsJSON
       );
+      console.log('Problem order:', order);
 
       // 초기 solvedProblems 상태 설정
       const initialSolvedState = Object.keys(editedProblems).reduce(
@@ -90,9 +129,26 @@ function Game() {
       setSolvedProblems(initialSolvedState);
 
       // Ice positions 생성
-      generateCircularIcePositions(Object.keys(editedProblems).length);
+      generateCircularIcePositions(order.length);
+
+      // 첫 번째 문제 선택
+      const firstProblemNumber = order[0];
+      setSelectedFloe(firstProblemNumber);
+      setSelectedProblem(editedProblems[firstProblemNumber] || '');
+      setSelectedConcept(
+        concepts[firstProblemNumber] || 'No concept available'
+      );
+      setShowModal(true);
+
+      // 첫 번째 문제 위치로 펭귄 이동
+      if (icePositions[0]) {
+        const newPosition = new THREE.Vector3(...icePositions[0]);
+        newPosition.y = 0.5;
+        setPenguinPosition(newPosition);
+        penguinTargetPosition.current = newPosition;
+      }
     }
-  }, []);
+  }, [concepts]);
 
   useEffect(() => {
     if (
@@ -161,33 +217,6 @@ function Game() {
     },
     [icePositions, penguinPosition, problemTexts, concepts]
   );
-
-  const handleSolveProblem = useCallback(() => {
-    console.log(selectedFloe);
-    setSolvedProblems((prev) => ({ ...prev, [selectedFloe]: true }));
-    setShowModal(false);
-    setShowSolvedMessage(true); // "Solved!" 메시지 표시
-    setTimeout(() => setShowSolvedMessage(false), 2000);
-    console.log('이 문제 풀었음!', selectedFloe);
-  }, [selectedFloe]);
-
-  const moveToNextProblem = useCallback(() => {
-    const problemNumbers = Object.keys(problemTexts).map(Number);
-    const nextIndex = (currentProblemIndex + 1) % problemNumbers.length;
-    setCurrentProblemIndex(nextIndex);
-    const nextProblemNumber = problemNumbers[nextIndex];
-
-    // 다음 문제의 위치로 펭귄 이동
-    const newPosition = new THREE.Vector3(...icePositions[nextIndex]);
-    newPosition.y = 0.5;
-    penguinTargetPosition.current = newPosition;
-
-    // 다음 문제의 모달 표시
-    setSelectedFloe(nextProblemNumber);
-    setSelectedProblem(problemTexts[nextProblemNumber] || '');
-    setSelectedConcept(concepts[nextProblemNumber] || 'No concept available');
-    setShowModal(true);
-  }, [currentProblemIndex, problemTexts, concepts, icePositions]);
 
   useEffect(() => {
     console.log(solvedProblems);
@@ -290,21 +319,17 @@ function Game() {
         >
           <meshBasicMaterial attach="material" color="#b9d5ff" />
         </Plane>
-        {icePositions.map((position, index) => {
-          const problemNumbers = Object.keys(problemTexts).map(Number);
-          const problemNumber = problemNumbers[index];
-          return (
-            <IceFloe
-              key={problemNumber}
-              position={position}
-              solved={solvedProblems[problemNumber]}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFloeClick(index);
-              }}
-            />
-          );
-        })}
+        {icePositions.map((position, index) => (
+          <IceFloe
+            key={problemOrder[index]}
+            position={position}
+            solved={solvedProblems[problemOrder[index]]}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleFloeClick(index);
+            }}
+          />
+        ))}
         <Penguin
           position={penguinPosition.toArray()}
           targetPosition={penguinTargetPosition}

@@ -33,9 +33,120 @@ const SidebarItem: FC<SidebarItemProps> = ({
     {title}
   </button>
 );
+const allBadges = [
+  {
+    id: 'badge01',
+    title: '초보자',
+    description: '첫 번째 문제를 풀었습니다.',
+    image: null, // Placeholder for now, update with actual images if available
+  },
+  {
+    id: 'badge02',
+    title: '꾸준함의 시작',
+    description: '연속 7일 동안 매일 문제를 풀었습니다.',
+    image: null,
+  },
+  {
+    id: 'badge03',
+    title: '성장하는 실력',
+    description: '10개의 문제를 해결했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge04',
+    title: '집념의 승리',
+    description: '어려운 문제를 해결했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge05',
+    title: '지식 탐험가',
+    description: '5개의 다른 카테고리 문제를 풀었습니다.',
+    image: null,
+  },
+  {
+    id: 'badge06',
+    title: '주간 챔피언',
+    description: '이번 주 가장 많은 문제를 해결했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge07',
+    title: '시간 관리의 달인',
+    description: '5일 연속으로 하루에 1시간 이상 공부했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge08',
+    title: '퀴즈 마스터',
+    description: '모든 유형의 문제를 1개씩 해결했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge09',
+    title: '결심의 증거',
+    description: '30일 연속 문제를 풀었습니다.',
+    image: null,
+  },
+  {
+    id: 'badge10',
+    title: '도전 정신',
+    description: '10개의 어려운 문제를 해결했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge11',
+    title: '학습의 즐거움',
+    description: '하루에 5시간 이상 공부했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge12',
+    title: '속도의 왕',
+    description: '문제를 가장 빠르게 해결했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge13',
+    title: '협력의 힘',
+    description: '다른 사람과 협력하여 문제를 해결했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge14',
+    title: '완벽한 주간',
+    description: '이번 주 모든 문제를 해결했습니다.',
+    image: null,
+  },
+  {
+    id: 'badge15',
+    title: '궁극의 도전',
+    description: '가장 어려운 문제를 해결했습니다.',
+    image: null,
+  },
+];
 
-const SettingsPage = () => {
-  const [nickname, setNickname] = useState('jang');
+const BadgeList = () => {
+  return (
+    <div className="grid grid-cols-3 gap-4 p-6">
+      {allBadges.map((badge) => (
+        <div key={badge.id} className="text-center">
+          <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto flex items-center justify-center mb-2">
+            {badge.image ? (
+              <img src={badge.image} alt={badge.title} className="w-10 h-10" />
+            ) : (
+              <span className="text-gray-500 text-lg">?</span>
+            )}
+          </div>
+          <p className="text-sm">{badge.title}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const MyInfoPage = () => {
+  const [nickname, setNickname] = useState(localStorage.getItem('nickname'));
   const [activeSection, setActiveSection] = useState('뱃지 목록');
 
   const handleNicknameChange = () => {
@@ -46,7 +157,12 @@ const SettingsPage = () => {
   const renderContent = () => {
     switch (activeSection) {
       case '뱃지 목록':
-        return <div className="p-6">여기에 뱃지 목록이 표시됩니다.</div>;
+        return (
+          <div>
+            <h2 className="p-6 text-xl font-semibold">뱃지 목록</h2>
+            <BadgeList />
+          </div>
+        );
       case '티어 정보':
         return <div className="p-6">티어 정보가 여기에 표시됩니다.</div>;
       case '학교 정보':
@@ -128,4 +244,4 @@ const SettingsPage = () => {
   );
 };
 
-export default SettingsPage;
+export default MyInfoPage;
