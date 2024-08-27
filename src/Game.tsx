@@ -443,13 +443,20 @@ function Game() {
       </AnimatePresence>
       {showSolvedMessage && (
         <motion.div
-          className="fixed inset-0 flex items-center justify-center text-7xl font-bold text-primary-500"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        className="fixed inset-0 flex items-start justify-center pt-20"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <motion.div
+          className="bg-gray-50 bg-opacity-50 rounded-2xl shadow-lg p-8"
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -50, opacity: 0 }}
         >
-          🎉정답!🥳
+          <h2 className="text-5xl font-bold text-primary-400">🎉 정답! 🥳</h2>
         </motion.div>
+      </motion.div>
       )}
     </div>
   );
