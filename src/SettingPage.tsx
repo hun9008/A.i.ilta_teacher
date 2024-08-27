@@ -25,6 +25,7 @@ const steps: Step[] = [
 
 function SettingPage() {
   const [currentStep, setCurrentStep] = useState(0);
+  // console.log("currentStep: ", currentStep)
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isGoalsSubmitted, setIsGoalsSubmitted] = useState(false);
@@ -92,7 +93,19 @@ function SettingPage() {
       case 'mobcam':
         return <PCControlPage />;
       case 'goals':
-        return <StudyGoals onGoalsSubmit={handleGoalsSubmit} />;
+        return (
+          <div className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-white mb-4">
+              {steps[currentStep].title}
+            </h2>
+            <p className="text-lg text-white mb-6">
+              오늘의 공부 목표를 설정하고, 집중할 준비를 해보세요!
+            </p>
+            <div className="bg-white rounded-xl p-6 shadow-md">
+              <StudyGoals onGoalsSubmit={handleGoalsSubmit} />
+            </div>
+          </div>
+        );
       case 'ocr-check':
         return <OcrResultPage onOcrSubmit={handleOcrSubmit} />;
       case 'complete':
@@ -103,6 +116,7 @@ function SettingPage() {
         return null;
     }
   };
+  
 
   if (isLoading) {
     return <LoadingPage />;
@@ -163,17 +177,19 @@ function SettingPage() {
         >
           이전
         </button>
-        <button
-          onClick={currentStep === steps.length - 1 ? goToGamePage : nextStep}
-          disabled={isNextButtonDisabled}
-          className={`px-4 py-2 ${
-            isNextButtonDisabled
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-primary-400 text-white hover:bg-primary-500'
-          } rounded-2xl`}
-        >
-          {currentStep === steps.length - 1 ? '완료' : '다음'}
-        </button>
+        {currentStep !== 3 && (
+          <button
+            onClick={currentStep === steps.length - 1 ? goToGamePage : nextStep}
+            disabled={isNextButtonDisabled}
+            className={`px-4 py-2 ${
+              isNextButtonDisabled
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-primary-400 text-white hover:bg-primary-500'
+            } rounded-2xl`}
+          >
+            {currentStep === steps.length - 1 ? '완료' : '다음'}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -103,39 +103,17 @@ const StudyGoals: React.FC<StudyGoalsProps> = ({ onGoalsSubmit }) => {
     }
   };
 
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name } = event.target;
-
-    if (
-      (name === 'goal1' && problems) ||
-      (name === 'goal2' && (time.goal2Hours || time.goal2Minutes)) ||
-      (name === 'goal3' && (time.goal3Hours || time.goal3Minutes))
-    ) {
-      setGoals((prevGoals) => ({
-        ...prevGoals,
-        [name]: !prevGoals[name],
-      }));
-    }
-  };
-
   const allGoalsCompleted = goals.goal1 && goals.goal2 && goals.goal3;
 
   return (
-    <div className="flex flex-col items-center justify-center bg-gray-50">
-      <h1 className="text-2xl font-bold mb-6">오늘의 공부 목표 설정하기</h1>
-      <div className="space-y-4 w-full max-w-md">
-        <div className="space-y-2">
+    <div className="flex flex-col items-center justify-center bg-gray-50 p-6 rounded-lg shadow-lg max-w-md mx-auto">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">오늘의 공부 목표 설정하기</h1>
+      <div className="space-y-6 w-full">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-lg">1. 몇 문제 풀건가요?</label>
-            <input
-              type="checkbox"
-              name="goal1"
-              checked={goals.goal1}
-              onChange={handleCheckboxChange}
-              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
+            <label className="text-lg font-medium text-gray-700">1. 몇 문제 풀건가요?</label>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-col space-y-2">
             <input
               type="number"
               name="problems"
@@ -143,98 +121,97 @@ const StudyGoals: React.FC<StudyGoalsProps> = ({ onGoalsSubmit }) => {
               onChange={handleTimeChange}
               placeholder="01"
               min="1"
-              className="w-16 text-center border border-gray-300 rounded p-1"
-            />{' '}
-            문제 풀기
+              className="w-full text-center border border-gray-300 rounded-lg p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
             <button
               onClick={() => handleSelectionComplete('goal1')}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className={`w-full px-4 py-2 font-semibold rounded-lg shadow-lg transition-all duration-300 ${
+                goals.goal1
+                  ? 'bg-green-500 text-white'
+                  : 'bg-gradient-to-r from-blue-400 to-blue-600 text-white hover:from-blue-500 hover:to-blue-700'
+              }`}
             >
-              선택
+              문제 풀기 선택
             </button>
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-lg">2. 얼마나 공부할건가요?</label>
-            <input
-              type="checkbox"
-              name="goal2"
-              checked={goals.goal2}
-              onChange={handleCheckboxChange}
-              readOnly
-              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
+            <label className="text-lg font-medium text-gray-700">2. 얼마나 공부할건가요?</label>
           </div>
-          <div className="flex items-center space-x-2">
-            <input
-              type="number"
-              name="goal2Hours"
-              value={time.goal2Hours}
-              onChange={handleTimeChange}
-              placeholder="00"
-              min="0"
-              className="w-16 text-center border border-gray-300 rounded p-1"
-            />{' '}
-            시간{' '}
-            <input
-              type="number"
-              name="goal2Minutes"
-              value={time.goal2Minutes}
-              onChange={handleTimeChange}
-              placeholder="00"
-              min="0"
-              className="w-16 text-center border border-gray-300 rounded p-1"
-            />{' '}
-            분 할 거야.
+          <div className="flex flex-col space-y-2">
+            <div className="flex space-x-2">
+              <input
+                type="number"
+                name="goal2Hours"
+                value={time.goal2Hours}
+                onChange={handleTimeChange}
+                placeholder="00"
+                min="0"
+                className="w-1/2 text-center border border-gray-300 rounded-lg p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <span>시간</span>
+              <input
+                type="number"
+                name="goal2Minutes"
+                value={time.goal2Minutes}
+                onChange={handleTimeChange}
+                placeholder="00"
+                min="0"
+                className="w-1/2 text-center border border-gray-300 rounded-lg p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <span>분 할 거야.</span>
+            </div>
             <button
               onClick={() => handleSelectionComplete('goal2')}
-              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className={`w-full px-4 py-2 font-semibold rounded-lg shadow-lg transition-all duration-300 ${
+                goals.goal2
+                  ? 'bg-green-500 text-white'
+                  : 'bg-gradient-to-r from-blue-400 to-blue-600 text-white hover:from-blue-500 hover:to-blue-700'
+              }`}
             >
-              선택
+              공부 시간 선택
             </button>
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-lg">3. 공부 중 얼마나 쉴건가요?</label>
-            <input
-              type="checkbox"
-              name="goal3"
-              checked={goals.goal3}
-              onChange={handleCheckboxChange}
-              readOnly
-              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
+            <label className="text-lg font-medium text-gray-700">3. 공부 중 얼마나 쉴건가요?</label>
           </div>
-          <div className="flex items-center space-x-2">
-            <input
-              type="number"
-              name="goal3Hours"
-              value={time.goal3Hours}
-              onChange={handleTimeChange}
-              placeholder="00"
-              min="0"
-              className="w-16 text-center border border-gray-300 rounded p-1"
-            />{' '}
-            시간{' '}
-            <input
-              type="number"
-              name="goal3Minutes"
-              value={time.goal3Minutes}
-              onChange={handleTimeChange}
-              placeholder="00"
-              min="0"
-              className="w-16 text-center border border-gray-300 rounded p-1"
-            />{' '}
-            분 쉴꺼야.
+          <div className="flex flex-col space-y-2">
+            <div className="flex space-x-2">
+              <input
+                type="number"
+                name="goal3Hours"
+                value={time.goal3Hours}
+                onChange={handleTimeChange}
+                placeholder="00"
+                min="0"
+                className="w-1/2 text-center border border-gray-300 rounded-lg p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <span>시간</span>
+              <input
+                type="number"
+                name="goal3Minutes"
+                value={time.goal3Minutes}
+                onChange={handleTimeChange}
+                placeholder="00"
+                min="0"
+                className="w-1/2 text-center border border-gray-300 rounded-lg p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <span>분 쉴꺼야.</span>
+            </div>
             <button
               onClick={() => handleSelectionComplete('goal3')}
-              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className={`w-full px-4 py-2 font-semibold rounded-lg shadow-lg transition-all duration-300 ${
+                goals.goal3
+                  ? 'bg-green-500 text-white'
+                  : 'bg-gradient-to-r from-blue-400 to-blue-600 text-white hover:from-blue-500 hover:to-blue-700'
+              }`}
             >
-              선택
+              휴식 시간 선택
             </button>
           </div>
         </div>
@@ -243,9 +220,9 @@ const StudyGoals: React.FC<StudyGoalsProps> = ({ onGoalsSubmit }) => {
       <button
         onClick={sendTimeToServer}
         disabled={!allGoalsCompleted}
-        className={`mt-8 px-6 py-3 rounded ${
+        className={`mt-8 w-full px-4 py-2 font-semibold rounded-lg shadow-lg ${
           allGoalsCompleted
-            ? 'bg-green-500 text-white hover:bg-green-600'
+            ? 'bg-green-500 text-white hover:bg-green-600 transition-all ease-in-out duration-300'
             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
         }`}
       >

@@ -7,7 +7,7 @@ const PCControlPage: React.FC = () => {
   const { sendMessage, isConnected, imageData, setImageData } = useWebSocket();
   const u_id = localStorage.getItem('u_id');
 
-  const [capturedPosition, setCapturedPosition] = useState<string | null>(null); // capturedPosition 상태 정의
+  const [capturedPosition, setCapturedPosition] = useState<string | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
@@ -16,15 +16,16 @@ const PCControlPage: React.FC = () => {
     null
   );
   const [points, setPoints] = useState<{ x: number; y: number }[]>([]);
+  const [isCornersDetected, setIsCornersDetected] = useState(false); // 모서리 찾기 상태
+  const [isImageCropped, setIsImageCropped] = useState(false); // 이미지 자르기 상태
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const editCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleCaptureRequest = async () => {
-    // 캡처 버튼이 눌렸을 때 현재의 imageData를 고정
     if (imageData) {
       setCapturedImage(imageData);
-      setShowPopup(true); // 팝업 열기
+      setShowPopup(true);
     }
   };
 
@@ -39,13 +40,13 @@ const PCControlPage: React.FC = () => {
     }
     try {
       const base64Image = croppedImage.split(',')[1];
-      setImageData(base64Image); // Store the cropped image in the context
+      setImageData(base64Image);
       const message = {
         u_id,
         type: 'ocr',
         device: 'mobile',
         payload: base64Image,
-        position: capturedPosition, // Include the captured position here
+        position: capturedPosition,
         ocrs: '',
       };
       sendMessage(wsUrl, message);
@@ -208,6 +209,7 @@ const PCControlPage: React.FC = () => {
         x: approx.data32S[i * 2] * scale,
         y: approx.data32S[i * 2 + 1] * scale,
       }));
+      setIsCornersDetected(true); // 모서리가 감지된 후 상태 변경
     } else {
       const width = canvas.width * scale;
       const height = canvas.height * scale;
@@ -296,43 +298,51 @@ const PCControlPage: React.FC = () => {
 
     // position 객체를 JSON 문자열로 변환
     const positionString = JSON.stringify(positionObject);
-    setCapturedPosition(positionString); // Save the position string
+    setCapturedPosition(positionString);
 
     [src, dst, srcTri, dstTri, M].forEach((mat) => mat.delete());
 
     setShowPopup(false);
+    setIsImageCropped(true); // 이미지가 잘린 후 상태 변경
   };
 
   return (
-    <div>
-      <h1>모바일 이미지 확인</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <h1 className="text-2xl font-bold text-gray-800 mb-4">
+        모바일 이미지 확인
+      </h1>
       {imageData ? (
         <>
           <img
             src={`data:image/png;base64,${imageData}`}
             alt="Received from WebSocket"
-            className="w-1/2"
+            className="w-1/2 rounded-lg shadow-md mb-4"
           />
-          <button onClick={handleCaptureRequest}>캡쳐!</button>
+          <button
+            onClick={handleCaptureRequest}
+            className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition-colors duration-300 mb-4"
+          >
+            캡쳐!
+          </button>
           {showPopup && (
             <div
               className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
               onClick={() => setShowPopup(false)}
             >
               <div
-                className="bg-white p-5 rounded-lg relative"
-                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+                className="bg-white p-6 rounded-lg shadow-lg relative"
+                onClick={(e) => e.stopPropagation()}
               >
-                <p className="text-center mb-4 font-semibold">
+                <p className="text-center mb-4 font-semibold text-gray-700">
                   문제 영역에 맞게 모서리를 조정해주세요.
                 </p>
                 <div className="absolute top-[-9999px] left-[-9999px]">
                   <canvas ref={canvasRef} />
                 </div>
-                <div>
+                <div className="mb-4">
                   <canvas
                     ref={editCanvasRef}
-                    className={`${
+                    className={`w-full h-full border border-gray-300 rounded-lg shadow-md ${
                       draggingPointIndex !== null
                         ? 'cursor-grabbing'
                         : 'cursor-grab'
@@ -342,16 +352,37 @@ const PCControlPage: React.FC = () => {
                     onMouseUp={handleCanvasInteraction}
                   />
                 </div>
-                <button onClick={detectCorners}>모서리 찾기</button>
-                <button onClick={cropImage} disabled={points.length !== 4}>
-                  이미지 자르기
-                </button>
+                <div className="flex justify-between">
+                  <button
+                    onClick={detectCorners}
+                    className={`px-4 py-2 font-semibold rounded-lg shadow-md transition-colors duration-300 ${
+                      isCornersDetected
+                        ? 'bg-green-500 text-white'
+                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                    }`}
+                  >
+                    모서리 찾기
+                  </button>
+                  <button
+                    onClick={cropImage}
+                    disabled={points.length !== 4}
+                    className={`px-4 py-2 font-semibold rounded-lg shadow-md transition-colors duration-300 ${
+                      points.length !== 4
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : isImageCropped
+                        ? 'bg-green-500 text-white'
+                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                    }`}
+                  >
+                    이미지 자르기
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </>
       ) : (
-        <p>모바일 카메라 정보를 받아들이고 있습니다!</p>
+        <p className="text-lg text-gray-600">모바일 카메라 정보를 받아들이고 있습니다!</p>
       )}
     </div>
   );
