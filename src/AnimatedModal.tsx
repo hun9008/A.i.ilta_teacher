@@ -72,11 +72,11 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         socket.onopen = () => {
           console.log('WebSocket connection opened');
           setSocketReady(true);
-          // sendMessage(chatSocketUrl, {
-          //   u_id: u_id,
-          //   status: 'open',
-          //   text: 'hi',
-          // });
+          sendMessage(chatSocketUrl, {
+            u_id: u_id,
+            status: 'open',
+            text: 'hi',
+          });
         };
 
         socket.onmessage = async (event: MessageEvent) => {
