@@ -58,7 +58,7 @@ function Game() {
     const savedTime = parseInt(localStorage.getItem('breakTime') || '0');
     return { hours: Math.floor(savedTime / 60), minutes: savedTime % 60 };
   });
-  const [isStudyRunning, setIsStudyRunning] = useState(false);
+  const [isStudyRunning, setIsStudyRunning] = useState(true);
   const [isBreakRunning, setIsBreakRunning] = useState(false);
   const navigate = useNavigate();
 
@@ -198,6 +198,10 @@ function Game() {
       if (timer) clearInterval(timer);
     };
   }, [isStudyRunning, isBreakRunning]);
+
+  useEffect(() => {
+    setIsStudyRunning(true);
+  }, []);
 
   const handleStudyStart = useCallback(() => {
     setIsStudyRunning(true);

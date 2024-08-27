@@ -72,11 +72,11 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         socket.onopen = () => {
           console.log('WebSocket connection opened');
           setSocketReady(true);
-          sendMessage(chatSocketUrl, {
-            u_id: u_id,
-            status: 'open',
-            text: 'hi',
-          });
+          // sendMessage(chatSocketUrl, {
+          //   u_id: u_id,
+          //   status: 'open',
+          //   text: 'hi',
+          // });
         };
 
         socket.onmessage = async (event: MessageEvent) => {
@@ -84,6 +84,10 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           console.log('Received WebSocket message:', data);
 
           if (data.startsWith('status :')) {
+            if (data.trim() === 'status : solve') {
+              onSolve();
+              return;
+            }
             console.log('Ignoring status message:', data);
             return;
           }
