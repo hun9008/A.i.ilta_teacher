@@ -141,7 +141,7 @@ async def perform_handwrite_ocr(hand_write_image, solution):
 
 def parse_solution(solution):
     # Step이나 Answer, 정답이 포함된 패턴을 유연하게 매칭
-    steps = re.split(r'(Step \d+:|Answer:|정답:)', solution)
+    steps = re.split(r'(Step \d+:|step \d+:|Answer:|정답:)', solution)
     
     # 결과를 담을 리스트
     steps_array = []
@@ -393,7 +393,7 @@ async def process_message(chat: ChatRequest):
             print("solve_problem : ", solve_problem)
 
             ## DB에 state 저장
-            response = "{}번째 문제를 해결했어! 다른문제를 풀어볼까?".format(solve_problem)
+            response = "문제를 해결했어! 다른문제를 풀어볼까?"
             
         elif user_vars.user_status == "doing":
             # response = ''
