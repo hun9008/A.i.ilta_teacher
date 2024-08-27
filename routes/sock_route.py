@@ -137,6 +137,23 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
             # 좌표 문자열에서 괄호와 공백을 제거하고, 쉼표로 분리한 후 float로 변환
             x, y = coord_str.strip("()").split(',')
             return float(x), float(y)
+        
+        def resize_image_if_needed(image, max_size=8000):
+            """
+            이미지 크기를 8000 픽셀 이하로 줄이기 위한 함수.
+            :param image: OpenCV 이미지
+            :param max_size: 최대 허용 크기 (기본값은 8000 픽셀)
+            :return: 리사이즈된 이미지
+            """
+            height, width = image.shape[:2]
+
+            # 가로 또는 세로가 max_size를 초과할 경우 리사이즈
+            if max(height, width) > max_size:
+                scaling_factor = max_size / max(height, width)
+                new_size = (int(width * scaling_factor), int(height * scaling_factor))
+                image = cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
+            
+            return image
 
         # 각 좌표를 튜플로 변환
         left_top = parse_coordinates(position["left_top"])
@@ -164,6 +181,7 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
 
         # 변환을 적용하여 사다리꼴 영역 크롭
         roi = cv2.warpPerspective(img, M, (max_width, max_height))
+        roi = resize_image_if_needed(roi)
 
         _, buffer = cv2.imencode('.jpg', roi)
         preprocess_data = base64.b64encode(buffer).decode('utf-8')
