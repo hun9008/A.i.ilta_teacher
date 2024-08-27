@@ -14,7 +14,6 @@ interface AnimatedModalProps {
   chatOnly?: boolean;
   onSolve: () => void;
   enableTTS: boolean;
-  onMoveToNext: () => void;
 }
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
@@ -31,7 +30,6 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   chatOnly = false,
   onSolve,
   enableTTS,
-  onMoveToNext,
 }) => {
   const { getSocket, sendMessage, connectWebSocket, isConnected } =
     useWebSocket();
