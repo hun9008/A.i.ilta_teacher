@@ -83,7 +83,11 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                     url = "http://model.maitutor.site/hand_determinant"
 
                     headers = {'Content-Type': 'application/json'}
-                    response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
+                    # response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
+                    response = {
+                        "handwrite_num": 0,
+                        "user_handwrite_image": include_hand
+                    }
 
                     if isinstance(response, requests.models.Response):
                         try:
