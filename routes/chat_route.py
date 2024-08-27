@@ -113,8 +113,13 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
 
                         print("solution : ", solution)
 
-                        hand_response = await perform_handwrite_ocr(hand_write_image, solution)
-
+                        # hand_response = await perform_handwrite_ocr(hand_write_image, solution)
+                        hand_response = {
+                            "status_code": 200,
+                            "json": {
+                                "determinants": "wrong"
+                            }
+                        }
                         if hand_response.status_code == 200:
                             if (user_id not in delay_block_list) and (user_id not in wrong_block_list):
                                 user_vars.user_status = hand_response.json().get("determinants")
