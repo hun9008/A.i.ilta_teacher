@@ -127,8 +127,31 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
         nparr = np.frombuffer(image_data, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        x, y, w, h = position['x'], position['y'], position['w'], position['h']
-        roi = img[y:y+h, x:x+w]  
+        left_top = position.get("left_top")
+        right_top = position.get("right_top")
+        right_bottom = position.get("right_bottom")
+        left_bottom = position.get("left_bottom")
+
+        pts = np.array([left_top, right_top, right_bottom, left_bottom], dtype=np.float32)
+
+        # 사다리꼴 영역의 크기를 계산
+        width_top = np.linalg.norm(pts[0] - pts[1])  # 상단 너비
+        width_bottom = np.linalg.norm(pts[2] - pts[3])  # 하단 너비
+        height_left = np.linalg.norm(pts[0] - pts[3])  # 왼쪽 높이
+        height_right = np.linalg.norm(pts[1] - pts[2])  # 오른쪽 높이
+
+        # 결과 이미지의 너비와 높이를 결정
+        max_width = int(max(width_top, width_bottom))
+        max_height = int(max(height_left, height_right))
+
+        # 크롭할 영역의 대상 좌표 설정
+        dst_pts = np.array([[0, 0], [max_width - 1, 0], [max_width - 1, max_height - 1], [0, max_height - 1]], dtype=np.float32)
+
+        # 변환 행렬 계산
+        M = cv2.getPerspectiveTransform(pts, dst_pts)
+
+        # 변환을 적용하여 사다리꼴 영역 크롭
+        roi = cv2.warpPerspective(img, M, (max_width, max_height))
 
         _, buffer = cv2.imencode('.jpg', roi)
         preprocess_data = base64.b64encode(buffer).decode('utf-8')
