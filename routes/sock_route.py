@@ -133,55 +133,56 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
         right_bottom = position["right_bottom"]
         left_bottom = position["left_bottom"]
 
-        def parse_coordinates(coord_str):
-            # 좌표 문자열에서 괄호와 공백을 제거하고, 쉼표로 분리한 후 float로 변환
-            x, y = coord_str.strip("()").split(',')
-            return float(x), float(y)
+        # def parse_coordinates(coord_str):
+        #     # 좌표 문자열에서 괄호와 공백을 제거하고, 쉼표로 분리한 후 float로 변환
+        #     x, y = coord_str.strip("()").split(',')
+        #     return float(x), float(y)
         
-        def resize_image_if_needed(image, max_size=7000):
-            """
-            이미지 크기를 8000 픽셀 이하로 줄이기 위한 함수.
-            :param image: OpenCV 이미지
-            :param max_size: 최대 허용 크기 (기본값은 8000 픽셀)
-            :return: 리사이즈된 이미지
-            """
-            height, width = image.shape[:2]
+        # def resize_image_if_needed(image, max_size=7000):
+        #     """
+        #     이미지 크기를 8000 픽셀 이하로 줄이기 위한 함수.
+        #     :param image: OpenCV 이미지
+        #     :param max_size: 최대 허용 크기 (기본값은 8000 픽셀)
+        #     :return: 리사이즈된 이미지
+        #     """
+        #     height, width = image.shape[:2]
 
-            # 가로 또는 세로가 max_size를 초과할 경우 리사이즈
-            if max(height, width) > max_size:
-                scaling_factor = max_size / max(height, width)
-                new_size = (int(width * scaling_factor), int(height * scaling_factor))
-                image = cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
+        #     # 가로 또는 세로가 max_size를 초과할 경우 리사이즈
+        #     if max(height, width) > max_size:
+        #         scaling_factor = max_size / max(height, width)
+        #         new_size = (int(width * scaling_factor), int(height * scaling_factor))
+        #         image = cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
             
-            return image
+        #     return image
 
         # 각 좌표를 튜플로 변환
-        left_top = parse_coordinates(position["left_top"])
-        right_top = parse_coordinates(position["right_top"])
-        right_bottom = parse_coordinates(position["right_bottom"])
-        left_bottom = parse_coordinates(position["left_bottom"])
+        # left_top = parse_coordinates(position["left_top"])
+        # right_top = parse_coordinates(position["right_top"])
+        # right_bottom = parse_coordinates(position["right_bottom"])
+        # left_bottom = parse_coordinates(position["left_bottom"])
 
-        pts = np.array([left_top, right_top, right_bottom, left_bottom], dtype=np.float32)
+        # pts = np.array([left_top, right_top, right_bottom, left_bottom], dtype=np.float32)
 
-        # 사다리꼴 영역의 크기를 계산
-        width_top = np.linalg.norm(pts[0] - pts[1])  # 상단 너비
-        width_bottom = np.linalg.norm(pts[2] - pts[3])  # 하단 너비
-        height_left = np.linalg.norm(pts[0] - pts[3])  # 왼쪽 높이
-        height_right = np.linalg.norm(pts[1] - pts[2])  # 오른쪽 높이
+        # # 사다리꼴 영역의 크기를 계산
+        # width_top = np.linalg.norm(pts[0] - pts[1])  # 상단 너비
+        # width_bottom = np.linalg.norm(pts[2] - pts[3])  # 하단 너비
+        # height_left = np.linalg.norm(pts[0] - pts[3])  # 왼쪽 높이
+        # height_right = np.linalg.norm(pts[1] - pts[2])  # 오른쪽 높이
 
-        # 결과 이미지의 너비와 높이를 결정
-        max_width = int(max(width_top, width_bottom))
-        max_height = int(max(height_left, height_right))
+        # # 결과 이미지의 너비와 높이를 결정
+        # max_width = int(max(width_top, width_bottom))
+        # max_height = int(max(height_left, height_right))
 
-        # 크롭할 영역의 대상 좌표 설정
-        dst_pts = np.array([[0, 0], [max_width - 1, 0], [max_width - 1, max_height - 1], [0, max_height - 1]], dtype=np.float32)
+        # # 크롭할 영역의 대상 좌표 설정
+        # dst_pts = np.array([[0, 0], [max_width - 1, 0], [max_width - 1, max_height - 1], [0, max_height - 1]], dtype=np.float32)
 
-        # 변환 행렬 계산
-        M = cv2.getPerspectiveTransform(pts, dst_pts)
+        # # 변환 행렬 계산
+        # M = cv2.getPerspectiveTransform(pts, dst_pts)
 
-        # 변환을 적용하여 사다리꼴 영역 크롭
-        roi = cv2.warpPerspective(img, M, (max_width, max_height))
-        roi = resize_image_if_needed(roi)
+        # # 변환을 적용하여 사다리꼴 영역 크롭
+        # roi = cv2.warpPerspective(img, M, (max_width, max_height))
+        # roi = resize_image_if_needed(roi)
+        roi = img
 
         _, buffer = cv2.imencode('.jpg', roi)
         preprocess_data = base64.b64encode(buffer).decode('utf-8')
