@@ -133,6 +133,17 @@ async def handle_ws_ocr(frame_data, websocket, u_id, device):
         right_bottom = position["right_bottom"]
         left_bottom = position["left_bottom"]
 
+        def parse_coordinates(coord_str):
+            # 좌표 문자열에서 괄호와 공백을 제거하고, 쉼표로 분리한 후 float로 변환
+            x, y = coord_str.strip("()").split(',')
+            return float(x), float(y)
+
+        # 각 좌표를 튜플로 변환
+        left_top = parse_coordinates(position["left_top"])
+        right_top = parse_coordinates(position["right_top"])
+        right_bottom = parse_coordinates(position["right_bottom"])
+        left_bottom = parse_coordinates(position["left_bottom"])
+
         pts = np.array([left_top, right_top, right_bottom, left_bottom], dtype=np.float32)
 
         # 사다리꼴 영역의 크기를 계산
