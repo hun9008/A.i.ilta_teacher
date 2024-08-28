@@ -42,7 +42,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   const [gradeInfo, setGradeInfo] = useState<string>('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [cleanedHandOcrs, setCleanedHandOcrs] = useState<string>('');
-
+  const [lastValidHandOcr, setLastValidHandOcr] = useState<string>('');
   /* 채팅 아래로 스크롤*/
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -114,14 +114,17 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               }
             }
             if (handOcrMatch) {
-              const cleanedHandOcrs = handOcrMatch[1].trim();
-              console.log(cleanedHandOcrs);
+              const newHandOcr = handOcrMatch[1].trim();
+              console.log(newHandOcr);
 
-              setCleanedHandOcrs(
-                cleanedHandOcrs.toLowerCase() === 'not yet'
-                  ? '손글씨가 아직 인식되지 않았습니다.'
-                  : cleanedHandOcrs
-              );
+              if (newHandOcr.toLowerCase() !== 'not yet') {
+                setLastValidHandOcr(newHandOcr);
+                setCleanedHandOcrs(newHandOcr);
+              } else {
+                setCleanedHandOcrs(
+                  lastValidHandOcr || '손글씨가 아직 인식되지 않았습니다.'
+                );
+              }
             }
 
             if (problemNumMatch) {
@@ -169,6 +172,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     sendMessage,
     onProblemIndexChange,
     onSolve,
+    lastValidHandOcr,
   ]);
 
   const handleSendMessage = () => {
