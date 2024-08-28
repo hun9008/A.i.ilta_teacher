@@ -87,7 +87,10 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                     headers = {'Content-Type': 'application/json'}
                     response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
                     user_hand_ocr_saved = response.json().get("user_hand_ocr_result")
-                    user_problem_num = response.json().get("handwrite_num")
+                    if type(response.json().get("handwrite_num")) == int:
+                        user_problem_num = str(response.json().get("handwrite_num"))
+                    else:
+                        user_problem_num = response.json().get("handwrite_num")
                     print("I save user_hand_ocr_result : ", user_hand_ocr_saved)
                     print("response : ", response)
                     await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_hand_ocr_saved + "//" + "problem_num : " + user_problem_num)
