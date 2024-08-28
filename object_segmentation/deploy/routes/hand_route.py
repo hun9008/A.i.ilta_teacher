@@ -469,8 +469,9 @@ def detect_handwriting(image, problem_texts):
     # 남아있는 텍스트가 있다면 손글씨로 판단
     cropped_lines = [line for line in cropped_lines if line]  # 빈 문자열 제거
     if cropped_lines:
-        print(f"Detected text: {' '.join(cropped_lines)}")
-        user_ocr_result.append(cropped_lines)
+        detected_text = " ".join(cropped_lines)
+        print(f"Detected text: {detected_text}")
+        user_ocr_result.append(detected_text)
         return True
 
     return False
