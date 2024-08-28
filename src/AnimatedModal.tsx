@@ -102,7 +102,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             const handOcrMatch = data.match(/hand_ocr\s*:\s*(.*)/);
             const cleanedHandOcrs = handOcrMatch ? handOcrMatch[1].trim() : '';
             setCleanedHandOcrs(cleanedHandOcrs); // Set the cleanedHandOcrs state
-
+          
             if (data.trim() === 'status : solve') {
               onSolve();
               return;
@@ -265,7 +265,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   <h3 className="text-xl font-bold mb-4 text-gray-900">
                     Hand_OCRs
                   </h3>
-                  <h3 className="text-xl font-bold mb-4 text-gray-900">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-800">
                     {cleanedHandOcrs}
                   </h3>
                 </div>
@@ -338,7 +338,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 </div>
               ))}
             </div>
-            <div className="flex p-1.5 bg-white rounded-full shadow-lg overflow-hidden">
+            <div className="flex p-1.5 bg-white rounded-full shadow-lg overflow-hidden" style={{ minHeight: '56px' }}>
               <input
                 type="text"
                 value={inputMessage}
@@ -346,10 +346,12 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                 placeholder="메시지를 입력하세요..."
                 className="flex-grow pl-4 p-1.5 rounded-l-full focus:outline-none"
+                style={{ minHeight: '40px' }}
               />
               <button
                 onClick={handleSendMessage}
                 className="round-full bg-blue-500 text-white hover:bg-blue-600"
+                style={{ height: '40px' }}
               >
                 <Send size={16} className="mx-4" />
               </button>
