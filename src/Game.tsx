@@ -74,10 +74,13 @@ function Game() {
           newPosition.y = 0.5; // 펭귄의 y 위치 조정
           penguinTargetPosition.current = newPosition;
           setIsPenguinMoving(true);
+          setSelectedFloe(problemNumber);
+          setSelectedProblem(problemTexts[problemNumber] || '');
+          setSelectedConcept(concepts[problemNumber] || 'No concept available');
         }
       }
     },
-    [problemIndexMap, icePositions, setSelectedFloe]
+    [problemIndexMap, icePositions, setSelectedFloe, problemTexts, concepts]
   );
 
   const [studyTime, setStudyTime] = useState<{
@@ -372,10 +375,10 @@ function Game() {
               />
               <Text
                 position={[position[0], position[1] + 0.3, position[2]]} // 높이 조정
-                rotation={[-Math.PI / 2.5, 0, -0.75]}  // x축을 기준으로 90도 회전
+                rotation={[-Math.PI / 2.5, 0, -0.75]} // x축을 기준으로 90도 회전
                 fontSize={0.3} // 폰트 크기 축소
-                color="#edfaff"  // 푸른 빛이 도는 흰색 (AliceBlue)
-                font="/Iceberg-Regular.ttf"  // 사용하고자 하는 폰트 파일의 경로
+                color="#edfaff" // 푸른 빛이 도는 흰색 (AliceBlue)
+                font="/Iceberg-Regular.ttf" // 사용하고자 하는 폰트 파일의 경로
                 anchorX="center"
                 anchorY="middle"
                 depthOffset={-10} // 텍스트가 얼음 위에 오도록 설정
