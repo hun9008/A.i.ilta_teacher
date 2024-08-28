@@ -43,6 +43,8 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [cleanedHandOcrs, setCleanedHandOcrs] = useState<string>('');
   const [lastValidHandOcr, setLastValidHandOcr] = useState<string>('');
+  const [solvedProblems, setSolvedProblems] = useState<Set<number>>(new Set());
+
   /* 채팅 아래로 스크롤*/
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -104,15 +106,6 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             const statusMatch = data.match(/status\s*:\s*(\w+)/);
             const handOcrMatch = data.match(/hand_ocr\s*:\s*(.*?)(?:\/\/|$)/);
             const problemNumMatch = data.match(/problem_num\s*:\s*(\d+)/);
-
-            if (statusMatch) {
-              const status = statusMatch[1].trim();
-              console.log(status);
-              if (status === 'solve') {
-                onSolve();
-                return;
-              }
-            }
             if (handOcrMatch) {
               const newHandOcr = handOcrMatch[1].trim();
               console.log(newHandOcr);
@@ -126,12 +119,20 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 );
               }
             }
+            if (statusMatch && problemNumMatch) {
+              const status = statusMatch[1].trim();
+              const newProblemIndex = parseInt(problemNumMatch[1], 10);
+              console.log(status, newProblemIndex);
 
+              if (status === 'solve' && !solvedProblems.has(newProblemIndex)) {
+                onSolve();
+                setSolvedProblems((prev) => new Set(prev).add(newProblemIndex));
+                return;
+              }
+            }
             if (problemNumMatch) {
               const newProblemIndex = parseInt(problemNumMatch[1], 10);
               console.log(newProblemIndex);
-
-              onProblemIndexChange(newProblemIndex); // 직접 콜백 함수 호출
             }
             console.log('Processed status message:', data);
             return;
@@ -146,9 +147,11 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           });
 
           if (newMessage.sender === 'bot' && enableTTS) {
-            console.log("!!newMessage: ", newMessage.text)
+            console.log('!!newMessage: ', newMessage.text);
             // 첫 번째 문장 추출
-            const firstSentence = newMessage.text.match(/[^\.!\?]+[\.!\?]*/)?.[0] || newMessage.text;
+            const firstSentence =
+              newMessage.text.match(/[^\.!\?]+[\.!\?]*/)?.[0] ||
+              newMessage.text;
 
             const ttsAudioUrl = await handleTTS(
               firstSentence.trim(),
@@ -177,6 +180,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     onProblemIndexChange,
     onSolve,
     lastValidHandOcr,
+    solvedProblems,
   ]);
 
   const handleSendMessage = () => {
