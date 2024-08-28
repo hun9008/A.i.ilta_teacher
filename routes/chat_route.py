@@ -432,19 +432,19 @@ async def process_message(chat: ChatRequest):
                 return response
 
         elif user_vars.user_status == "solve":
-            # user_context[user_id]["solve_delay"] = False 
-            # user_context[user_id]["wrong"] = False
+            user_context[user_id]["solve_delay"] = False 
+            user_context[user_id]["wrong"] = False
             
-            # #한 문제 풀었으면 prev_chat init
-            # user_context[user_id] = {"prev_chat": ""} 
+            #한 문제 풀었으면 prev_chat init
+            user_context[user_id] = {"prev_chat": ""} 
             
-            # if user_look[user_id] not in solve_problem:
-            #     solve_problem.append(user_look[user_id])
-            #     print("solve_problem : ", solve_problem)
+            if user_look[user_id] not in solve_problem:
+                solve_problem.append(user_look[user_id])
+                print("solve_problem : ", solve_problem)
 
-            # ## DB에 state 저장
-            # response = "문제를 해결했어! 다른문제를 풀어볼까?"
-            return ''
+            ## DB에 state 저장
+            response = "문제를 해결했어! 다른문제를 풀어볼까?"
+            # return ''
             
         elif user_vars.user_status == "doing":
             # response = ''
