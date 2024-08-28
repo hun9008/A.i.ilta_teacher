@@ -396,7 +396,7 @@ async def process_message(chat: ChatRequest):
                 user_context[user_id] = {"wrong": True, "prev_chat": ""}
                 wrong_block_list.append(user_id)
                 print("$$$$$$ start wrong block $$$$$$")
-                return "방금 풀이에서 틀린 부분 없는지 체크해볼래?"
+                return "방금 풀이에서 " + user_hand_ocr_saved + "라고 했는데, 틀린 부분 없는지 체크해볼래?"
 
             solution = step_elements[problem_index]
 
