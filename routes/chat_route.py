@@ -176,8 +176,10 @@ async def websocket_endpoint(websocket: WebSocket):
 
             await websocket.send_text("문제를 풀어보자! 내가 잘못된 부분이 있으면 알려줄게.")
             if user_vars.user_hand_ocr == None:
+                print("user_hand_ocr is None at Start")
                 await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + "Not Yet")
             else:
+                print("I'm set user_hand_ocr : ", user_vars.user_hand_ocr)
                 await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
             solve_problem.clear()
             # user_vars.user_status.clear()
@@ -238,8 +240,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 if response:
                     await websocket.send_text(response)
                     if user_vars.user_hand_ocr == None:
+                        print("user_hand_ocr is None")
                         await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + "Not Yet")
                     else:
+                        print("user_hand_ocr : ", user_vars.user_hand_ocr)
                         await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
 
             except asyncio.TimeoutError:
@@ -255,8 +259,10 @@ async def websocket_endpoint(websocket: WebSocket):
                         else:
                             await websocket.send_text(response)
                             if user_vars.user_hand_ocr == None:
+                                print("user_hand_ocr is None")
                                 await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + "Not Yet")
                             else:
+                                print("user_hand_ocr : ", user_vars.user_hand_ocr)
                                 await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
                         # break
                     else:
