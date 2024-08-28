@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, BookOpen, User } from 'lucide-react';
 import { useWebSocket } from './WebSocketContext';
@@ -38,6 +38,19 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   const [socketReady, setSocketReady] = useState(false);
   const [gradeInfo, setGradeInfo] = useState<string>('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+
+  /* 채팅 아래로 스크롤*/
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isOpen]);
 
   const handleSolveClick = () => {
     onSolve(); // Call the onSolve function
@@ -199,6 +212,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     message = message.replace(/\n/g, '<br>');
     return message;
   };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -275,7 +289,10 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             <h1 className="text-2xl font-bold mb-6 text-gray-900 flex items-center">
               채팅
             </h1>
-            <div className="flex-grow overflow-y-auto mb-6 bg-white bg-opacity-90 rounded-2xl p-4 shadow-inner">
+            <div
+              ref={chatContainerRef}
+              className="flex-grow overflow-y-auto mb-6 bg-white bg-opacity-90 rounded-2xl p-4 shadow-inner"
+            >
               {messages.map((message, index) => (
                 <div
                   key={index}

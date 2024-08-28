@@ -157,7 +157,6 @@ function Game() {
       } else {
         penguinTargetPosition.current = newPosition;
         setIsPenguinMoving(true);
-        setIsMovingToNextProblem(false);
         nextProblemRef.current = null;
       }
     },
@@ -177,27 +176,7 @@ function Game() {
     return null; // 모든 문제가 해결된 경우
   }, [problemTexts, selectedFloe, solvedProblems]);
   const [isPenguinMoving, setIsPenguinMoving] = useState(false);
-  // const [isMovingToNextProblem, setIsMovingToNextProblem] = useState(false);
   const nextProblemRef = useRef<number | null>(null);
-  // const [shouldShowModalAfterMovement, setShouldShowModalAfterMovement] =
-  //   useState(false);
-
-  // const moveToNextProblem = useCallback(() => {
-  //   const nextProblem = findNextUnsolved();
-  //   if (nextProblem !== null) {
-  //     const nextIndex = Object.keys(problemTexts)
-  //       .map(Number)
-  //       .indexOf(nextProblem);
-  //     const newPosition = new THREE.Vector3(...icePositions[nextIndex]);
-  //     newPosition.y = 0.5;
-  //     penguinTargetPosition.current = newPosition;
-  //     nextProblemRef.current = nextProblem;
-  //     setIsPenguinMoving(true);
-  //     setIsMovingToNextProblem(true);
-  //   } else {
-  //     console.log('모든 문제를 해결했습니다!');
-  //   }
-  // }, [findNextUnsolved, icePositions, problemTexts]);
 
   const handleSolveProblem = useCallback(() => {
     console.log('이 문제 풀었음!', selectedFloe);
@@ -237,34 +216,6 @@ function Game() {
       setIsPenguinMoving(false);
     }
   }, [penguinPosition, isPenguinMoving]);
-  // useEffect(() => {
-  //   if (
-  //     isPenguinMoving &&
-  //     penguinPosition.equals(penguinTargetPosition.current)
-  //   ) {
-  //     setIsPenguinMoving(false);
-  //     if (isMovingToNextProblem && nextProblemRef.current !== null) {
-  //       setSelectedFloe(nextProblemRef.current);
-  //       setSelectedProblem(problemTexts[nextProblemRef.current] || '');
-  //       setSelectedConcept(
-  //         concepts[nextProblemRef.current] || 'No concept available'
-  //       );
-  //       if (shouldShowModalAfterMovement) {
-  //         setShowModal(true);
-  //         setShouldShowModalAfterMovement(false);
-  //       }
-  //       setIsMovingToNextProblem(false);
-  //       nextProblemRef.current = null;
-  //     }
-  //   }
-  // }, [
-  //   penguinPosition,
-  //   isPenguinMoving,
-  //   isMovingToNextProblem,
-  //   problemTexts,
-  //   concepts,
-  //   shouldShowModalAfterMovement,
-  // ]);
 
   /* 아래부턴 타이머 부분 */
   useEffect(() => {
@@ -334,7 +285,7 @@ function Game() {
           u_id,
           s_id,
           study_time: usedStudyMinutes,
-          break_time: usedBreakMinutes,
+          break_time: usedBreakMinutes + 1,
         }),
       });
       if (!response.ok) throw new Error('Failed to send data to server');
@@ -443,20 +394,20 @@ function Game() {
       </AnimatePresence>
       {showSolvedMessage && (
         <motion.div
-        className="fixed inset-0 flex items-start justify-center pt-20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
-        <motion.div
-          className="bg-gray-50 bg-opacity-50 rounded-2xl shadow-lg p-8"
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -50, opacity: 0 }}
+          className="fixed inset-0 flex items-start justify-center pt-20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
-          <h2 className="text-5xl font-bold text-primary-400">🎉 정답! 🥳</h2>
+          <motion.div
+            className="bg-gray-50 bg-opacity-50 rounded-2xl shadow-lg p-8"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+          >
+            <h2 className="text-5xl font-bold text-primary-400">🎉 정답! 🥳</h2>
+          </motion.div>
         </motion.div>
-      </motion.div>
       )}
     </div>
   );
