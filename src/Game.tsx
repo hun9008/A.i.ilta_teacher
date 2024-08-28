@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { PerspectiveCamera, Grid, Plane } from '@react-three/drei';
+import { PerspectiveCamera, Grid, Plane, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import Penguin from './3D/Penguin';
 import IceFloe from './3D/IceFloe';
@@ -27,11 +27,10 @@ function Game() {
   }>({});
   const [enableTTS, setEnableTTS] = useState<boolean>(false);
 
-  const [problemTexts, setProblemTexts] = useState<{ [key: number]: string }>({});
+  const [problemTexts, setProblemTexts] = useState<{ [key: number]: string }>(
+    {}
+  );
   const [concepts, setConcepts] = useState<{ [key: number]: string }>({});
-
-
-
   const [penguinPosition, setPenguinPosition] = useState<THREE.Vector3>(
     new THREE.Vector3(0, 0.5, 0)
   );
@@ -45,6 +44,41 @@ function Game() {
     []
   );
   const [showSolvedMessage, setShowSolvedMessage] = useState(false);
+
+  const [problemIndexMap, setProblemIndexMap] = useState<{
+    [key: number]: number;
+  }>({});
+
+  useEffect(() => {
+    // 문제 번호와 인덱스의 매핑 생성
+    const indexMap = Object.keys(problemTexts).reduce((acc, key, index) => {
+      acc[index] = parseInt(key);
+      return acc;
+    }, {} as { [key: number]: number });
+    setProblemIndexMap(indexMap);
+  }, [problemTexts]);
+
+  const handleProblemIndexChange = useCallback(
+    (newProblemIndex: number) => {
+      // 해당 인덱스에 대응하는 문제 번호 찾기
+      const problemNumber = problemIndexMap[newProblemIndex];
+
+      if (problemNumber !== undefined) {
+        setSelectedFloe(problemNumber); // selectedFloe를 업데이트
+        // 문제 번호에 해당하는 얼음 조각의 위치 찾기
+        const icePosition = icePositions[newProblemIndex];
+
+        if (icePosition) {
+          // 펭귄을 해당 위치로 이동
+          const newPosition = new THREE.Vector3(...icePosition);
+          newPosition.y = 0.5; // 펭귄의 y 위치 조정
+          penguinTargetPosition.current = newPosition;
+          setIsPenguinMoving(true);
+        }
+      }
+    },
+    [problemIndexMap, icePositions, setSelectedFloe]
+  );
 
   const [studyTime, setStudyTime] = useState<{
     hours: number;
@@ -327,15 +361,27 @@ function Game() {
           const problemNumbers = Object.keys(problemTexts).map(Number);
           const problemNumber = problemNumbers[index];
           return (
-            <IceFloe
-              key={problemNumber}
-              position={position}
-              solved={solvedProblems[problemNumber]}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFloeClick(index);
-              }}
-            />
+            <group key={problemNumber}>
+              <IceFloe
+                position={position}
+                solved={solvedProblems[problemNumber]}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFloeClick(index);
+                }}
+              />
+              <Text
+                position={[position[0], position[1] + 0.3, position[2]]} // 높이 조정
+                fontSize={0.15} // 폰트 크기 축소
+                color="white"
+                anchorX="center"
+                anchorY="middle"
+                depthOffset={1} // 텍스트가 얼음 위에 오도록 설정
+                renderOrder={1} // 텍스트가 항상 위에 보이도록 설정
+              >
+                {problemNumber}
+              </Text>
+            </group>
           );
         })}
         <Penguin
@@ -382,6 +428,7 @@ function Game() {
             // selectedHandOcr={selectedHandOcr}
             onSolve={handleSolveProblem}
             enableTTS={enableTTS}
+            onProblemIndexChange={handleProblemIndexChange}
           />
         )}
       </AnimatePresence>
@@ -398,6 +445,7 @@ function Game() {
             chatOnly={true}
             onSolve={handleSolveProblem}
             enableTTS={enableTTS}
+            onProblemIndexChange={handleProblemIndexChange}
           />
         )}
       </AnimatePresence>

@@ -15,6 +15,7 @@ interface AnimatedModalProps {
   chatOnly?: boolean;
   onSolve: () => void;
   enableTTS: boolean;
+  onProblemIndexChange: (problemIndex: number) => void;
 }
 
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
@@ -31,6 +32,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   chatOnly = false,
   onSolve,
   enableTTS,
+  onProblemIndexChange,
 }) => {
   const { getSocket, sendMessage, connectWebSocket, isConnected } =
     useWebSocket();
@@ -99,15 +101,27 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           console.log('Received WebSocket message:', data);
 
           if (data.startsWith('status :')) {
+            const statusMatch = data.match(/status\s*:\s*(\w+)/);
             const handOcrMatch = data.match(/hand_ocr\s*:\s*(.*)/);
-            const cleanedHandOcrs = handOcrMatch ? handOcrMatch[1].trim() : '';
-            setCleanedHandOcrs(cleanedHandOcrs); // Set the cleanedHandOcrs state
-          
-            if (data.trim() === 'status : solve') {
-              onSolve();
-              return;
+            const problemNumMatch = data.match(/problem_num\s*:\s*(\d+)/);
+
+            if (statusMatch) {
+              const status = statusMatch[1].trim();
+              if (status === 'solve') {
+                onSolve();
+                return;
+              }
             }
-            console.log('Ignoring status message:', data);
+
+            if (handOcrMatch) {
+              const cleanedHandOcrs = handOcrMatch[1].trim();
+              setCleanedHandOcrs(cleanedHandOcrs);
+            }
+            if (problemNumMatch) {
+              const newProblemIndex = parseInt(problemNumMatch[1], 10);
+              onProblemIndexChange(newProblemIndex); // 직접 콜백 함수 호출
+            }
+            console.log('Processed status message:', data);
             return;
           }
 
@@ -138,7 +152,15 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         }
       };
     }
-  }, [isOpen, getSocket, connectWebSocket, isConnected, sendMessage]);
+  }, [
+    isOpen,
+    getSocket,
+    connectWebSocket,
+    isConnected,
+    sendMessage,
+    onProblemIndexChange,
+    onSolve,
+  ]);
 
   const handleSendMessage = () => {
     if (inputMessage.trim() && socketReady) {
@@ -338,7 +360,10 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 </div>
               ))}
             </div>
-            <div className="flex p-1.5 bg-white rounded-full shadow-lg overflow-hidden" style={{ minHeight: '56px' }}>
+            <div
+              className="flex p-1.5 bg-white rounded-full shadow-lg overflow-hidden"
+              style={{ minHeight: '56px' }}
+            >
               <input
                 type="text"
                 value={inputMessage}
