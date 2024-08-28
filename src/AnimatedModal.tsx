@@ -102,23 +102,32 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
 
           if (data.startsWith('status :')) {
             const statusMatch = data.match(/status\s*:\s*(\w+)/);
-            const handOcrMatch = data.match(/hand_ocr\s*:\s*(.*)/);
+            const handOcrMatch = data.match(/hand_ocr\s*:\s*(.*?)(?:\/\/|$)/);
             const problemNumMatch = data.match(/problem_num\s*:\s*(\d+)/);
 
             if (statusMatch) {
               const status = statusMatch[1].trim();
+              console.log(status);
               if (status === 'solve') {
                 onSolve();
                 return;
               }
             }
-
             if (handOcrMatch) {
               const cleanedHandOcrs = handOcrMatch[1].trim();
-              setCleanedHandOcrs(cleanedHandOcrs);
+              console.log(cleanedHandOcrs);
+
+              setCleanedHandOcrs(
+                cleanedHandOcrs.toLowerCase() === 'not yet'
+                  ? '손글씨가 아직 인식되지 않았습니다.'
+                  : cleanedHandOcrs
+              );
             }
+
             if (problemNumMatch) {
               const newProblemIndex = parseInt(problemNumMatch[1], 10);
+              console.log(newProblemIndex);
+
               onProblemIndexChange(newProblemIndex); // 직접 콜백 함수 호출
             }
             console.log('Processed status message:', data);
@@ -285,7 +294,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   </h3>
                   {/* hans: 6 */}
                   <h3 className="text-xl font-bold mb-4 text-gray-900">
-                    Hand_OCRs
+                    손글씨
                   </h3>
                   <h3 className="text-lg font-semibold mb-4 text-gray-800">
                     {cleanedHandOcrs}
