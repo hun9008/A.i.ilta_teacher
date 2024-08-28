@@ -399,7 +399,7 @@ async def fetch(ocr_result, solution):
         return ""
     
 async def fetch_voting(user_ocrs, solution):
-    tasks = [fetch(user_ocrs, solution) for _ in range(5)]
+    tasks = [fetch(user_ocrs, solution) for _ in range(3)]
     results = await asyncio.gather(*tasks)
     print("answer : ", user_ocrs, "results : ", results)
     voting_result = max(set(results), key=results.count)
