@@ -385,9 +385,12 @@ async def one_problem_ocr(input: OCRInput):
 @router.post("/hand_ocr")
 async def hand_ocr(input: Determinent):
 
+    start_time = time.time()
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./keys/flyai-432701-9290e087cf34.json"
 
     ocr_result = detect_hand_ocr_text(input.hand_write_image)
+    start_step_time = time.time()
+    print(f"OCR 수행 시간: {start_step_time - start_time:.2f}초")
     print("ocr_result : ", ocr_result)
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
@@ -398,6 +401,8 @@ async def hand_ocr(input: Determinent):
     print("solution : ", solution)
     print("@@@@@@@@@ Determinent @@@@@@@@@")
     openai_result = await fetch_openai(client, f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
+    start_step_time = time.time()
+    print(f"OpenAI 수행 시간: {start_step_time - start_time:.2f}초")
 
     determinent = "None"
     if "##1##" in openai_result:

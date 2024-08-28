@@ -13,6 +13,7 @@ from google.cloud import vision
 from google.protobuf import json_format
 import io
 import re
+import time
 
 hand_router = APIRouter()
 
@@ -504,6 +505,7 @@ def print_ocr_response(image):
 
 @hand_router.post("/hand_determinant")
 async def hand_determinant(image_input: ImageInput):
+    start_time = time.time()
     
     user_ocr_result.clear()
     problem_image = image_input.get_origin_image()
@@ -511,7 +513,10 @@ async def hand_determinant(image_input: ImageInput):
     origin_right, origin_left = imtrim(problem_image)
 
     right, left = prob_loc_crop(problem_image)
+    start_step_time = time.time()
+    print(f"Step 1: Problem location detection time: {start_step_time - start_time:.2f} seconds")
 
+    start_step_time = time.time()
     for i, (x, y, w, h) in enumerate(left):
         cropped_left = origin_left[y:y+h, x:x+w]
         cv2.imwrite(f"./temp/problem_left_{i}.png", cropped_left)
@@ -562,7 +567,9 @@ async def hand_determinant(image_input: ImageInput):
     for i, (x, y, w, h) in enumerate(inter_question_areas_right):
         cropped_right = target_right[y:y+h, x:x+w]
         cv2.imwrite(f"./temp/cropped_right_{i}.png", cropped_right)
-    
+
+    print(f"Step 2: Inter-question area cropping time: {time.time() - start_step_time:.2f} seconds")
+    start_step_time = time.time()
     # 문제 OCR 결과를 저장할 변수
     problem_ocr_texts_left = []
     problem_ocr_texts_right = []
@@ -650,7 +657,7 @@ async def hand_determinant(image_input: ImageInput):
             "user_handwrite_image": user_handwrite_image_base64,
             "user_hand_ocr_result": user_ocr_result[handwrite_num]
         }
-    
+    print(f"Step 3: Handwriting detection time: {time.time() - start_step_time:.2f} seconds")
     return output_json
 
 # origin_image = cv2.imread('./hand_no.jpg')
