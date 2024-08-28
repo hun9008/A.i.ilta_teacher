@@ -43,7 +43,7 @@ const OcrResultPage: React.FC<OcrResultPageProps> = ({ onOcrSubmit }) => {
     const parsedProblems: { [key: number]: string } = {};
 
     ocrs.forEach((ocr) => {
-      const problemRegex = /\*(\d+)[\.\s]*\*([\s\S]*?)(?=\*\d+[\.\s]*\*|$)/g;
+      const problemRegex = /\*(\d+)[\s\.\*]*(.*?)(?=\*\d+|$)/gs;
       let match;
 
       while ((match = problemRegex.exec(ocr)) !== null) {
