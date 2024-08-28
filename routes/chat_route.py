@@ -437,8 +437,12 @@ async def process_message(chat: ChatRequest):
             
         elif user_vars.user_status == "doing":
             # response = ''
+            solution = step_elements[problem_index]
+
             if user_text:
-                response = await call_openai_api(user_text)
+                all_solution = '\n'.join(solution)
+                prompt = prompt_wrong(ocr, all_solution, user_text, prev_chat)
+                response = await call_openai_api(prompt)
                 user_context[user_id]["prev_chat"] = user_text + "\n" + "나의 답변 : " + response + "\n"
                 return response
             else:
