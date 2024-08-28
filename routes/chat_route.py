@@ -258,6 +258,8 @@ async def websocket_endpoint(websocket: WebSocket):
                     else:
                         print("user_hand_ocr : ", user_hand_ocr_saved)
                         await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_hand_ocr_saved + "//" + "problem_num : " + user_problem_num)
+                else:
+                    await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_hand_ocr_saved + "//" + "problem_num : " + user_problem_num)
 
             except asyncio.TimeoutError:
                 # sleep_time 동안 메시지가 없으면 다음 스텝 진행
