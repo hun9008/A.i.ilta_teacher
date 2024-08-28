@@ -151,7 +151,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               console.log(status, newProblemIndex);
 
               if (status === 'solve' && !solvedProblems.has(newProblemIndex)) {
-                // onSolve();
+                onSolve();
                 setSolvedProblems((prev) => new Set(prev).add(newProblemIndex));
                 return;
               }
