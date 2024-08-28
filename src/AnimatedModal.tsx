@@ -149,6 +149,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               const status = statusMatch[1].trim();
               const newProblemIndex = parseInt(problemNumMatch[1], 10);
               console.log(status, newProblemIndex);
+              onProblemIndexChange(newProblemIndex);
 
               if (status === 'solve' && !solvedProblems.has(newProblemIndex)) {
                 onSolve();
@@ -156,11 +157,11 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 return;
               }
             }
-            if (problemNumMatch) {
-              const newProblemIndex = parseInt(problemNumMatch[1], 10);
-              console.log(newProblemIndex);
-              onProblemIndexChange(newProblemIndex);
-            }
+            // if (problemNumMatch) {
+            //   const newProblemIndex = parseInt(problemNumMatch[1], 10);
+            //   console.log(newProblemIndex);
+            //   onProblemIndexChange(newProblemIndex);
+            // }
             console.log('Processed status message:', data);
             return;
           }
