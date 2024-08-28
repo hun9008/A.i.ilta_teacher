@@ -114,6 +114,7 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                         if hand_response.status_code == 200:
                             if (user_id not in delay_block_list) and (user_id not in wrong_block_list):
                                 user_vars.user_status = hand_response.json().get("determinants")
+                                user_vars.user_hand_ocr = hand_response.json().get("user_hand_ocr_result")
                             else:
                                 print("This time is Locked")
                         else:
@@ -174,7 +175,7 @@ async def websocket_endpoint(websocket: WebSocket):
             background_task = asyncio.create_task(decide_user_wrong(websocket, chat_request.u_id))
 
             await websocket.send_text("문제를 풀어보자! 내가 잘못된 부분이 있으면 알려줄게.")
-            await websocket.send_text("status : " + user_vars.user_status)
+            await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
             solve_problem.clear()
             # response = await process_message(chat_request)
             # await websocket.send_text(response)
@@ -232,7 +233,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 if response:
                     await websocket.send_text(response)
-                    await websocket.send_text("status : " + user_vars.user_status)
+                    await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
 
             except asyncio.TimeoutError:
                 # sleep_time 동안 메시지가 없으면 다음 스텝 진행
@@ -246,11 +247,11 @@ async def websocket_endpoint(websocket: WebSocket):
                             print("Already solved problem")
                         else:
                             await websocket.send_text(response)
-                            await websocket.send_text("status : " + user_vars.user_status)
+                            await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
                         # break
                     else:
                         await websocket.send_text(response)
-                        await websocket.send_text("status : " + user_vars.user_status)
+                        await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
 
             except WebSocketDisconnect:
                 print("WebSocket disconnected")
