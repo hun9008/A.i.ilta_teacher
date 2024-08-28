@@ -177,6 +177,7 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.send_text("문제를 풀어보자! 내가 잘못된 부분이 있으면 알려줄게.")
             await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
             solve_problem.clear()
+            # user_vars.user_status.clear()
             # response = await process_message(chat_request)
             # await websocket.send_text(response)
             
