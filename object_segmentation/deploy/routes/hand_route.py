@@ -643,6 +643,8 @@ async def hand_determinant(image_input: ImageInput):
         _, buffer = cv2.imencode('.jpg', user_handwrite_image)
         user_handwrite_image_base64 = base64.b64encode(buffer).decode('utf-8')
 
+        print("user_ocr_result[handwrite_num] : ", user_ocr_result[handwrite_num])
+        print("type handwrite_num : ", type(user_ocr_result[handwrite_num]))
         output_json = {
             "handwrite_num": handwrite_num,
             "user_handwrite_image": user_handwrite_image_base64,
