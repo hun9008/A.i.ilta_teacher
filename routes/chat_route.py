@@ -189,13 +189,7 @@ async def websocket_endpoint(websocket: WebSocket):
             background_task = asyncio.create_task(decide_user_wrong(websocket, chat_request.u_id))
 
             await websocket.send_text("문제를 풀어보자! 내가 잘못된 부분이 있으면 알려줄게.")
-            if user_hand_ocr_saved == None:
-                print("user_hand_ocr is None at Start")
-                print("hand_ocr is none type")
-                await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_hand_ocr_saved + "//" + "problem_num : " + user_problem_num)
-            else:
-                print("I'm set user_hand_ocr : ", user_hand_ocr_saved)
-                await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_hand_ocr_saved + "//" + "problem_num : " + user_problem_num)
+            await websocket.send_text("status : " + user_vars.user_status)
             solve_problem.clear()
             user_hand_ocr_saved = "Not Yet"
             user_problem_num = "Not Yet"
