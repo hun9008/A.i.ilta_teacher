@@ -250,6 +250,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 if response:
                     await websocket.send_text(response)
+                    print("SEND BY CHAT RESPONSE")
                     if user_hand_ocr_saved == None:
                         print("user_hand_ocr is None")
                         print("hand_ocr is none type")
@@ -266,6 +267,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     if response == 'Invalid state.':
                         break
                     elif "문제를 해결했어! 다른문제를 풀어볼까?" in response:
+                        print("SEND BY SOLVE")
                         if user_look.get(chat_request.u_id, 0) in solve_problem:
                             print("Already solved problem")
                         else:
@@ -279,6 +281,7 @@ async def websocket_endpoint(websocket: WebSocket):
                                 await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_hand_ocr_saved + "//" + "problem_num : " + user_problem_num)
                         # break
                     else:
+                        print("SEND BY DELAY OR WRONG")
                         await websocket.send_text(response)
                         if user_hand_ocr_saved == None:
                             print("user_hand_ocr is None")
