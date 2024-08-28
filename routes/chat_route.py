@@ -115,6 +115,8 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                             if (user_id not in delay_block_list) and (user_id not in wrong_block_list):
                                 user_vars.user_status = hand_response.json().get("determinants")
                                 user_vars.user_hand_ocr = hand_response.json().get("user_hand_ocr_result")
+                                print("SAVED user_hand_ocr / type: ", user_vars.user_hand_ocr, " ", type(user_vars.user_hand_ocr))
+                                print("Probably : ", hand_response.json().get("user_hand_ocr_result"), " ", type(hand_response.json().get("user_hand_ocr_result")))
                                 if user_vars.user_hand_ocr == None:
                                     print("user_hand_ocr is None at Start")
                                     await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + "Not Yet")
@@ -415,8 +417,9 @@ async def process_message(chat: ChatRequest):
             #한 문제 풀었으면 prev_chat init
             user_context[user_id] = {"prev_chat": ""} 
             
-            solve_problem.append(user_look[user_id])
-            print("solve_problem : ", solve_problem)
+            if user_look[user_id] not in solve_problem:
+                solve_problem.append(user_look[user_id])
+                print("solve_problem : ", solve_problem)
 
             ## DB에 state 저장
             response = "문제를 해결했어! 다른문제를 풀어볼까?"
