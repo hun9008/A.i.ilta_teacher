@@ -625,9 +625,10 @@ async def hand_determinant(image_input: ImageInput):
 
     print("handwrite_num : ", handwrite_num)
     print("len user_ocr_result : ", len(user_ocr_result))
-    if handwrite_num > 0 and handwrite_num < len(user_ocr_result):
-        print("user_ocr_result : ", user_ocr_result[handwrite_num])
-
+    if handwrite_num > -1 and handwrite_num < len(user_ocr_result):
+        print("user_ocr_result[handwrite_num] : ", user_ocr_result[handwrite_num])
+        print("user_ocr_result : ", user_ocr_result)
+   
     if handwrite_num == -1:
         output_json = {
             "handwrite_num": handwrite_num,
@@ -644,6 +645,7 @@ async def hand_determinant(image_input: ImageInput):
         output_json = {
             "handwrite_num": handwrite_num,
             "user_handwrite_image": user_handwrite_image_base64,
+            "user_hand_ocr_result": user_ocr_result[handwrite_num]
         }
     
     return output_json
