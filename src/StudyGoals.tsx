@@ -103,6 +103,24 @@ const StudyGoals: React.FC<StudyGoalsProps> = ({ onGoalsSubmit }) => {
     }
   };
 
+  const handleDefaultSetting = () => {
+    setProblems('5');
+    setTime({
+      goal2Hours: '01',
+      goal2Minutes: '00',
+      goal3Hours: '00',
+      goal3Minutes: '20',
+    });
+    setGoals({
+      goal1: true,
+      goal2: true,
+      goal3: true,
+    });
+
+    // 자동으로 설정 완료 후 서버로 데이터 전송
+    sendTimeToServer();
+  };
+
   const allGoalsCompleted = goals.goal1 && goals.goal2 && goals.goal3;
 
   return (
@@ -227,6 +245,13 @@ const StudyGoals: React.FC<StudyGoalsProps> = ({ onGoalsSubmit }) => {
         }`}
       >
         설정 완료
+      </button>
+
+      <button
+        onClick={handleDefaultSetting}
+        className="mt-4 w-full px-4 py-2 font-semibold rounded-lg shadow-lg bg-red-500 text-white hover:bg-red-600 transition-all ease-in-out duration-300"
+      >
+        기본 세팅
       </button>
     </div>
   );

@@ -146,8 +146,12 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           });
 
           if (newMessage.sender === 'bot' && enableTTS) {
+            console.log("!!newMessage: ", newMessage.text)
+            // 첫 번째 문장 추출
+            const firstSentence = newMessage.text.match(/[^\.!\?]+[\.!\?]*/)?.[0] || newMessage.text;
+
             const ttsAudioUrl = await handleTTS(
-              newMessage.text,
+              firstSentence.trim(),
               u_id as string
             );
             if (ttsAudioUrl) {
