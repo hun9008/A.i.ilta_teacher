@@ -133,6 +133,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             if (problemNumMatch) {
               const newProblemIndex = parseInt(problemNumMatch[1], 10);
               console.log(newProblemIndex);
+              onProblemIndexChange(newProblemIndex);
             }
             console.log('Processed status message:', data);
             return;
