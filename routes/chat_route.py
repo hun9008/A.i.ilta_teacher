@@ -115,6 +115,12 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                             if (user_id not in delay_block_list) and (user_id not in wrong_block_list):
                                 user_vars.user_status = hand_response.json().get("determinants")
                                 user_vars.user_hand_ocr = hand_response.json().get("user_hand_ocr_result")
+                                if user_vars.user_hand_ocr == None:
+                                    print("user_hand_ocr is None at Start")
+                                    await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + "Not Yet")
+                                else:
+                                    print("I'm set user_hand_ocr : ", user_vars.user_hand_ocr)
+                                    await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
                             else:
                                 print("This time is Locked")
                         else:
