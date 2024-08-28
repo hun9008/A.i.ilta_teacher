@@ -400,9 +400,11 @@ async def hand_ocr(input: Determinent):
     print("ocr_result : ", ocr_result)
     print("solution : ", solution)
     print("@@@@@@@@@ Determinent @@@@@@@@@")
-    openai_result = await fetch_openai(client, f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
+    # openai_result = await fetch_openai(client, f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
+    openai_result = await fetch_ans_llama31(f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
     start_step_time = time.time()
-    print(f"OpenAI 수행 시간: {start_step_time - start_time:.2f}초")
+    print(f"Llamma 수행 시간: {start_step_time - start_time:.2f}초")
+    # print(f"OpenAI 수행 시간: {start_step_time - start_time:.2f}초")
 
     determinent = "None"
     if "##1##" in openai_result:
