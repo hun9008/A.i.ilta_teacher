@@ -174,6 +174,7 @@ def parse_solution(solution):
     # 스텝이나 정답 키워드를 앞에 붙여서 저장
     for i in range(1, len(steps), 2):  # 홀수 인덱스가 키워드
         current_step = steps[i] + steps[i+1].strip()
+        current_step = re.sub(r'[\(\)]', '', current_step)
         steps_array.append(current_step)
     
     return steps_array
