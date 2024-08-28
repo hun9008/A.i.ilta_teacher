@@ -50,7 +50,7 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
         while True:
             await asyncio.sleep(sleep_time)  
             # 디버그 로그 추가
-            print("Running decide_user_wrong loop")
+            # print("Running decide_user_wrong loop")
 
             # 여기서 에러가 발생할 가능성이 있는 모든 코드를 try-except로 감싸서 에러 로그 확인
             try:
@@ -84,7 +84,9 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
 
                     headers = {'Content-Type': 'application/json'}
                     response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
-
+                    user_hand_ocr_result = response.json().get("user_hand_ocr_result")
+                    print("I save user_hand_ocr_result : ", user_hand_ocr_result)
+                    print("response : ", response)
                     if isinstance(response, requests.models.Response):
                         try:
                             response_json = response.json()
