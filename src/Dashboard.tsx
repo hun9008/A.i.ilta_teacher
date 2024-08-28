@@ -423,13 +423,6 @@ const Dashboard: React.FC = () => {
     responsive: true,
     maintainAspectRatio: false, // Allow the chart to stretch and fit its container
     plugins: {
-      title: {
-        display: true,
-        text: '단원별 성취도',
-        font: {
-          size: 18,
-        },
-      },
       legend: {
         position: 'bottom' as const,
       },
@@ -440,9 +433,19 @@ const Dashboard: React.FC = () => {
         position: 'bottom',
         ticks: {
           autoSkip: false,
-          maxRotation: 90,
-          minRotation: 90,
+          maxRotation: 45,
+          minRotation: 45,
+          callback: function(value, index, ticks) {
+            if (index < 10){
+            const label = this.getLabelForValue(index);
+            if (typeof label === 'string') {
+              return label.length > 4 ? label.substr(0, 4) : label;
+            }
+            return label;
+          }
+          }
         },
+        max: 8,
       },
       y: {
         type: 'linear' as const,
@@ -731,8 +734,8 @@ const Dashboard: React.FC = () => {
         min: minMinutes,
         max: maxMinutes,
         title: {
-          display: true,
-          text: '시간 (1 day)',
+          display: false,
+          text: '시간',
         },
         ticks: {
           callback: function (tickValue: string | number) {
@@ -742,9 +745,11 @@ const Dashboard: React.FC = () => {
               ? 130
               : numericValue;
 
-            const hours = Math.floor(normalizedValue / 60); // 'normalizedValue'를 시간으로 변환
-            const minutes = normalizedValue % 60; // 'normalizedValue'를 분으로 변환
-            return `${hours}시 ${minutes}분`;
+              const hours = Math.floor(normalizedValue / 60);
+              let hoursString = hours < 10 ? `0${hours}` : `${hours}`;
+              const minutes = normalizedValue % 60;
+              const minutesString = minutes < 10 ? `0${minutes}` : `${minutes}`;
+              return `${hoursString}:${minutesString}`;
           },
         },
       },
@@ -775,171 +780,148 @@ const Dashboard: React.FC = () => {
   ///////////////////////////////////////////////////////
 
   return (
-    <div className={styles.dashboardContainer}>
-      <div className={styles.mainContent}>
-        <div className={styles.topSection}>
-          <div className={styles.leftColumn}>
-            <h1 className={styles.greeting}>
+    <div className="pt-8 flex justify-center items-start">
+      <div className="px-4 sm:px-6 lg:px-8 mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4 shadow-lg border-0 border-b-8 rounded-xl">
+
+          {/* Left Column */}
+          <div className="bg-white p-6 flex flex-col rounded-2xl ">
+            <h1 className="text-2xl font-bold flex items-center mb-4">
               안녕 {nickname}아! 오늘도 화이팅!!
-              <img
-                src={silverTier}
-                alt="Silver Tier"
-                className={styles.tierIcon}
-              />
+              <img src={silverTier} alt="Silver Tier" className="w-8 h-8 ml-2" />
             </h1>
-            <div className={styles.studyStatsContainer}>
-              <h2 className={styles.studyStatsTitle}>오늘의 학습량</h2>
-              <div className={styles.studyStats}>
-                <p>
-                  <span className={styles.statNumber}>{solvedProblems}</span>{' '}
-                  문제를 풀었고,{' '}
-                  <span className={styles.statNumber}>{correctProblems}</span>{' '}
-                  문제를 맞혔어요!
-                </p>
-                <p>
-                  오늘 총 <span className={styles.statNumber}>{studyTime}</span>{' '}
-                  분 공부했어요.
-                </p>
-              </div>
+            <div className="bg-blue-50 rounded-lg p-4 mb-4 flex-grow ">
+              <h2 className="text-xl font-semibold mb-2">오늘의 학습량</h2>
+              <p className="text-gray-700">
+                <span className="font-bold">{solvedProblems}</span> 문제를 풀었고,{' '}
+                <span className="font-bold">{correctProblems}</span> 문제를 맞혔어요!
+              </p>
+              <p className="text-gray-700">
+                오늘 총 <span className="font-bold">{studyTime}</span> 분 공부했어요.
+              </p>
             </div>
-            <div className={styles.tierAndBadgeSection}>
-              <div className={styles.tierSection}>
-                <h3 className={styles.tierTitle}>
-                  골드 티어 승급까지 {endExperience - currentExperience}점
-                  남았습니다.
-                </h3>
-                <div className={styles.experienceBarContainer}>
-                  <img
-                    src={silverTier}
-                    alt="Silver Tier"
-                    className={styles.tierImage}
-                  />
-                  <div className={styles.experienceBar}>
-                    <div
-                      className={styles.experienceProgress}
-                      style={{ width: `${experiencePercentage}%` }}
-                    >
-                      <span className={styles.currentExperience}>
-                        {currentExperience}
-                      </span>
-                    </div>
-                  </div>
-                  <img
-                    src={goldTier}
-                    alt="Gold Tier"
-                    className={styles.tierImage}
-                  />
+            <div className="bg-white rounded-lg p-4">
+              <h3 className="text-lg font-semibold mb-2">
+                골드 티어 승급까지 {endExperience - currentExperience}점 남았습니다.
+              </h3>
+              <div className="flex items-center mb-2">
+                <img src={silverTier} alt="Silver Tier" className="w-6 h-6 mr-2" />
+                <div className="flex-1 bg-gray-200 rounded-full h-4">
+                  <div
+                    className="bg-blue-600 rounded-full h-4"
+                    style={{ width: `${experiencePercentage}%` }}
+                  ></div>
                 </div>
-                <div className={styles.experienceValues}>
-                  <span>{startExperience}</span>
-                  <span>{endExperience}</span>
-                </div>
+                <img src={goldTier} alt="Gold Tier" className="w-6 h-6 ml-2" />
               </div>
-              <div className={styles.badgeSection}>
-                <h3 className={styles.sectionTitle}>뱃지 목록</h3>
-                <div className={styles.badgeContainer}>
-                  {existingBadges.slice(0, 3).map((badge, index) => (
-                    <div key={index} className={styles.badgeWrapper}>
-                      <div
-                        className={styles.badgeCircle}
-                        title={`${badge.title}: ${badge.description}`}
-                      >
-                        <img
-                          src={badge.image || ''}
-                          alt={badge.title || 'Badge'}
-                        />
-                      </div>
-                      <div className={styles.badgeTitle}>{badge.title}</div>
-                    </div>
-                  ))}
-                  <div className={styles.badgeWrapper}>
-                    <div
-                      className={`${styles.badgeCircle} ${styles.badgeCircleClickable}`}
-                      title="추가 배지"
-                      onClick={handleBadgeClick}
-                    >
-                      <div className={styles.plusIcon}>+</div>
-                    </div>
-                    <div className={styles.badgeTitle}>더 보기</div>
-                  </div>
-                </div>
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>{startExperience}</span>
+                <span>{endExperience}</span>
               </div>
             </div>
           </div>
 
-          <div className={styles.centerColumn}>
-            <div className={styles.competitionSection}>
-              <h3 className={styles.sectionTitle}>주간 경쟁전</h3>
-              <div className={styles.competitionBox}>
-                <p>2024-08-30 20:00 오픈</p>
-                <div className={styles.competitionInfo}>
+          {/* Center Column */}
+          <div className="bg-white p-6 flex flex-col h-full rounded-2xl ">
+            <div className="mb-4">
+              <h3 className="text-xl font-semibold mb-2">주간 경쟁전</h3>
+              <div className="bg-slate-50 rounded-lg p-4">
+                <p className="mb-2">2024-08-30 20:00 오픈</p>
+                <div className="flex justify-between items-center">
                   <span>범위 : {competitionRange}</span>
                   <button
-                    className={styles.competitionButton}
                     onClick={() => navigate('/main/competition')}
-                  >
+                    className="bg-tertiary-300 text-white px-4 py-1.5 rounded-md hover:bg-tertiary-400 text-sm">
                     1등 도전하기
                   </button>
                 </div>
               </div>
             </div>
-            <div className={styles.schoolRankingSection}>
-              <h4 className={styles.schoolRankingTitle}>내 학교 순위</h4>
-              <div className={styles.schoolRankingInfo}>
-                <p className={styles.schoolName}>
-                  {localStorage.getItem('school')}
-                </p>
-                <div className={styles.rankScoreContainer}>
-                  <p className={styles.rankInfo}>
-                    <span className={styles.rankLabel}>랭킹</span>
-                    <span className={styles.rankValue}>{13}등</span>
-                  </p>
-                  <p className={styles.scoreInfo}>
-                    <span className={styles.scoreLabel}>점수</span>
-                    <span className={styles.scoreValue}>{7426}점</span>
-                  </p>
-                  <button
-                    className={styles.competitionButton}
-                    onClick={() => navigate('/main/school-ranking')}
-                  >
-                    순위 확인하기
-                  </button>
+            <div className="flex-grow">
+              <h4 className="text-xl font-semibold mb-2">내 학교 순위</h4>
+              <div className="bg-slate-50 rounded-lg p-4 flex flex-col justify-between">
+                <div>
+                  <p className="text-lg font-medium mb-2">{localStorage.getItem('school')}</p>
+                  <div className="flex justify-between mb-2">
+                    <div>
+                      <p>순위</p>
+                      <p className="text-xl font-bold">13등</p>
+                    </div>
+                    <div>
+                      <p>점수</p>
+                      <p className="text-xl font-bold">7426점</p>
+                    </div>
+                  </div>
                 </div>
+                <button
+                  onClick={() => navigate('/main/school-ranking')}
+                  className="bg-tertiary-300 text-white px-4 py-1.5 rounded-md hover:bg-tertiary-400 text-sm w-full mt-4">    
+                  순위 보기
+                </button>
               </div>
             </div>
           </div>
 
-          <div className={styles.rightColumn}>
+          {/* Right Column */}
+          <div className="bg-white p-6 flex flex-col h-full rounded-2xl ">
             <button
-              className={styles.studyButton}
               onClick={() => navigate('/setting')}
-            >
-              학습하기 <StepForward size={30} className="icon" />
+              className="w-full bg-indigo-500 text-white px-6 py-2.5 rounded-lg text-xl font-bold flex items-center justify-center hover:bg-indigo-600 mb-4">
+              학습하기 <StepForward size={24} className="ml-2" />
             </button>
-
-            <div className={styles.timeRangeWrapper}>
-              <ResponsiveTimeRange
-                data={calendarData}
-                from="2024-01-01"
-                to="2024-08-31"
-                emptyColor="#eeeeee"
-                colors={colorScale}
-                margin={{ top: 10, right: 20, bottom: 20, left: 40 }}
-                dayBorderWidth={2}
-                dayBorderColor="#ffffff"
-                weekdayTicks={[0, 2, 4, 6]}
-              />
+            <div className="bg-teal-50 rounded-lg p-4 mb-4 flex-grow">
+              <h3 className="text-xl font-semibold mb-2">뱃지 목록</h3>
+              <div className="grid grid-cols-3 gap-4">
+                {existingBadges.slice(0, 3).map((badge, index) => (
+                  <div key={index} className="text-center">
+                    <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-200 overflow-hidden">
+                      <img 
+                        src={badge.image || ''} 
+                        alt={badge.title || 'Badge'} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p className="text-sm">{badge.title}</p>
+                  </div>
+                ))}
+                <div className="text-center">
+                  <button
+                    onClick={handleBadgeClick}
+                    className="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-200 flex items-center justify-center text-3xl font-bold text-gray-600"
+                  >
+                    +
+                  </button>
+                  <p className="text-sm">더 보기</p>
+                </div>
+              </div>
             </div>
-            <p className={styles.timeRangeDescription}>
-              점수 : 집중도, 푼 문제 수, 목표 시간 달성률 기준
-            </p>
+            <div className="bg-white rounded-lg p-4">
+              <div className="h-24">
+                <ResponsiveTimeRange
+                  data={calendarData}
+                  from="2024-01-01"
+                  to="2024-08-31"
+                  emptyColor="#eeeeee"
+                  colors={colorScale}
+                  margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                  dayBorderWidth={2}
+                  dayBorderColor="#ffffff"
+                  weekdayLegendOffset={0}
+                  monthLegendOffset={0}
+                  dayRadius={4}
+                />
+              </div>
+              <p className="text-sm text-gray-600 mt-2">
+                점수 : 집중도, 푼 문제 수, 목표 시간 달성률 기준
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className={styles.chartSection}>
-          <div className={styles.leftColumn}>
-            <div className={styles.chartWrapper}>
-              <h3 className={styles.sectionTitle}>주간 리포트</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8 shadow-lg border-0 border-b-8 rounded-xl">
+          <div className="flex-1">
+            <div className="h-[400px] flex flex-col bg-white rounded-2xl p-5 ">
+              <h3 className="mb-4 font-bold">주간 리포트</h3>
               <div className={styles.weeklyCharts}>
                 <div className={styles.chartItem}>
                   <Chart
@@ -959,30 +941,42 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className={styles.centerColumn}>
-            <div
-              className={`${styles.chartWrapper} ${styles.focusChartWrapper}`}
+          <div className="flex-1">
+          <div className="h-[400px] flex flex-col bg-white rounded-2xl p-5 "
               style={
                 { '--session-count': allSessions.length } as React.CSSProperties
               }
             >
-              <h3 className={styles.chartTitle}>세션 별 집중도</h3>
+              <h3 className="mb-4 font-bold">세션 별 집중도</h3>
+              <div className="flex-grow relative"></div>
+
+        <div className="flex-grow relative">
               <Chart
                 type="bar"
                 data={focusChartData}
-                options={focusChartOptions}
-                style={chartStyle}
+                options={{...focusChartOptions, maintainAspectRatio:false, responsive:true}}
               />
             </div>
-          </div>
-          <div className={styles.rightColumn}>
-            <div className={styles.chartWrapper}>
-              <h3 className={styles.chartTitle}>단원 별 정답률 비교</h3>
-              <Chart type="bar" data={categoryData} options={categoryOptions} />
             </div>
           </div>
+
+          <div className="flex-1">
+      <div className="h-[400px] flex flex-col bg-white rounded-2xl p-5 ">
+        <h3 className="mb-4 font-bold">단원 별 정답률 비교</h3>
+        <div className="flex-grow relative">
+          <Chart 
+            type="bar" 
+            data={categoryData} 
+            options={{
+              ...categoryOptions,
+              maintainAspectRatio: false,
+              responsive: true,
+            }}
+          />
         </div>
       </div>
+    </div>
+        </div>
 
       {modalVisible && (
         <div className={styles.modalOverlay} onClick={closeModal}>
@@ -1024,6 +1018,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       )}
+    </div>
+
     </div>
   );
 };

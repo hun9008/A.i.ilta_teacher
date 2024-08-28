@@ -106,10 +106,11 @@ const GameUI: React.FC<UIProps> = ({
     </div>
 
     <div className="absolute bottom-4 right-4 flex space-x-4">
+
+      {/*
       <button onClick={() => setShowDebugInfo(!showDebugInfo)}>
         {showDebugInfo ? '디버그 정보 숨기기' : '디버그 정보 표시'}
       </button>
-      {/*
       <button onClick={() => setShowChatModal(true)}>채팅</button>
       */}
       <button
