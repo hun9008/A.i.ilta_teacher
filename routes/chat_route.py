@@ -175,7 +175,10 @@ async def websocket_endpoint(websocket: WebSocket):
             background_task = asyncio.create_task(decide_user_wrong(websocket, chat_request.u_id))
 
             await websocket.send_text("문제를 풀어보자! 내가 잘못된 부분이 있으면 알려줄게.")
-            await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
+            if user_vars.user_hand_ocr == None:
+                await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + "Not Yet")
+            else:
+                await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
             solve_problem.clear()
             # user_vars.user_status.clear()
             # response = await process_message(chat_request)
@@ -234,7 +237,10 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 if response:
                     await websocket.send_text(response)
-                    await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
+                    if user_vars.user_hand_ocr == None:
+                        await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + "Not Yet")
+                    else:
+                        await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
 
             except asyncio.TimeoutError:
                 # sleep_time 동안 메시지가 없으면 다음 스텝 진행
@@ -248,11 +254,17 @@ async def websocket_endpoint(websocket: WebSocket):
                             print("Already solved problem")
                         else:
                             await websocket.send_text(response)
-                            await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
+                            if user_vars.user_hand_ocr == None:
+                                await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + "Not Yet")
+                            else:
+                                await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
                         # break
                     else:
                         await websocket.send_text(response)
-                        await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
+                        if user_vars.user_hand_ocr == None:
+                            await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + "Not Yet")
+                        else:
+                            await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_vars.user_hand_ocr)
 
             except WebSocketDisconnect:
                 print("WebSocket disconnected")
