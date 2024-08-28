@@ -2,9 +2,13 @@ import React, { useRef } from 'react';
 
 interface TTSAudioPlayerProps {
   audioUrl: string;
+  onEnded?: () => void;
 }
 
-export const TTSAudioPlayer: React.FC<TTSAudioPlayerProps> = ({ audioUrl }) => {
+export const TTSAudioPlayer: React.FC<TTSAudioPlayerProps> = ({
+  audioUrl,
+  onEnded,
+}) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   React.useEffect(() => {
@@ -14,7 +18,7 @@ export const TTSAudioPlayer: React.FC<TTSAudioPlayerProps> = ({ audioUrl }) => {
     }
   }, [audioUrl]);
 
-  return <audio ref={audioRef} />;
+  return <audio ref={audioRef} onEnded={onEnded} />;
 };
 
 export const handleTTS = async (

@@ -44,7 +44,8 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   const [cleanedHandOcrs, setCleanedHandOcrs] = useState<string>('');
   const [lastValidHandOcr, setLastValidHandOcr] = useState<string>('');
   const [solvedProblems, setSolvedProblems] = useState<Set<number>>(new Set());
-
+  const [ttsQueue, setTTSQueue] = useState<string[]>([]);
+  const ttsPlayingRef = useRef<boolean>(false);
   /* 채팅 아래로 스크롤*/
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +55,31 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         chatContainerRef.current.scrollHeight;
     }
   };
+  useEffect(() => {
+    const playNextInQueue = async () => {
+      if (ttsPlayingRef.current || ttsQueue.length === 0) {
+        return;
+      }
+
+      ttsPlayingRef.current = true;
+      const nextText = ttsQueue[0];
+
+      const ttsAudioUrl = await handleTTS(nextText.trim(), u_id as string);
+      if (ttsAudioUrl) {
+        setAudioUrl(ttsAudioUrl);
+      }
+    };
+
+    if (ttsQueue.length > 0) {
+      playNextInQueue();
+    }
+  }, [ttsQueue]);
+
+  const handleAudioEnd = () => {
+    ttsPlayingRef.current = false;
+    setTTSQueue((prevQueue) => prevQueue.slice(1));
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages, isOpen]);
@@ -336,7 +362,6 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               </div>
             </motion.div>
           )}
-
           <motion.div
             className="flex flex-col min-w-[25vw] w-1/2 border-r-2 border-l-2 border-b-8 border-blue-400 border-opacity-50 bg-blue-50 bg-opacity-100 rounded-3xl p-5 overflow-hidden shadow-2xl "
             variants={panelVariants}
@@ -411,7 +436,9 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               닫기
             </button>*/}
           </motion.div>
-          {audioUrl && <TTSAudioPlayer audioUrl={audioUrl} />}
+          {audioUrl && (
+            <TTSAudioPlayer audioUrl={audioUrl} onEnded={handleAudioEnd} />
+          )}{' '}
         </div>
       </motion.div>
     </AnimatePresence>
