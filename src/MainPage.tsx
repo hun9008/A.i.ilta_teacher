@@ -9,9 +9,9 @@ const MainPage: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-primary-200 to-tertiary-100">
-      <div className="flex flex-col items-center pt-[30px] w-16 h-screen fixed left-2 top-0">
-        <button
+    <div className="flex flex-col min-h-screen max-h-full bg-gradient-to-br from-primary-200 to-tertiary-100">
+  <div className="flex flex-col items-center pt-[30px] w-16 h-full fixed left-2 top-0">
+    <button
           className={`text-gray-400 mb-0 w-16 h-20 rounded-r-none py-2 ${
             isActive('/main') ? 'bg-white' : ''
           }`}
@@ -58,8 +58,8 @@ const MainPage: React.FC = () => {
           <Settings size={30} className="mx-auto" />
         </button>
       </div>
-      <div className="flex bg-white rounded-2xl flex-grow h-full m-4 ml-[4.5rem]">
-        <Outlet />
+      <div className="flex-grow flex items-start justify-center bg-white rounded-2xl h-full m-4 ml-[4.5rem] ">
+      <Outlet />
       </div>
     </div>
   );
