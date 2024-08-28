@@ -431,7 +431,8 @@ async def hand_ocr(input: Determinent):
     start_step_time = time.time()
     print(f"Llamma 수행 시간: {start_step_time - start_time:.2f}초")
     # print(f"OpenAI 수행 시간: {start_step_time - start_time:.2f}초")
-
+    print("openai_result : ", openai_result)
+    
     determinent = "None"
     if "##1##" in openai_result:
         print("solve")
