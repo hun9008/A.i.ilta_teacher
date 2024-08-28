@@ -405,6 +405,7 @@ async def fetch_voting(user_ocrs, solution):
     voting_result = max(set(results), key=results.count)
     print("voting_result : ", voting_result)
     print("=====================================")
+    return voting_result
     
 
 @router.post("/hand_ocr")
