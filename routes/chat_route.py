@@ -90,6 +90,7 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                     user_problem_num = response.json().get("handwrite_num")
                     print("I save user_hand_ocr_result : ", user_hand_ocr_saved)
                     print("response : ", response)
+                    await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_hand_ocr_saved + "//" + "problem_num : " + user_problem_num)
                     if isinstance(response, requests.models.Response):
                         try:
                             response_json = response.json()
