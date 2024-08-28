@@ -87,7 +87,7 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                     headers = {'Content-Type': 'application/json'}
                     response = await asyncio.to_thread(requests.post, url, json=problem_detect_json, headers=headers)
                     
-                    if response.get("user_hand_ocr_result") != None:
+                    if response.json().get("user_hand_ocr_result") != None:
                         user_hand_ocr_saved = response.json().get("user_hand_ocr_result")
                     else:
                         print("received None")
