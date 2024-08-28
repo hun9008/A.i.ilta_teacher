@@ -11,6 +11,7 @@ interface AnimatedModalProps {
   selectedFloe: number;
   selectedProblem: string;
   selectedConcept: string;
+  // selectedHandOcr: string;
   chatOnly?: boolean;
   onSolve: () => void;
   enableTTS: boolean;
@@ -38,6 +39,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   const [socketReady, setSocketReady] = useState(false);
   const [gradeInfo, setGradeInfo] = useState<string>('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [cleanedHandOcrs, setCleanedHandOcrs] = useState<string>('');
 
   /* 채팅 아래로 스크롤*/
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -97,6 +99,10 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
           console.log('Received WebSocket message:', data);
 
           if (data.startsWith('status :')) {
+            const handOcrMatch = data.match(/hand_ocr\s*:\s*(.*)/);
+            const cleanedHandOcrs = handOcrMatch ? handOcrMatch[1].trim() : '';
+            setCleanedHandOcrs(cleanedHandOcrs); // Set the cleanedHandOcrs state
+
             if (data.trim() === 'status : solve') {
               onSolve();
               return;
@@ -254,6 +260,13 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                   </h3>
                   <h3 className="text-lg font-semibold mb-4 text-gray-800">
                     {cleanedConcept}
+                  </h3>
+                  {/* hans: 6 */}
+                  <h3 className="text-xl font-bold mb-4 text-gray-900">
+                    Hand_OCRs
+                  </h3>
+                  <h3 className="text-xl font-bold mb-4 text-gray-900">
+                    {cleanedHandOcrs}
                   </h3>
                 </div>
                 <div className="flex justify-end">

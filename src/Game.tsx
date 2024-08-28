@@ -17,6 +17,8 @@ import { useNavigate } from 'react-router-dom';
 function Game() {
   const [selectedProblem, setSelectedProblem] = useState<string>('');
   const [selectedConcept, setSelectedConcept] = useState<string>('');
+  // hans
+  // const [selectedHandOcr, setSelectedHandOcr] = useState<string>('');
   const { solutionResponse } = useWebSocket();
   const [showChatModal, setShowChatModal] = useState<boolean>(false);
   const [iceCount, setIceCount] = useState<number>(5);
@@ -25,10 +27,10 @@ function Game() {
   }>({});
   const [enableTTS, setEnableTTS] = useState<boolean>(false);
 
-  const [problemTexts, setProblemTexts] = useState<{ [key: number]: string }>(
-    {}
-  );
+  const [problemTexts, setProblemTexts] = useState<{ [key: number]: string }>({});
   const [concepts, setConcepts] = useState<{ [key: number]: string }>({});
+
+
 
   const [penguinPosition, setPenguinPosition] = useState<THREE.Vector3>(
     new THREE.Vector3(0, 0.5, 0)
@@ -153,6 +155,8 @@ function Game() {
         setSelectedFloe(problemNumber);
         setSelectedProblem(problemTexts[problemNumber] || '');
         setSelectedConcept(concepts[problemNumber] || 'No concept available');
+        // hans
+        // setSelectedHandOcr(handocrs[problemNumber] || 'No handocr');
         setShowModal(true);
       } else {
         penguinTargetPosition.current = newPosition;
@@ -160,6 +164,7 @@ function Game() {
         nextProblemRef.current = null;
       }
     },
+    // hans: handocrs
     [icePositions, penguinPosition, problemTexts, concepts]
   );
 
@@ -373,6 +378,8 @@ function Game() {
             selectedFloe={selectedFloe}
             selectedProblem={selectedProblem}
             selectedConcept={selectedConcept}
+            // hans
+            // selectedHandOcr={selectedHandOcr}
             onSolve={handleSolveProblem}
             enableTTS={enableTTS}
           />
@@ -386,6 +393,8 @@ function Game() {
             selectedFloe={selectedFloe}
             selectedProblem={selectedProblem}
             selectedConcept={selectedConcept}
+            // hans
+            // selectedHandOcr={selectedHandOcr}
             chatOnly={true}
             onSolve={handleSolveProblem}
             enableTTS={enableTTS}
