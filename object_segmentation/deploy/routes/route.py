@@ -382,6 +382,31 @@ async def one_problem_ocr(input: OCRInput):
 
     return JSONResponse(content=output_json)
 
+async def fetch(ocr_result, solution):
+    truth = re.search(r'\(정답: \d+\)', solution)
+    if truth is None:
+        truth = re.search(r'\(정답 : \d+\)', solution)
+    truth = truth.group().split(":")[1].strip()
+    truth = re.sub(r'\)', '', truth)
+    result = await fetch_ans_llama31(f"너는 수학선생님이야. 내가 '//'로 구분되는 유저의 응답(ocr_result)과 문제지의 답지인 solution과 정답인 truth를 줄거야. 참고로 solution은 유저가 한 응답이 아니야. ocr_result와 truth가 일치하는 경우만 ##1## 을 반환해(##1##을 판단할때는 solution을 볼 필요가 없고 수가 다르면 정답이 절대 아니야). ocr_result가 solution을 고려했을때 잘못된 풀이나 틀린 답이라면 ##2##을 반환해(가끔 영단어같은 잘못된 ocr_result가 있을 수 있는데 이 경우 ##2##야). ocr_result가 solution에 포함되어있으면 ##3##을 반환해줘. ##2##인 경우가 많을 것으로 예상돼. // ocr_result : {ocr_result} // solution : {solution} // truth : {truth}")
+    if "##1##" in result:
+        return "##1##"
+    elif "##2##" in result:
+        return "##2##"
+    elif "##3##" in result:
+        return "##3##"
+    else:
+        return ""
+    
+async def fetch_voting(user_ocrs, solution):
+    tasks = [fetch(user_ocrs, solution) for _ in range(5)]
+    results = await asyncio.gather(*tasks)
+    print("answer : ", user_ocrs, "results : ", results)
+    voting_result = max(set(results), key=results.count)
+    print("voting_result : ", voting_result)
+    print("=====================================")
+    
+
 @router.post("/hand_ocr")
 async def hand_ocr(input: Determinent):
 
@@ -401,7 +426,8 @@ async def hand_ocr(input: Determinent):
     print("solution : ", solution)
     print("@@@@@@@@@ Determinent @@@@@@@@@")
     # openai_result = await fetch_openai(client, f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
-    openai_result = await fetch_ans_llama31(f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
+    # openai_result = await fetch_ans_llama31(f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
+    openai_result = await fetch_voting(ocr_result, solution)
     start_step_time = time.time()
     print(f"Llamma 수행 시간: {start_step_time - start_time:.2f}초")
     # print(f"OpenAI 수행 시간: {start_step_time - start_time:.2f}초")
