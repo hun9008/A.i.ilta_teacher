@@ -386,9 +386,20 @@ async def fetch(ocr_result, solution):
     truth = re.search(r'\(정답: \d+\)', solution)
     if truth is None:
         truth = re.search(r'\(정답 : \d+\)', solution)
+        truth = truth.group().split(":")[1].strip()
     if truth is None:
         truth = re.search(r'\(정답: \-\d+\)', solution)
-    truth = truth.group().split(":")[1].strip()
+        truth = truth.group().split(":")[1].strip()
+    if truth is None:
+        truth = re.search(r'정답 : \d', solution)
+        truth = truth.group().split(":")[1].strip()
+    if truth is None:
+        truth = re.search(r'정답 : \-\d', solution)
+        truth = truth.group().split(":")[1].strip()
+    if truth is None:
+        truth = solution
+    if truth != solution:
+        truth = truth.group().split(":")[1].strip()
     truth = re.sub(r'\)', '', truth)
     result = await fetch_ans_llama31(f"너는 수학선생님이야. 내가 '//'로 구분되는 유저의 응답(ocr_result)과 문제지의 답지인 solution과 정답인 truth를 줄거야. 참고로 solution은 유저가 한 응답이 아니야. ocr_result와 truth가 일치하는 경우만 ##1## 을 반환해(##1##을 판단할때는 solution을 볼 필요가 없고 수가 다르면 정답이 절대 아니야). ocr_result가 solution을 고려했을때 잘못된 풀이나 틀린 답이라면 ##2##을 반환해(가끔 영단어같은 잘못된 ocr_result가 있을 수 있는데 이 경우 ##2##야). ocr_result가 solution에 포함되어있으면 ##3##을 반환해줘. ##2##인 경우가 많을 것으로 예상돼. // ocr_result : {ocr_result} // solution : {solution} // truth : {truth}")
     if "##1##" in result:
