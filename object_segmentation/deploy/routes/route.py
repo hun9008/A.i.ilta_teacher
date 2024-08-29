@@ -479,26 +479,38 @@ async def hand_ocr(input: Determinent):
     #   solution : str
     
     # hard coding version user status determinating
-    answer = solution[-1]
+    # answer = solution[-1]
 
     openai_result = ''
     pattern = r"\(정답:[^)]+\)"
-    pre_answer = re.search(pattern, solution)
-    print("pre_answer : ", pre_answer)
-    pre_ocr_result = ocr_result.strip()
-    print("pre_ocr_result : ", pre_ocr_result)
-    pre_ocr_result = pre_ocr_result.replace("구하시오.", "")
+    match = re.search(pattern, solution)
 
-    if pre_ocr_result in pre_answer:
-        openai_result = 'solve'
+    if match:
+        # match.group(0)으로 정답 부분을 문자열로 추출하고, 괄호와 공백을 제거
+        pre_answer = match.group(0).replace("(", "").replace(")", "").replace(" ", "")
+        print("pre_answer:", pre_answer)
+
+        # OCR 결과에서 불필요한 부분 제거
+        pre_ocr_result = ocr_result.strip()
+        print("pre_ocr_result:", pre_ocr_result)
+        pre_ocr_result = pre_ocr_result.replace("구하시오.", "")
+
+        # 정답 부분과 OCR 결과 비교
+        if pre_ocr_result in pre_answer:
+            openai_result = 'solve'
+        else:
+            # solution 내에서 OCR 결과가 포함된 항목이 있는지 확인
+            for sol in solution:
+                if pre_ocr_result in sol:
+                    openai_result = 'doing'
+                    break
     else:
-        for sol in solution:
-            if pre_ocr_result in sol:
-                openai_result = 'doing'
-                break
-    
+        openai_result = 'wrong'
+
     if openai_result == '':
         openai_result = 'wrong'
+
+    print("openai_result:", openai_result)
 
 
     # openai_result = 'doing'
