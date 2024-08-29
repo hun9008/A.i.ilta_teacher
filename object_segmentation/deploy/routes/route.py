@@ -461,20 +461,22 @@ async def hand_ocr(input: Determinent):
     print(f"Llamma 수행 시간: {start_step_time - start_time:.2f}초")
     # print(f"OpenAI 수행 시간: {start_step_time - start_time:.2f}초")
     print("openai_result : ", openai_result)
-    
-    determinent = "None"
-    if "##1##" in openai_result:
-        print("solve")
-        determinent = "solve"
-    elif "##2##" in openai_result:
-        print("wrong")
-        determinent = "wrong"
-    elif "##3##" in openai_result:
-        print("doing")
-        determinent = "doing"
-    else:
-        print("None")
-        determinent = "None"
+
+    determinent = openai_result
+        
+    # determinent = "None"
+    # if "##1##" in openai_result:
+    #     print("solve")
+    #     determinent = "solve"
+    # elif "##2##" in openai_result:
+    #     print("wrong")
+    #     determinent = "wrong"
+    # elif "##3##" in openai_result:
+    #     print("doing")
+    #     determinent = "doing"
+    # else:
+    #     print("None")
+    #     determinent = "None"
 
     output_json = {
         "ocr_result": ocr_result,
