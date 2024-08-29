@@ -490,6 +490,8 @@ async def hand_ocr(input: Determinent):
     pattern = r"\(정답:[^)]+\)"
     match = re.search(pattern, solution)
 
+    ignore_word = '구하시오.\n'
+
     if match:
         # match.group(0)으로 정답 부분을 문자열로 추출하고, 괄호와 공백을 제거
         pre_answer = match.group(0).replace("(", "").replace(")", "").replace(" ", "")
@@ -498,7 +500,8 @@ async def hand_ocr(input: Determinent):
         # OCR 결과에서 불필요한 부분 제거
         pre_ocr_result = ocr_result.strip()
         print("pre_ocr_result:", pre_ocr_result)
-        pre_ocr_result = pre_ocr_result.replace("구하시오.", "")
+        ignore_index = ocr_result.find(ignore_word)
+        pre_ocr_result = ocr_result[ignore_index + len(ignore_word):].strip()
 
         # 정답 부분과 OCR 결과 비교
         if pre_ocr_result in pre_answer:
