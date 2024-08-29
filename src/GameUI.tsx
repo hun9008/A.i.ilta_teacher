@@ -22,15 +22,15 @@ interface UIProps {
   showChatModal: boolean;
   setShowChatModal: (show: boolean) => void;
   onEndStudySession: () => Promise<void>;
-
   onSolve: () => void;
   enableTTS: boolean;
   setEnableTTS: (show: boolean) => void;
+  onReset: () => void;
 }
 
 const GameUI: React.FC<UIProps> = ({
-  showDebugInfo,
-  setShowDebugInfo,
+  // showDebugInfo,
+  // setShowDebugInfo,
   studyTime,
   breakTime,
   isStudyRunning,
@@ -43,6 +43,7 @@ const GameUI: React.FC<UIProps> = ({
   enableTTS,
   setEnableTTS,
   onEndStudySession,
+  onReset,
 }) => (
   <>
     <div className="absolute top-4 left-4 p-2 rounded-lg font-poor-story">
@@ -106,13 +107,18 @@ const GameUI: React.FC<UIProps> = ({
     </div>
 
     <div className="absolute bottom-4 right-4 flex space-x-4">
-
       {/*
       <button onClick={() => setShowDebugInfo(!showDebugInfo)}>
         {showDebugInfo ? '디버그 정보 숨기기' : '디버그 정보 표시'}
       </button>
       <button onClick={() => setShowChatModal(true)}>채팅</button>
       */}
+      <button
+        onClick={onReset}
+        className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+      >
+        초기화
+      </button>
       <button
         className="
           p-4 bg-rose-400 text-white rounded-full

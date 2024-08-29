@@ -21,7 +21,17 @@ interface AnimatedModalProps {
 const chatSocketUrl = import.meta.env.VITE_CHAT_SOCKET_URL;
 const u_id = localStorage.getItem('u_id');
 
-let globalMessages: { text: string; sender: 'user' | 'bot' }[] = [];
+if (typeof window !== 'undefined') {
+  if (!(window as any).globalMessages) {
+    (window as any).globalMessages = [];
+  }
+}
+
+interface Message {
+  text: string;
+  sender: 'user' | 'bot';
+}
+let globalMessages: Message[] = (window as any).globalMessages || [];
 
 const AnimatedModal: React.FC<AnimatedModalProps> = ({
   isOpen,
@@ -36,7 +46,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
 }) => {
   const { getSocket, sendMessage, connectWebSocket, isConnected } =
     useWebSocket();
-  const [messages, setMessages] = useState(globalMessages);
+  const [messages, setMessages] = useState<Message[]>(globalMessages);
   const [inputMessage, setInputMessage] = useState('');
   const [socketReady, setSocketReady] = useState(false);
   const [gradeInfo, setGradeInfo] = useState<string>('');
@@ -161,7 +171,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
 
           const processedText = preprocessMessage(data);
           const newMessage = { text: processedText, sender: 'bot' as const };
-          setMessages((prevMessages) => {
+          setMessages((prevMessages: Message[]) => {
             const updatedMessages = [...prevMessages, newMessage];
             globalMessages = updatedMessages;
             return updatedMessages;

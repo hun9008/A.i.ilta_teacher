@@ -435,15 +435,15 @@ const Dashboard: React.FC = () => {
           autoSkip: false,
           maxRotation: 45,
           minRotation: 45,
-          callback: function(value, index, ticks) {
-            if (index < 10){
-            const label = this.getLabelForValue(index);
-            if (typeof label === 'string') {
-              return label.length > 4 ? label.substr(0, 4) : label;
+          callback: function (_, index) {
+            if (index < 10) {
+              const label = this.getLabelForValue(index);
+              if (typeof label === 'string') {
+                return label.length > 4 ? label.substr(0, 4) : label;
+              }
+              return label;
             }
-            return label;
-          }
-          }
+          },
         },
         max: 8,
       },
@@ -745,11 +745,11 @@ const Dashboard: React.FC = () => {
               ? 130
               : numericValue;
 
-              const hours = Math.floor(normalizedValue / 60);
-              let hoursString = hours < 10 ? `0${hours}` : `${hours}`;
-              const minutes = normalizedValue % 60;
-              const minutesString = minutes < 10 ? `0${minutes}` : `${minutes}`;
-              return `${hoursString}:${minutesString}`;
+            const hours = Math.floor(normalizedValue / 60);
+            let hoursString = hours < 10 ? `0${hours}` : `${hours}`;
+            const minutes = normalizedValue % 60;
+            const minutesString = minutes < 10 ? `0${minutes}` : `${minutes}`;
+            return `${hoursString}:${minutesString}`;
           },
         },
       },
@@ -762,10 +762,10 @@ const Dashboard: React.FC = () => {
     },
   };
 
-  const chartStyle = {
-    height: '250px', // 차트의 세로 크기를 600px로 설정
-    width: '100%', // 차트의 가로 크기는 100%로 설정
-  };
+  // const chartStyle = {
+  //   height: '250px', // 차트의 세로 크기를 600px로 설정
+  //   width: '100%', // 차트의 가로 크기는 100%로 설정
+  // };
 
   // 경험치 바 생성하기
 
@@ -783,29 +783,39 @@ const Dashboard: React.FC = () => {
     <div className="pt-8 flex justify-center items-start">
       <div className="px-4 sm:px-6 lg:px-8 mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4 shadow-lg border-0 border-b-8 rounded-xl">
-
           {/* Left Column */}
           <div className="bg-white p-6 flex flex-col rounded-2xl ">
             <h1 className="text-2xl font-bold flex items-center mb-4">
               안녕 {nickname}아! 오늘도 화이팅!!
-              <img src={silverTier} alt="Silver Tier" className="w-8 h-8 ml-2" />
+              <img
+                src={silverTier}
+                alt="Silver Tier"
+                className="w-8 h-8 ml-2"
+              />
             </h1>
             <div className="bg-blue-50 rounded-lg p-4 mb-4 flex-grow ">
               <h2 className="text-xl font-semibold mb-2">오늘의 학습량</h2>
               <p className="text-gray-700">
-                <span className="font-bold">{solvedProblems}</span> 문제를 풀었고,{' '}
-                <span className="font-bold">{correctProblems}</span> 문제를 맞혔어요!
+                <span className="font-bold">{solvedProblems}</span> 문제를
+                풀었고, <span className="font-bold">{correctProblems}</span>{' '}
+                문제를 맞혔어요!
               </p>
               <p className="text-gray-700">
-                오늘 총 <span className="font-bold">{studyTime}</span> 분 공부했어요.
+                오늘 총 <span className="font-bold">{studyTime}</span> 분
+                공부했어요.
               </p>
             </div>
             <div className="bg-white rounded-lg p-4">
               <h3 className="text-lg font-semibold mb-2">
-                골드 티어 승급까지 {endExperience - currentExperience}점 남았습니다.
+                골드 티어 승급까지 {endExperience - currentExperience}점
+                남았습니다.
               </h3>
               <div className="flex items-center mb-2">
-                <img src={silverTier} alt="Silver Tier" className="w-6 h-6 mr-2" />
+                <img
+                  src={silverTier}
+                  alt="Silver Tier"
+                  className="w-6 h-6 mr-2"
+                />
                 <div className="flex-1 bg-gray-200 rounded-full h-4">
                   <div
                     className="bg-blue-600 rounded-full h-4"
@@ -831,7 +841,8 @@ const Dashboard: React.FC = () => {
                   <span>범위 : {competitionRange}</span>
                   <button
                     onClick={() => navigate('/main/competition')}
-                    className="bg-tertiary-300 text-white px-4 py-1.5 rounded-md hover:bg-tertiary-400 text-sm">
+                    className="bg-tertiary-300 text-white px-4 py-1.5 rounded-md hover:bg-tertiary-400 text-sm"
+                  >
                     1등 도전하기
                   </button>
                 </div>
@@ -841,7 +852,9 @@ const Dashboard: React.FC = () => {
               <h4 className="text-xl font-semibold mb-2">내 학교 순위</h4>
               <div className="bg-slate-50 rounded-lg p-4 flex flex-col justify-between">
                 <div>
-                  <p className="text-lg font-medium mb-2">{localStorage.getItem('school')}</p>
+                  <p className="text-lg font-medium mb-2">
+                    {localStorage.getItem('school')}
+                  </p>
                   <div className="flex justify-between mb-2">
                     <div>
                       <p>순위</p>
@@ -855,7 +868,8 @@ const Dashboard: React.FC = () => {
                 </div>
                 <button
                   onClick={() => navigate('/main/school-ranking')}
-                  className="bg-tertiary-300 text-white px-4 py-1.5 rounded-md hover:bg-tertiary-400 text-sm w-full mt-4">    
+                  className="bg-tertiary-300 text-white px-4 py-1.5 rounded-md hover:bg-tertiary-400 text-sm w-full mt-4"
+                >
                   순위 보기
                 </button>
               </div>
@@ -866,7 +880,8 @@ const Dashboard: React.FC = () => {
           <div className="bg-white p-6 flex flex-col h-full rounded-2xl ">
             <button
               onClick={() => navigate('/setting')}
-              className="w-full bg-indigo-500 text-white px-6 py-2.5 rounded-lg text-xl font-bold flex items-center justify-center hover:bg-indigo-600 mb-4">
+              className="w-full bg-indigo-500 text-white px-6 py-2.5 rounded-lg text-xl font-bold flex items-center justify-center hover:bg-indigo-600 mb-4"
+            >
               학습하기 <StepForward size={24} className="ml-2" />
             </button>
             <div className="bg-teal-50 rounded-lg p-4 mb-4 flex-grow">
@@ -875,9 +890,9 @@ const Dashboard: React.FC = () => {
                 {existingBadges.slice(0, 3).map((badge, index) => (
                   <div key={index} className="text-center">
                     <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-200 overflow-hidden">
-                      <img 
-                        src={badge.image || ''} 
-                        alt={badge.title || 'Badge'} 
+                      <img
+                        src={badge.image || ''}
+                        alt={badge.title || 'Badge'}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -942,7 +957,8 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="flex-1">
-          <div className="h-[400px] flex flex-col bg-white rounded-2xl p-5 "
+            <div
+              className="h-[400px] flex flex-col bg-white rounded-2xl p-5 "
               style={
                 { '--session-count': allSessions.length } as React.CSSProperties
               }
@@ -950,76 +966,79 @@ const Dashboard: React.FC = () => {
               <h3 className="mb-4 font-bold">세션 별 집중도</h3>
               <div className="flex-grow relative"></div>
 
-        <div className="flex-grow relative">
-              <Chart
-                type="bar"
-                data={focusChartData}
-                options={{...focusChartOptions, maintainAspectRatio:false, responsive:true}}
-              />
-            </div>
+              <div className="flex-grow relative">
+                <Chart
+                  type="bar"
+                  data={focusChartData}
+                  options={{
+                    ...focusChartOptions,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                  }}
+                />
+              </div>
             </div>
           </div>
 
           <div className="flex-1">
-      <div className="h-[400px] flex flex-col bg-white rounded-2xl p-5 ">
-        <h3 className="mb-4 font-bold">단원 별 정답률 비교</h3>
-        <div className="flex-grow relative">
-          <Chart 
-            type="bar" 
-            data={categoryData} 
-            options={{
-              ...categoryOptions,
-              maintainAspectRatio: false,
-              responsive: true,
-            }}
-          />
-        </div>
-      </div>
-    </div>
-        </div>
-
-      {modalVisible && (
-        <div className={styles.modalOverlay} onClick={closeModal}>
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.closeButton} onClick={closeModal}>
-              ×
-            </div>
-            <div className={styles.badgeGrid}>
-              {mergedBadges.map((badge, index) => (
-                <div
-                  key={index}
-                  className={styles.badgeCircleModal}
-                  title={`${badge.title}: ${badge.description}`}
-                >
-                  <div
-                    className={`${styles.badgeImageWrapper} ${
-                      badge.earned ? styles.badgeImageWrapperEarned : ''
-                    }`}
-                  >
-                    {badge.image ? (
-                      <img
-                        className={styles.badgeImage}
-                        src={badge.image}
-                        alt={badge.title}
-                      />
-                    ) : (
-                      <div className={styles.placeholderText}>
-                        {badge.earned ? '!' : '?'}
-                      </div>
-                    )}
-                  </div>
-                  <div className={styles.badgeTitle}>{badge.title}</div>
-                </div>
-              ))}
+            <div className="h-[400px] flex flex-col bg-white rounded-2xl p-5 ">
+              <h3 className="mb-4 font-bold">단원 별 정답률 비교</h3>
+              <div className="flex-grow relative">
+                <Chart
+                  type="bar"
+                  data={categoryData}
+                  options={{
+                    ...categoryOptions,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
-      )}
-    </div>
 
+        {modalVisible && (
+          <div className={styles.modalOverlay} onClick={closeModal}>
+            <div
+              className={styles.modalContent}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.closeButton} onClick={closeModal}>
+                ×
+              </div>
+              <div className={styles.badgeGrid}>
+                {mergedBadges.map((badge, index) => (
+                  <div
+                    key={index}
+                    className={styles.badgeCircleModal}
+                    title={`${badge.title}: ${badge.description}`}
+                  >
+                    <div
+                      className={`${styles.badgeImageWrapper} ${
+                        badge.earned ? styles.badgeImageWrapperEarned : ''
+                      }`}
+                    >
+                      {badge.image ? (
+                        <img
+                          className={styles.badgeImage}
+                          src={badge.image}
+                          alt={badge.title}
+                        />
+                      ) : (
+                        <div className={styles.placeholderText}>
+                          {badge.earned ? '!' : '?'}
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.badgeTitle}>{badge.title}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

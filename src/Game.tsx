@@ -49,6 +49,35 @@ function Game() {
     [key: number]: number;
   }>({});
 
+  const handleReset = () => {
+    // 모든 문제의 solved 상태를 false로 초기화
+    const resetSolvedProblems = Object.keys(solvedProblems).reduce(
+      (acc, key) => {
+        acc[parseInt(key)] = false;
+        return acc;
+      },
+      {} as { [key: number]: boolean }
+    );
+    setSolvedProblems(resetSolvedProblems);
+
+    // 채팅 내용 초기화
+    // AnimatedModal 컴포넌트에서 관리되는 전역 변수를 초기화
+    if (typeof window !== 'undefined') {
+      (window as any).globalMessages = [];
+    }
+
+    // 로컬 스토리지에서 채팅 내용 제거
+    localStorage.removeItem('chatMessages');
+
+    // 얼음 조각들의 색깔 초기화는 solvedProblems 상태 변경으로 자동으로 처리됨
+
+    // 모달 닫기
+    setShowModal(false);
+    setShowChatModal(false);
+
+    console.log('Game state has been reset');
+  };
+
   useEffect(() => {
     // 문제 번호와 인덱스의 매핑 생성
     const indexMap = Object.keys(problemTexts).reduce((acc, key, index) => {
@@ -420,6 +449,7 @@ function Game() {
         onSolve={handleSolveProblem}
         enableTTS={enableTTS}
         setEnableTTS={setEnableTTS}
+        onReset={handleReset}
       />
       <AnimatePresence>
         {showModal && (
