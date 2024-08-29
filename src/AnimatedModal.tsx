@@ -40,12 +40,26 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
   const [inputMessage, setInputMessage] = useState('');
   const [socketReady, setSocketReady] = useState(false);
   const [gradeInfo, setGradeInfo] = useState<string>('');
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  // const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [cleanedHandOcrs, setCleanedHandOcrs] = useState<string>('');
   const [lastValidHandOcr, setLastValidHandOcr] = useState<string>('');
   const [solvedProblems, setSolvedProblems] = useState<Set<number>>(new Set());
   const [ttsQueue, setTTSQueue] = useState<string[]>([]);
-  const ttsPlayingRef = useRef<boolean>(false);
+  const [isProcessingTTS, setIsProcessingTTS] = useState(false);
+  const [currentProblemNum, setCurrentProblemNum] =
+    useState<number>(selectedFloe);
+
+  const handleTTSComplete = () => {
+    setTTSQueue((prevQueue) => prevQueue.slice(1)); // Remove the processed TTS from the queue
+    setIsProcessingTTS(false);
+  };
+
+  useEffect(() => {
+    if (ttsQueue.length > 0 && !isProcessingTTS) {
+      setIsProcessingTTS(true);
+    }
+  }, [ttsQueue, isProcessingTTS]);
+
   /* 채팅 아래로 스크롤*/
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -55,31 +69,6 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
         chatContainerRef.current.scrollHeight;
     }
   };
-  useEffect(() => {
-    const playNextInQueue = async () => {
-      if (ttsPlayingRef.current || ttsQueue.length === 0) {
-        return;
-      }
-
-      ttsPlayingRef.current = true;
-      const nextText = ttsQueue[0];
-
-      const ttsAudioUrl = await handleTTS(nextText.trim(), u_id as string);
-      if (ttsAudioUrl) {
-        setAudioUrl(ttsAudioUrl);
-      }
-    };
-
-    if (ttsQueue.length > 0) {
-      playNextInQueue();
-    }
-  }, [ttsQueue]);
-
-  const handleAudioEnd = () => {
-    ttsPlayingRef.current = false;
-    setTTSQueue((prevQueue) => prevQueue.slice(1));
-  };
-
   useEffect(() => {
     scrollToBottom();
   }, [messages, isOpen]);
@@ -150,11 +139,15 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
               const newProblemIndex = parseInt(problemNumMatch[1], 10);
               console.log(status, newProblemIndex);
               onProblemIndexChange(newProblemIndex);
+              setCurrentProblemNum(newProblemIndex);
 
-              if (status === 'solve' && !solvedProblems.has(newProblemIndex)) {
+              if (
+                status === 'solve' &&
+                newProblemIndex === currentProblemNum &&
+                !solvedProblems.has(newProblemIndex)
+              ) {
                 onSolve();
                 setSolvedProblems((prev) => new Set(prev).add(newProblemIndex));
-                return;
               }
             }
             // if (problemNumMatch) {
@@ -189,7 +182,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
             );
 
             if (ttsAudioUrl) {
-              setAudioUrl(ttsAudioUrl);
+              setTTSQueue((prevQueue) => [...prevQueue, ttsAudioUrl]);
             }
           }
         };
@@ -212,6 +205,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     onSolve,
     lastValidHandOcr,
     solvedProblems,
+    currentProblemNum,
   ]);
 
   const handleSendMessage = () => {
@@ -432,13 +426,12 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 <Send size={16} className="mx-4" />
               </button>
             </div>
-            {/*
-            <button onClick={handleClose} className="bg-gray-400">
-              닫기
-            </button>*/}
           </motion.div>
-          {audioUrl && (
-            <TTSAudioPlayer audioUrl={audioUrl} onEnded={handleAudioEnd} />
+          {ttsQueue.length > 0 && isProcessingTTS && (
+            <TTSAudioPlayer
+              ttsQueue={ttsQueue}
+              onTTSComplete={handleTTSComplete}
+            />
           )}{' '}
         </div>
       </motion.div>

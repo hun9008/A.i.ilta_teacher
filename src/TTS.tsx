@@ -1,24 +1,37 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 interface TTSAudioPlayerProps {
-  audioUrl: string;
-  onEnded?: () => void;
+  ttsQueue: string[];
+  onTTSComplete: () => void;
 }
 
 export const TTSAudioPlayer: React.FC<TTSAudioPlayerProps> = ({
-  audioUrl,
-  onEnded,
+  ttsQueue,
+  onTTSComplete,
 }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (audioUrl && audioRef.current) {
-      audioRef.current.src = audioUrl;
+  useEffect(() => {
+    if (ttsQueue.length > 0 && !currentAudioUrl) {
+      const nextAudioUrl = ttsQueue[0];
+      setCurrentAudioUrl(nextAudioUrl);
+    }
+  }, [ttsQueue, currentAudioUrl]);
+
+  useEffect(() => {
+    if (currentAudioUrl && audioRef.current) {
+      audioRef.current.src = currentAudioUrl;
       audioRef.current.play();
     }
-  }, [audioUrl]);
+  }, [currentAudioUrl]);
 
-  return <audio ref={audioRef} onEnded={onEnded} />;
+  const handleAudioEnd = () => {
+    onTTSComplete();
+    setCurrentAudioUrl(null); // Prepare for the next audio in the queue
+  };
+
+  return <audio ref={audioRef} onEnded={handleAudioEnd} />;
 };
 
 export const handleTTS = async (
