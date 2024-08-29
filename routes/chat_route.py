@@ -118,7 +118,7 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                         if hand_write_image is None:
                             print("Warning: hand_write is None")
                             continue
-                        solution = solutions_storage[0][prob_num]
+                        solution = solutions_storage[prob_num]
 
                         print("solution : ", solution)
 
@@ -225,7 +225,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # response = await process_message(chat_request)
             # await websocket.send_text(response)
             
-            for solution in solutions_storage[0]:
+            for solution in solutions_storage:
                 if type(solution) == list:
                     print("right solution type : list")
                     net_solution = solution
