@@ -60,79 +60,79 @@ def generate_random_competition(difficulty, term):
 
     print(f"New competition generated for difficulty {difficulty}, term {term} and saved to the database.")
 
-def user_focusing_level_calculation(u_id, s_id):
+# def user_focusing_level_calculation(u_id, s_id):
 
-    # local_storage/pc의 가장 최근 사진을 model.maitutor.site/face_tracker로 전송
-    timer_running = False
-    start_time = None
-    focus_time_threshold = 60
+#     # local_storage/pc의 가장 최근 사진을 model.maitutor.site/face_tracker로 전송
+#     timer_running = False
+#     start_time = None
+#     focus_time_threshold = 60
 
-    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+#     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
-    while True:
+#     while True:
 
-        image_path = os.path.join(root_dir, "local_storage/pc")
-        all_pc_images = os.listdir(image_path)
+#         image_path = os.path.join(root_dir, "local_storage/pc")
+#         all_pc_images = os.listdir(image_path)
 
-        if len(all_pc_images) > 0:
-            recent_pc_image = all_pc_images[-1]
+#         if len(all_pc_images) > 0:
+#             recent_pc_image = all_pc_images[-1]
 
-            with open(f"{image_path}/{recent_pc_image}", "rb") as f:
-                image_data = f.read()
+#             with open(f"{image_path}/{recent_pc_image}", "rb") as f:
+#                 image_data = f.read()
 
-            encoding_image = base64.b64encode(image_data).decode('utf-8')
+#             encoding_image = base64.b64encode(image_data).decode('utf-8')
 
-            response = requests.post("http://model.maitutor.site/face_tracker", json={"image": encoding_image})
+#             response = requests.post("http://model.maitutor.site/face_tracker", json={"image": encoding_image})
 
-            if stop_thread_flag:
-                break
-            elif response.status_code != 200:
-                print("Face tracker model request failed.")
-            else:
-                if type(response) == json:
-                    is_focus = response.get("is_focus", 0)
-                elif type(response) == dict:
-                    is_focus = response["is_focus"]
-                elif isinstance(response, requests.models.Response):
-                    if response.status_code == 200:
-                        response_json = response.json()
-                        is_focus = response_json.get("is_focus", 0)
-                    else:
-                        print("Face tracker model request failed.")
-                        is_focus = 0
-                else:
-                    print("warning (unexpected response type) : ", type(response))
-                    is_focus = 0
-                # is_focus = response.get("is_focus", 0)
-                if is_focus != 1:
-                    if not timer_running:
-                        start_time = datetime.now()
-                        timer_running = True
-                        print("User is not focusing.")
-                else:
-                    if timer_running:
-                        end_time = datetime.now()
-                        elapsed_time = (end_time - start_time).total_seconds()
+#             if stop_thread_flag:
+#                 break
+#             elif response.status_code != 200:
+#                 print("Face tracker model request failed.")
+#             else:
+#                 if type(response) == json:
+#                     is_focus = response.get("is_focus", 0)
+#                 elif type(response) == dict:
+#                     is_focus = response["is_focus"]
+#                 elif isinstance(response, requests.models.Response):
+#                     if response.status_code == 200:
+#                         response_json = response.json()
+#                         is_focus = response_json.get("is_focus", 0)
+#                     else:
+#                         print("Face tracker model request failed.")
+#                         is_focus = 0
+#                 else:
+#                     print("warning (unexpected response type) : ", type(response))
+#                     is_focus = 0
+#                 # is_focus = response.get("is_focus", 0)
+#                 if is_focus != 1:
+#                     if not timer_running:
+#                         start_time = datetime.now()
+#                         timer_running = True
+#                         print("User is not focusing.")
+#                 else:
+#                     if timer_running:
+#                         end_time = datetime.now()
+#                         elapsed_time = (end_time - start_time).total_seconds()
 
-                        if elapsed_time >= focus_time_threshold:
+#                         if elapsed_time >= focus_time_threshold:
                             
-                            connection = get_db_connection()
-                            cursor = connection.cursor()
+#                             connection = get_db_connection()
+#                             cursor = connection.cursor()
 
-                            insert_query = "INSERT INTO not_focusing_time (u_id, s_id, not_f_time_s, not_f_time_e, not_f_time_t) VALUES (%s, %s, %s, %s, %s)"
-                            cursor.execute(insert_query, (u_id, s_id, start_time, end_time, elapsed_time))
-                            connection.commit()
+#                             insert_query = "INSERT INTO not_focusing_time (u_id, s_id, not_f_time_s, not_f_time_e, not_f_time_t) VALUES (%s, %s, %s, %s, %s)"
+#                             cursor.execute(insert_query, (u_id, s_id, start_time, end_time, elapsed_time))
+#                             connection.commit()
 
-                            cursor.close()
-                            connection.close()
+#                             cursor.close()
+#                             connection.close()
                             
-                            print(f"Unfocused time recorded: {elapsed_time} seconds.")
+#                             print(f"Unfocused time recorded: {elapsed_time} seconds.")
 
-                        timer_running = False
+#                         timer_running = False
 
-            time.sleep(60)
-        else:
-            time.sleep(120)
+#             time.sleep(60)
+#         else:
+#             time.sleep(120)
 
 
     
@@ -163,10 +163,10 @@ def start_background_task():
 #         print("New competitions generated.")
 #         time.sleep(60)
 
-def start_focusing_level_task(u_id, s_id):
-    global focusing_thread
-    focusing_thread = threading.Thread(target=user_focusing_level_calculation, args=(u_id, s_id), daemon=True)
-    focusing_thread.start()
+# def start_focusing_level_task(u_id, s_id):
+#     global focusing_thread
+#     focusing_thread = threading.Thread(target=user_focusing_level_calculation, args=(u_id, s_id), daemon=True)
+#     focusing_thread.start()
 
 def end_focusing_level_task():
     global stop_thread_flag

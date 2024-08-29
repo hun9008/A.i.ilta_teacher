@@ -429,7 +429,8 @@ async def process_message(chat: ChatRequest):
                     response = ''
                 else:
                     response = "모든 단계를 설명했어. 다른 질문이 있으면 물어봐."
-                    user_step_cnt += 1
+                    # user_step_cnt += 1
+                    user_step_cnt = 0
                 return response
 
         elif user_vars.user_status == "solve":

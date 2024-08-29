@@ -21,7 +21,7 @@ async def set_time(settime:SetTime):
     # start_focusing_level_task()
     s_id = generate_random_s_id(current)
 
-    start_focusing_level_task(settime.u_id, s_id)
+    # start_focusing_level_task(settime.u_id, s_id)
     
     # settime에서 u_id, time 두개 가져오기
     u_id = settime.u_id
@@ -71,7 +71,7 @@ async def real_time(realtime:RealTime):
     print("DB connected in /study/realtime\n")
     connection = create_connection()
 
-    end_focusing_level_task()
+    # end_focusing_level_task()
 
     # front에서 가져올 data
     u_id = realtime.u_id
