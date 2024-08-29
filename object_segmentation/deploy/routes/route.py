@@ -482,7 +482,7 @@ async def hand_ocr(input: Determinent):
     answer = solution[-1]
 
     openai_result = ''
-    pre_answer = pre_answer.replace("\n", "")
+    pre_answer = answer.replace("\n", "")
     print("pre_answer : ", pre_answer)
     pre_ocr_result = ocr_result.strip()
     print("pre_ocr_result : ", pre_ocr_result)
