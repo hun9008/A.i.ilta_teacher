@@ -435,6 +435,23 @@ async def fetch_voting(user_answer, solution):
         print("result : ", result)
         return result
     
+def find_ans_in_sol(solution):
+    # Find the index of the keyword "정답"
+    keyword = "정답"
+    start_index = solution.find(keyword)
+    
+    if start_index == -1:
+        # If "정답" is not found, return an empty string
+        return "no keyword: answer"
+    
+    # Extract the substring starting right after "정답"
+    tmp = solution[start_index + len(keyword):]
+    
+    # Strip leading colons or spaces
+    ans = tmp.strip(": ").strip()
+    
+    return ans
+
 
 @router.post("/hand_ocr")
 async def hand_ocr(input: Determinent):
@@ -456,7 +473,26 @@ async def hand_ocr(input: Determinent):
     print("@@@@@@@@@ Determinent @@@@@@@@@")
     # openai_result = await fetch_openai(client, f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
     # openai_result = await fetch_ans_llama31(f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
-    openai_result = await fetch_voting(ocr_result, solution)
+    # openai_result = await fetch_voting(ocr_result, solution)
+    
+    # code understanding
+    # ocr_result: hand ocr result
+    # solution: input.solution, input := Determinent
+    # class Determinent(BaseModel):
+    #   hand_write_image : str
+    #   solution : str
+    
+    # hard coding version user status determinating
+    answer = find_ans_in_sol(solution)
+    openai_result = 'doing'
+    
+    if (ocr_result in solution) and (ocr_result != answer):
+        openai_result = 'doing'
+    elif ocr_result == answer:
+        openai_result = 'solve'
+    else:
+        openai_result = 'wrong'
+        
     start_step_time = time.time()
     print(f"Llamma 수행 시간: {start_step_time - start_time:.2f}초")
     # print(f"OpenAI 수행 시간: {start_step_time - start_time:.2f}초")
