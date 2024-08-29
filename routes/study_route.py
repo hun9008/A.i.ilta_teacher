@@ -6,7 +6,7 @@ from config import user_vars
 from config.database import create_connection, execute_query, read_query
 from utils.study_utils import generate_random_s_id
 from datetime import datetime
-from background_task import start_focusing_level_task, end_focusing_level_task
+# from background_task import start_focusing_level_task, end_focusing_level_task
 
 route = APIRouter()
 
