@@ -460,33 +460,29 @@ async def hand_ocr(input: Determinent):
     ocr_results = detect_hand_ocr_text(input.hand_write_image)
     # for hand_ocr in ocr_results:
     #     print("### textAnnotations: ", hand_ocr)
-    ocr_result = ocr_results[0]
-    start_step_time = time.time()
+    
+    ocr_result = ocr_results[0] # hand ocr
+    # start_step_time = time.time()
     print("@@@@@@@@@ hand_ocr_start @@@@@@@@@")
 
-    print(f"OCR 수행 시간: {start_step_time - start_time:.2f}초")
-    print("ocr_result : ", ocr_result)
-    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-
-    solution = input.solution
-
-    print("ocr_result : ", ocr_result)
-    print("solution : ", solution)
+    # print(f"OCR 수행 시간: {start_step_time - start_time:.2f}초")
+    print("ocr_result: ", ocr_result, "ocr_result type: ", type(ocr_result))
+    
+    # client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
     # openai_result = await fetch_openai(client, f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
     # openai_result = await fetch_ans_llama31(f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
     # openai_result = await fetch_voting(ocr_result, solution)
     
+    solution = input.solution
+    # print("solution : ", solution)
     # code understanding
-    # ocr_result: hand ocr result
     # solution: input.solution, input := Determinent
     # class Determinent(BaseModel):
     #   hand_write_image : str
     #   solution : str
-    
-    # hard coding version user status determinating
-    # answer = solution[-1]
 
-    openai_result = ''
+    openai_result = 'doing'
+    error_detect = ''
     pattern = r"\(정답:[^)]+\)"
     match = re.search(pattern, solution)
 
@@ -495,34 +491,32 @@ async def hand_ocr(input: Determinent):
     if match:
         # match.group(0)으로 정답 부분을 문자열로 추출하고, 괄호와 공백을 제거
         pre_answer = match.group(0).replace("(", "").replace(")", "").replace(" ", "")
+        answer_list = pre_answer.split(',')
         print("pre_answer:", pre_answer)
 
         # OCR 결과에서 불필요한 부분 제거
         pre_ocr_result = ocr_result.strip()
-        print("pre_ocr_result:", pre_ocr_result)
         ignore_index = ocr_result.find(ignore_word)
         pre_ocr_result = ocr_result[ignore_index + len(ignore_word):].strip()
-
-        # 정답 부분과 OCR 결과 비교
-        if pre_ocr_result in pre_answer:
-            openai_result = 'solve'
-        else:
-            # solution 내에서 OCR 결과가 포함된 항목이 있는지 확인
-            for sol in solution:
-                if pre_ocr_result in sol:
-                    openai_result = 'doing'
-                    break
+        nospace_ocr_result = ocr_result.replace(" ", "")  # 공백 제거
+        print("nospace_ocr_result:", nospace_ocr_result)
+        
+        for answer in answer_list:
+            if answer in nospace_ocr_result:
+                openai_result = 'solve'
+                break
     else:
+        error_detect = 'there is no answer from ai'
         openai_result = 'wrong'
 
     if openai_result == '':
+        error_detect = 'there is no answer from both'
         openai_result = 'wrong'
 
-    print("openai_result:", openai_result)
-
+    print("openai_result: ", openai_result)
+    print("error_detect: ", error_detect)
 
     # openai_result = 'doing'
-    
     # if (ocr_result in solution) and (ocr_result != answer):
     #     openai_result = 'doing'
     # elif ocr_result == answer:
@@ -530,8 +524,8 @@ async def hand_ocr(input: Determinent):
     # else:
     #     openai_result = 'wrong'
         
-    start_step_time = time.time()
-    print(f"Llamma 수행 시간: {start_step_time - start_time:.2f}초")
+    # start_step_time = time.time()
+    # print(f"Llamma 수행 시간: {start_step_time - start_time:.2f}초")
     # print(f"OpenAI 수행 시간: {start_step_time - start_time:.2f}초")
     # print("openai_result : ", openai_result)
 
@@ -552,7 +546,7 @@ async def hand_ocr(input: Determinent):
     #     determinent = "None"
 
     output_json = {
-        "ocr_result": ocr_result,
+        "ocr_result": nospace_ocr_result,
         "determinants": determinent,
     }
     print("output_json : ", output_json)
