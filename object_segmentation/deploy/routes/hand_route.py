@@ -19,127 +19,6 @@ hand_router = APIRouter()
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-# def decode_image(base64_str):
-#     img_data = base64.b64decode(base64_str)
-#     np_arr = np.frombuffer(img_data, np.uint8)
-#     image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-#     return image
-
-# def area_loc2ratio(image_size, x, y, w, h):
-    
-#     output_loc2rat = ((x*100)/image_size[1], (y*100)/image_size[0], (w*100)/image_size[1], (h*100)/image_size[0])
-    
-#     return output_loc2rat
-
-# ## which problem is user solving
-# @hand_router.post("/prob_areas_which_prob")
-# async def define_prob_areas(input: ProbAreas_HandImg):
-#     image_clean = decode_image(input.image_clean)
-#     image_hand = decode_image(input.image_hand)
-    
-#     prob_loc_l, prob_loc_r = prob_loc_crop(image_clean)
-    
-#     if prob_loc_l is not None and prob_loc_r is not None:
-#         prob_loc_l.sort(key=lambda x: x[1])
-#         prob_loc_r.sort(key=lambda x: x[1])
-        
-#         real_loc_r = []
-#         tot_loc = []
-#         left_prob_count = 0
-#         right_prob_count = 0
-#         for loc in prob_loc_l:
-#             # print("left", loc)
-#             tot_loc.append(loc)
-#             left_prob_count += 1
-#         for loc in prob_loc_r:
-#             loc = (loc[0]+image_clean.shape[1]//2,loc[1], loc[2], loc[3])
-#             # print("right", loc)
-#             real_loc_r.append(loc)
-#             tot_loc.append(loc)
-#             right_prob_count += 1
-            
-#         prob_areas = []
-#         if left_prob_count > 1:
-#             for i in range (left_prob_count - 1):
-#                 tmp = prob_loc_l[i]
-#                 tmp_next = prob_loc_l[i+1]
-#                 prob_area = (tmp[0], tmp[1], image_clean.shape[1]//2-tmp[0]-3, tmp_next[1]-tmp[1]-3)
-#                 prob_areas.append(prob_area)
-#             tmp = prob_loc_l[left_prob_count - 1]
-#             prob_areas.append((tmp[0], tmp[1], image_clean.shape[1]//2-tmp[0], image_clean.shape[0]-tmp[1]-3))
-#         else:
-#             if len(prob_loc_l) > 0 and len(prob_loc_r) > 0:
-#                 prob_areas.append((prob_loc_l[0], prob_loc_l[1], image_clean.shape[1]//2-prob_loc_l[0]-3, image_clean.shape[0]-prob_loc_l[1]-3))
-#             else:
-#                 prob_areas.append((0, 0, image_clean.shape[1]//2, image_clean.shape[0]))
-#         if right_prob_count > 1:
-#             for i in range (right_prob_count - 1):
-#                 tmp = real_loc_r[i]
-#                 tmp_next = real_loc_r[i+1]
-#                 prob_area = (tmp[0], tmp[1], image_clean.shape[1]-tmp[0]-3, tmp_next[1]-tmp[1]-3)
-#                 prob_areas.append(prob_area)
-#             tmp = real_loc_r[right_prob_count - 1]
-#             prob_areas.append((tmp[0], tmp[1], image_clean.shape[1]-tmp[0], image_clean.shape[0]-tmp[1]-3))
-#         else:
-#             prob_areas.append((real_loc_r[0], real_loc_r[1], image_clean.shape[1]-real_loc_r[0]-3, image_clean.shape[0]-real_loc_r[1]-3))
-
-#         # visualize_problem_locations(image_show_clean[:,], prob_areas)
-        
-#         tl, br = hand_loc(image_hand)
-#         hand_area_loc = (tl[0], tl[1], br[0]-tl[0], br[1]-tl[1])
-#         # visualize_hand_area(image_show_hand[:,], hand_area_loc)
-            
-#         prob_loc_rats = []
-#         image_clean_size = (image_clean.shape[0], image_clean.shape[1])
-#         for (prob_x, prob_y, prob_w, prob_h) in prob_areas:
-#             rat_x, rat_y, rat_w, rat_h = area_loc2ratio(image_clean_size, prob_x, prob_y, prob_w, prob_h)
-#             prob_loc_rats.append((rat_x, rat_y, rat_w, rat_h))
-        
-#         #determine which prob_area the hand_are_loc is located
-#         handloc_x, handloc_y, handloc_w, handloc_h = hand_area_loc
-        
-#         image_hand_size = (image_hand.shape[0], image_hand.shape[1])
-#         hand_x, hand_y, hand_w, hand_h = area_loc2ratio(image_hand_size, handloc_x, handloc_y, handloc_w, handloc_h)
-        
-#         # print("-------*********")
-#         # print("clean figure size: ", image_clean_size)
-#         # print("hand figure size: ",image_hand_size)
-#         # for i in prob_loc_rats:
-#             # print(i)
-#         # print("\n hand location", hand_area_loc)
-#         # print(f"hand loc ratio: {hand_x, hand_y, hand_w, hand_h}")
-#         # print("-------*********")
-        
-#         prob_num = None
-#         for i, (prob_x, prob_y, prob_w, prob_h) in enumerate(prob_loc_rats):
-#             # print("prob area: ", i, "prob location rat", (prob_x, prob_y, prob_w, prob_h))
-#             if (hand_x >= prob_x and hand_x <= prob_x + prob_w and
-#                 hand_y >= prob_y and hand_y <= prob_y + prob_h):
-#                 prob_num = i
-#                 break
-        
-#         if prob_num is None:
-#             prob_num = -1
-        
-#         image_path = './temp'
-#         # print("image_list : ", os.listdir(image_path))
-#         for filename in os.listdir(image_path):
-#             # print("filename: ", filename)
-#             os.remove(os.path.join(image_path, filename))
-        
-#         output = {
-#             "prob_area": prob_areas,
-#             "prob_num": prob_num,
-#         }
-#     else:
-#         output = {
-#             "prob_area": [],
-#             "prob_num": -1,
-#         }
-    
-#     return JSONResponse(content=output)
-
-
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./keys/flyai-432701-9290e087cf34.json"
 client = vision.ImageAnnotatorClient()
 
@@ -389,7 +268,7 @@ def calculate_inter_question_areas(problem_locations, image_height):
         x2, y2, w2, h2 = problem_locations[i + 1]
 
         # 문제 사이의 중간 영역을 계산
-        y_margin = (y2-(y1 +h1))*0.1
+        y_margin = (y2-(y1 +h1))*0.05
         inter_y_start = y1 + h1 + y_margin
         inter_y_end = y2
         inter_h = inter_y_end - inter_y_start
@@ -455,8 +334,8 @@ def detect_handwriting(image, problem_texts):
         if text:
             cropped_lines.append(text)
     
-    print("problem len : ", len(problem_texts))
-    print("cropped len : ", len(cropped_lines))
+    # print("problem len : ", len(problem_texts))
+    # print("cropped len : ", len(cropped_lines))
 
     # 문제 텍스트의 각 항목을 cropped_lines에서 제거
     for problem_text in problem_texts:
@@ -504,6 +383,39 @@ def print_ocr_response(image):
 
     return texts, bounding_boxes
 
+def filtering_contoured_areas(positions):
+    filtered_positions = []
+
+    # 중복을 피하기 위해 이미 처리된 영역을 저장
+    processed = [False] * len(positions)
+
+    for i in range(len(positions)):
+        if processed[i]:
+            continue
+        
+        max_area_position = positions[i]
+        max_area = max_area_position[2] * max_area_position[3]
+        
+        for j in range(i + 1, len(positions)):
+            if processed[j]:
+                continue
+            
+            # x, y 좌표 차이의 합 계산
+            diff = abs(positions[i][0] - positions[j][0]) + abs(positions[i][1] - positions[j][1])
+            
+            if diff < 200:
+                # 면적 비교
+                area_j = positions[j][2] * positions[j][3]
+                if area_j > max_area:
+                    max_area_position = positions[j]
+                    max_area = area_j
+                # j번 영역은 중복 처리되므로 제외
+                processed[j] = True
+        
+        # i번 영역이 가장 큰 경우로 확정
+        filtered_positions.append(max_area_position)
+    return filtered_positions
+
 @hand_router.post("/hand_determinant")
 async def hand_determinant(image_input: ImageInput):
     start_time = time.time()
@@ -513,13 +425,17 @@ async def hand_determinant(image_input: ImageInput):
 
     origin_right, origin_left = imtrim(problem_image)
 
-    right, left = prob_loc_crop(problem_image)
-    start_step_time = time.time()
+    pre_right, pre_left = prob_loc_crop(problem_image)
     print("@@@@@@@@ hand_determinant_start @@@@@@@@@@@@")
+    print("image_size compare-origin_width: ", problem_image.shape[1], " origin_left_width: ", origin_left.shape[1])
 
-    print(f"Step 1: Problem location detection time: {start_step_time - start_time:.2f} seconds")
+    # print(f"Step 1: Problem location detection time: {start_step_time - start_time:.2f} seconds")
 
     start_step_time = time.time()
+    # 중복되는 영역 제거
+    left = filtering_contoured_areas(pre_left)
+    right = filtering_contoured_areas(pre_right)
+    
     for i, (x, y, w, h) in enumerate(left):
         cropped_left = origin_left[y:y+h, x:x+w]
         cv2.imwrite(f"./temp/problem_left_{i}.png", cropped_left)
@@ -611,8 +527,6 @@ async def hand_determinant(image_input: ImageInput):
             left_flag = False
             break
 
-    print("@@@@@@@@@@@@@@@@@@@@@")
-
     right_max_num = 0
     if left_flag:
         for i in range(len(inter_question_areas_right)):
@@ -628,7 +542,7 @@ async def hand_determinant(image_input: ImageInput):
     else:
         handwrite_num += left_max_num
 
-    print("@@@@@@@@@@@@@@@@@@@@@")
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
     # left와 right의 문제수를 고려해 handwrite가 연속된 마지막 번호 출력
 
@@ -652,13 +566,13 @@ async def hand_determinant(image_input: ImageInput):
         user_handwrite_image_base64 = base64.b64encode(buffer).decode('utf-8')
 
         print("user_ocr_result[handwrite_num] : ", user_ocr_result[handwrite_num])
-        print("type handwrite_num : ", type(user_ocr_result[handwrite_num]))
+        # print("type handwrite_num : ", type(user_ocr_result[handwrite_num]))
         output_json = {
             "handwrite_num": handwrite_num,
             "user_handwrite_image": user_handwrite_image_base64,
             "user_hand_ocr_result": user_ocr_result[handwrite_num]
         }
-    print(f"Step 3: Handwriting detection time: {time.time() - start_step_time:.2f} seconds")
+    # print(f"Step 3: Handwriting detection time: {time.time() - start_step_time:.2f} seconds")
     print("@@@@@@@@ hand_determinant_end @@@@@@@@@@@@")
 
     return output_json
