@@ -146,6 +146,18 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
 
             except Exception as e:
                 print(f"Error in decide_user_wrong loop: {str(e)}")
+                # reset
+                print("im clear")
+                user_vars.user_status = "doing"
+                user_context.clear()
+                step_elements.clear()
+                user_step_cnt = 0
+                wrong_block_list.clear()
+                delay_block_list.clear()
+                user_look.clear()
+                solve_problem.clear()
+                user_hand_ocr_saved = "Not Yet"
+                user_problem_num = "Not Yet"
         
     except Exception as e:
         print(f"Critical error in decide_user_wrong: {str(e)}")
