@@ -84,8 +84,8 @@ async def handle_ws_solution(user_ocrs, websocket, u_id, device):
     output_json = {
         # "concepts": response.get("concepts", []),
         # "solutions": response.get("solutions", [])
-        "concepts" : concepts_storage,
-        "solutions" : solutions_storage,
+        "concepts" : concepts_storage.copy(),
+        "solutions" : solutions_storage.copy(),
     }
 
     # concepts_storage.clear()
