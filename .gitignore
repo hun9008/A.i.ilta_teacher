@@ -18,3 +18,5 @@ temp_success
 temp/*
 segment_anything_/*
 hand_data
+
+model_venv

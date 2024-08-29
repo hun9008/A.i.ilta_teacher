@@ -514,6 +514,8 @@ async def hand_determinant(image_input: ImageInput):
 
     right, left = prob_loc_crop(problem_image)
     start_step_time = time.time()
+    print("@@@@@@@@ hand_determinant_start @@@@@@@@@@@@")
+
     print(f"Step 1: Problem location detection time: {start_step_time - start_time:.2f} seconds")
 
     start_step_time = time.time()
@@ -595,8 +597,6 @@ async def hand_determinant(image_input: ImageInput):
         print("problem text right : ", prob)
         problem_ocr_texts_right.append(prob)
     
-    print("@@@@@@@@@@@@@@@@@@@@@")
-
     left_flag = True
     handwrite_num = -1
     left_max_num = 0
@@ -658,6 +658,8 @@ async def hand_determinant(image_input: ImageInput):
             "user_hand_ocr_result": user_ocr_result[handwrite_num]
         }
     print(f"Step 3: Handwriting detection time: {time.time() - start_step_time:.2f} seconds")
+    print("@@@@@@@@ hand_determinant_end @@@@@@@@@@@@")
+
     return output_json
 
 # origin_image = cv2.imread('./hand_no.jpg')
