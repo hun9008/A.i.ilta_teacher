@@ -386,20 +386,16 @@ async def fetch(ocr_result, solution):
     truth = re.search(r'\(정답: \d+\)', solution)
     if truth is None:
         truth = re.search(r'\(정답 : \d+\)', solution)
-        truth = truth.group().split(":")[1].strip()
     if truth is None:
         truth = re.search(r'\(정답: \-\d+\)', solution)
-        truth = truth.group().split(":")[1].strip()
     if truth is None:
-        truth = re.search(r'정답 : \d', solution)
-        truth = truth.group().split(":")[1].strip()
-    if truth is None:
-        truth = re.search(r'정답 : \-\d', solution)
-        truth = truth.group().split(":")[1].strip()
+        truth = re.search(r'\(정답 : \-\d+\)', solution)
+    
     if truth is None:
         truth = solution
-    if truth != solution:
+    else:
         truth = truth.group().split(":")[1].strip()
+        
     truth = re.sub(r'\)', '', truth)
     result = await fetch_ans_llama31(f"너는 학생의 수학문제 정답을 판단하는 수학강사야. 내가 '//'로 구분되는 유저의 응답(ocr_result)과 정답인 truth를 줄거야. 반드시 ocr_result와 truth가 정확히 일치하는 경우만 ##1## 을 반환해. 일치하지 않는다면 ##2##을 반환해. // ocr_result : {ocr_result} // truth : {truth}")
     if "##1##" in result:
@@ -497,20 +493,22 @@ async def hand_ocr(input: Determinent):
     print(f"Llamma 수행 시간: {start_step_time - start_time:.2f}초")
     # print(f"OpenAI 수행 시간: {start_step_time - start_time:.2f}초")
     print("openai_result : ", openai_result)
-    
-    determinent = "None"
-    if "##1##" in openai_result:
-        print("solve")
-        determinent = "solve"
-    elif "##2##" in openai_result:
-        print("wrong")
-        determinent = "wrong"
-    elif "##3##" in openai_result:
-        print("doing")
-        determinent = "doing"
-    else:
-        print("None")
-        determinent = "None"
+
+    determinent = openai_result
+
+    # determinent = "None"
+    # if "##1##" in openai_result:
+    #     print("solve")
+    #     determinent = "solve"
+    # elif "##2##" in openai_result:
+    #     print("wrong")
+    #     determinent = "wrong"
+    # elif "##3##" in openai_result:
+    #     print("doing")
+    #     determinent = "doing"
+    # else:
+    #     print("None")
+    #     determinent = "None"
 
     output_json = {
         "ocr_result": ocr_result,
