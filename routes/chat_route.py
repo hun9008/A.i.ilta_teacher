@@ -224,11 +224,11 @@ async def websocket_endpoint(websocket: WebSocket):
             solve_problem.clear()
             user_hand_ocr_saved = "Not Yet"
             user_problem_num = "Not Yet"
-            step_elements.clear()
-            user_step_cnt = 0
-            wrong_block_list.clear()
-            delay_block_list.clear()
-            user_look.clear()
+            # step_elements.clear()
+            # user_step_cnt = 0
+            # wrong_block_list.clear()
+            # delay_block_list.clear()
+            # user_look.clear()
             # user_vars.user_status.clear()
             # response = await process_message(chat_request)
             # await websocket.send_text(response)
