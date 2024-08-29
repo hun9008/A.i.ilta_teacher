@@ -458,8 +458,8 @@ async def hand_ocr(input: Determinent):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./keys/flyai-432701-9290e087cf34.json"
 
     ocr_results = detect_hand_ocr_text(input.hand_write_image)
-    for hand_ocr in ocr_results:
-        print("### textAnnotations: ", hand_ocr)
+    # for hand_ocr in ocr_results:
+    #     print("### textAnnotations: ", hand_ocr)
     ocr_result = ocr_results[0]
     start_step_time = time.time()
     print("@@@@@@@@@ hand_ocr_start @@@@@@@@@")
