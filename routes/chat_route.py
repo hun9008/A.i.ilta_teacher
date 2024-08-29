@@ -48,6 +48,8 @@ user_hand_ocr_saved = "Not Yet"
 user_problem_num = "Not Yet"
 
 async def decide_user_wrong(websocket: WebSocket, user_id: str):
+    global user_hand_ocr_saved
+
     try:
         while True:
             await asyncio.sleep(sleep_time)  
