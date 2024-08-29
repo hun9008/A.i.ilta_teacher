@@ -77,17 +77,21 @@ async def handle_ws_solution(user_ocrs, websocket, u_id, device):
 
     print("type of user_ocrs : ", type(user_ocrs))
 
-    response = await perform_solution(user_ocrs)
+    # response = await perform_solution(user_ocrs)
 
+    print("CHECK : solutions_storage type : ", type(solutions_storage))
+    print("CHECK : solutions_storage len : ", len(solutions_storage))
     output_json = {
-        "concepts": response.get("concepts", []),
-        "solutions": response.get("solutions", [])
+        # "concepts": response.get("concepts", []),
+        # "solutions": response.get("solutions", [])
+        "concepts" : concepts_storage,
+        "solutions" : solutions_storage,
     }
 
-    concepts_storage.clear()
-    solutions_storage.clear()
+    # concepts_storage.clear()
+    # solutions_storage.clear()
     concepts_storage.append(output_json.get("concepts"))
-    solutions_storage.append(output_json.get("solutions"))
+    # solutions_storage.append(output_json.get("solutions"))
     
     pc_key = f'{u_id}_pc'
     if pc_key in connections:
