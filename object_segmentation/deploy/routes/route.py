@@ -487,10 +487,12 @@ async def hand_ocr(input: Determinent):
     answer = solution[-1]
 
     openai_result = ''
-    pre_answer = answer.replace("\n", "")
+    pattern = r"\(정답:[^)]+\)"
+    pre_answer = re.search(pattern, solution)
     print("pre_answer : ", pre_answer)
     pre_ocr_result = ocr_result.strip()
     print("pre_ocr_result : ", pre_ocr_result)
+    pre_ocr_result = pre_ocr_result.replace("구하시오.", "")
 
     if pre_ocr_result in pre_answer:
         openai_result = 'solve'
