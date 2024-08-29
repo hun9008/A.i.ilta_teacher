@@ -466,7 +466,7 @@ async def hand_ocr(input: Determinent):
     print("@@@@@@@@@ hand_ocr_start @@@@@@@@@")
 
     # print(f"OCR 수행 시간: {start_step_time - start_time:.2f}초")
-    print("ocr_result: ", ocr_result, "ocr_result type: ", type(ocr_result))
+    print("ocr_result: ", ocr_result, "\nocr_result type: ", type(ocr_result))
     
     # client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
     # openai_result = await fetch_openai(client, f"// ocr_result : {ocr_result} // solution : {solution} // 앞의 ocr_result 와 실제 문제의 solution을 비교해보고 (정답이 일치함, 풀이가 틀림, 푸는 중임) 중 하나를 알려줘. 답이 맞으면 ##1##을 반환하고 풀이 방법 잘못됨이라면 ##2##을 반환하고 문제를 아직 푸는 중이라면 ##3##을 반환해줘.")
@@ -481,7 +481,7 @@ async def hand_ocr(input: Determinent):
     #   hand_write_image : str
     #   solution : str
 
-    openai_result = 'doing'
+    openai_result = ''
     error_detect = ''
     pattern = r"\(정답:[^)]+\)"
     match = re.search(pattern, solution)
@@ -498,13 +498,25 @@ async def hand_ocr(input: Determinent):
         pre_ocr_result = ocr_result.strip()
         ignore_index = ocr_result.find(ignore_word)
         pre_ocr_result = ocr_result[ignore_index + len(ignore_word):].strip()
-        nospace_ocr_result = ocr_result.replace(" ", "")  # 공백 제거
+        nospace_ocr_result = pre_ocr_result.replace(" ", "")  # 공백 제거
         print("nospace_ocr_result:", nospace_ocr_result)
         
         for answer in answer_list:
             if answer in nospace_ocr_result:
                 openai_result = 'solve'
                 break
+        
+        # 정규식을 사용해 맨 마지막 "(정답:~" 패턴을 제거
+        solution_cleaned = re.sub(pattern, "", solution)
+
+        # 모든 공백과 줄바꿈 문자 제거
+        nospace_sol = solution_cleaned.replace(" ", "")
+        if openai_result != 'solve':
+            if nospace_ocr_result in nospace_sol:
+                openai_result = 'doing'
+            else: 
+                openai_result = 'wrong'
+
     else:
         error_detect = 'there is no answer from ai'
         openai_result = 'wrong'
