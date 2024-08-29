@@ -48,6 +48,9 @@ user_hand_ocr_saved = "Not Yet"
 user_problem_num = "Not Yet"
 
 async def decide_user_wrong(websocket: WebSocket, user_id: str):
+    global user_hand_ocr_saved
+    user_hand_ocr_saved = "Not Yet"
+
     try:
         while True:
             await asyncio.sleep(sleep_time)  
@@ -95,7 +98,7 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                         user_problem_num = str(response.json().get("handwrite_num"))
                     else:
                         user_problem_num = response.json().get("handwrite_num")
-                    print("I save user_hand_ocr_result : ", user_hand_ocr_saved)
+                    # print("I save user_hand_ocr_result : ", user_hand_ocr_saved)
                     print("response : ", response)
                     await websocket.send_text("status : " + user_vars.user_status + "//" + "hand_ocr : " + user_hand_ocr_saved + "//" + "problem_num : " + user_problem_num)
                     if isinstance(response, requests.models.Response):
@@ -221,6 +224,11 @@ async def websocket_endpoint(websocket: WebSocket):
             solve_problem.clear()
             user_hand_ocr_saved = "Not Yet"
             user_problem_num = "Not Yet"
+            # step_elements.clear()
+            # user_step_cnt = 0
+            # wrong_block_list.clear()
+            # delay_block_list.clear()
+            # user_look.clear()
             # user_vars.user_status.clear()
             # response = await process_message(chat_request)
             # await websocket.send_text(response)
