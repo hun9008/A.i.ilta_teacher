@@ -424,21 +424,16 @@ async def fetch_process(ocr_result, solution):
 #     print("=====================================")
 #     return voting_result
 
-async def fetch_voting(test_user_answer, solution):
-    wrongs = []
-    for user_answer in test_user_answer:
-        tasks = [fetch(user_answer, solution) for _ in range(3)]
-        ans_results = await asyncio.gather(*tasks)  
-        if ans_results == "not_solve":
-            wrongs.append(user_answer)
-    
-    for user_answer in wrongs:
-        tasks = [fetch_process(user_answer, solution) for _ in range(3)]
-        results = await asyncio.gather(*tasks) 
-        print("answer : ", user_answer, "results : ", results)
-        voting_result = max(set(results), key=results.count)
-        print("voting_result : ", voting_result)
-        print("=====================================")
+async def fetch_voting(user_answer, solution):
+
+    ans_result = await fetch(user_answer, solution)
+    if ans_result == "solve":
+        print("result : solve")
+        return "solve"
+    else:
+        result = await fetch_process(user_answer, solution)
+        print("result : ", result)
+        return result
     
 
 @router.post("/hand_ocr")
