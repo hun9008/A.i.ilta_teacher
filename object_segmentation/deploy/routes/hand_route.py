@@ -268,8 +268,7 @@ def calculate_inter_question_areas(problem_locations, image_height):
         x2, y2, w2, h2 = problem_locations[i + 1]
 
         # 문제 사이의 중간 영역을 계산
-        y_margin = (y2-(y1 +h1))*0.05
-        inter_y_start = y1 + h1 + y_margin
+        inter_y_start = y1 + h1
         inter_y_end = y2
         inter_h = inter_y_end - inter_y_start
         inter_w = max(w1, w2)
