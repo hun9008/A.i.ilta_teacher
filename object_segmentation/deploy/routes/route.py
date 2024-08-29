@@ -479,15 +479,34 @@ async def hand_ocr(input: Determinent):
     #   solution : str
     
     # hard coding version user status determinating
-    answer = find_ans_in_sol(solution)
-    openai_result = 'doing'
-    
-    if (ocr_result in solution) and (ocr_result != answer):
-        openai_result = 'doing'
-    elif ocr_result == answer:
+    answer = solution[-1]
+
+    openai_result = ''
+    pre_answer = answer.strip()
+    print("pre_answer : ", pre_answer)
+    pre_ocr_result = ocr_result.strip()
+    print("pre_ocr_result : ", pre_ocr_result)
+
+    if pre_ocr_result in pre_answer:
         openai_result = 'solve'
     else:
+        for sol in solution:
+            if pre_ocr_result in sol:
+                openai_result = 'doing'
+                break
+    
+    if openai_result == '':
         openai_result = 'wrong'
+
+
+    # openai_result = 'doing'
+    
+    # if (ocr_result in solution) and (ocr_result != answer):
+    #     openai_result = 'doing'
+    # elif ocr_result == answer:
+    #     openai_result = 'solve'
+    # else:
+    #     openai_result = 'wrong'
         
     start_step_time = time.time()
     print(f"Llamma 수행 시간: {start_step_time - start_time:.2f}초")
