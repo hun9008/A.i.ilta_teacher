@@ -32,7 +32,7 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # websocket 연결 관리 
 connections = []
 
-sleep_time = 1
+sleep_time = 2
 
 # (assume) define user_status
 user_vars.user_status = "doing"
