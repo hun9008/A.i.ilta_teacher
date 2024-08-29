@@ -782,9 +782,10 @@ const Dashboard: React.FC = () => {
   return (
     <div className="pt-8 flex justify-center items-start">
       <div className="px-4 sm:px-6 lg:px-8 mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4 shadow-lg border-0 border-b-8 rounded-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+
           {/* Left Column */}
-          <div className="bg-white p-6 flex flex-col rounded-2xl ">
+          <div className="bg-white p-6 flex flex-col rounded-2xl  shadow-lg border-0 border-b-8 rounded-xl">
             <h1 className="text-2xl font-bold flex items-center mb-4">
               안녕 {nickname}아! 오늘도 화이팅!!
               <img
@@ -832,7 +833,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Center Column */}
-          <div className="bg-white p-6 flex flex-col h-full rounded-2xl ">
+          <div className="bg-white p-6 flex flex-col h-full rounded-2xl  shadow-lg border-0 border-b-8 rounded-xl">
             <div className="mb-4">
               <h3 className="text-xl font-semibold mb-2">주간 경쟁전</h3>
               <div className="bg-slate-50 rounded-lg p-4">
@@ -877,7 +878,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Right Column */}
-          <div className="bg-white p-6 flex flex-col h-full rounded-2xl ">
+          <div className="bg-white p-6 flex flex-col h-full rounded-2xl  shadow-lg border-0 border-b-8 rounded-xl">
             <button
               onClick={() => navigate('/setting')}
               className="w-full bg-indigo-500 text-white px-6 py-2.5 rounded-lg text-xl font-bold flex items-center justify-center hover:bg-indigo-600 mb-4"
