@@ -92,12 +92,14 @@ def detect_hand_ocr_text(img):
     texts = response.text_annotations
     # print("Texts:")
 
+    google_text_results = []
     for text in texts:
         # print(f'\n"{text.description}"')
 
         vertices = [
             f"({vertex.x},{vertex.y})" for vertex in text.bounding_poly.vertices
         ]
+        google_text_results.append(text.description)
 
         # print("bounds: {}".format(",".join(vertices)))
 
@@ -109,7 +111,7 @@ def detect_hand_ocr_text(img):
     
     # print('len : ', len(texts[0].description))
 
-    return texts[0].description
+    return google_text_results
 
 def query_model(question):
     result = subprocess.run(
@@ -455,7 +457,10 @@ async def hand_ocr(input: Determinent):
     start_time = time.time()
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./keys/flyai-432701-9290e087cf34.json"
 
-    ocr_result = detect_hand_ocr_text(input.hand_write_image)
+    ocr_results = detect_hand_ocr_text(input.hand_write_image)
+    for hand_ocr in ocr_results:
+        print("### textAnnotations: ", hand_ocr)
+    ocr_result = ocr_results[0]
     start_step_time = time.time()
     print("@@@@@@@@@ hand_ocr_start @@@@@@@@@")
 
