@@ -42,11 +42,11 @@ async def fetch_ans_llama31(prompt_type: str):
     output = result.stdout.strip()
     return output
 
-async def fetch(ocr_result):
+async def fetch(ocr_result, solution):
     ## solution[0]에서 (정답:??)을 truth에 저장 또는 (정답 : ??)일 수도 있음
-    truth = re.search(r'\(정답: \d+\)', solution[0])
+    truth = re.search(r'\(정답: \d+\)', solution)
     if truth is None:
-        truth = re.search(r'\(정답 : \d+\)', solution[0])
+        truth = re.search(r'\(정답 : \d+\)', solution)
     truth = truth.group().split(":")[1].strip()
     truth = re.sub(r'\)', '', truth)
     # print("truth : ", truth)
@@ -59,6 +59,16 @@ async def fetch(ocr_result):
         return "doing"
     else:
         return ""
+    
+async def fetch_voting(test_user_answer, solution):
+    for user_answer in test_user_answer:
+        tasks = [fetch(user_answer, solution) for _ in range(3)]
+        results = await asyncio.gather(*tasks)  # 비동기 작업들을 병렬로 실행
+        print("answer : ", user_answer, "results : ", results)
+        voting_result = max(set(results), key=results.count)
+        print("voting_result : ", voting_result)
+        print("=====================================")
+
 
 # 비동기 함수를 실행하고 결과를 출력
 # result = asyncio.run(fetch("-8-3=-2a-1"))
@@ -78,16 +88,16 @@ async def fetch(ocr_result):
 
 # asyncio.run(fetch_voting(test_user_answer))
 
-async def fetch_voting(test_user_answer):
+async def fetch_voting(test_user_answer, solution):
     for user_answer in test_user_answer:
-        tasks = [fetch(user_answer) for _ in range(3)]
+        tasks = [fetch(user_answer, solution) for _ in range(3)]
         results = await asyncio.gather(*tasks)  # 비동기 작업들을 병렬로 실행
         print("answer : ", user_answer, "results : ", results)
         voting_result = max(set(results), key=results.count)
         print("voting_result : ", voting_result)
         print("=====================================")
 
-asyncio.run(fetch_voting(test_user_answer))
+asyncio.run(fetch_voting(test_user_answer, solution[0]))
 
 # print(solution[0])
 
