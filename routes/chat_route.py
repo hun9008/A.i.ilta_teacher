@@ -144,8 +144,13 @@ async def decide_user_wrong(websocket: WebSocket, user_id: str):
                         else:
                             user_vars.user_status = "doing"
 
+            except WebSocketDisconnect:
+                print("WebSocket disconnected during operation.")
+                break  # WebSocket이 끊어지면 루프 종료
+
             except Exception as e:
                 print(f"Error in decide_user_wrong loop: {str(e)}")
+                break
                 # reset
                 # print("im clear")
                 # user_vars.user_status = "doing"
