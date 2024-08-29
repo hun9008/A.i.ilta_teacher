@@ -462,6 +462,8 @@ async def process_message(chat: ChatRequest):
             
         elif user_vars.user_status == "doing":
             # response = ''
+            print("problem_index : ", problem_index)
+            print("len step elements : ", len(step_elements))
             solution = step_elements[problem_index]
 
             if user_text:
