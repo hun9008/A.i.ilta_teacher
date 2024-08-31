@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile</title>
+</head>
+<body>
+    <h1>Mobile Side</h1>
+    <video id="mobileVideo" autoplay playsinline style="width: 300px; height: 300px;" hidden></video>
+    <button id="openMobile">Open Mobile WebSocket</button>
+    <button id="sendAllMobile">Send All Request (Mobile)</button>
+    <div id="responseContainerMobile"></div>
+
+    <script>
+        let mobileSocket = null;
+        let videoElement = document.getElementById('mobileVideo');
+        let canvas = document.createElement('canvas');
+        let context = canvas.getContext('2d');
+
+        // Open WebSocket
+        document.getElementById("openMobile").addEventListener("click", async () => {
+            // Start capturing video from camera
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+            } catch (error) {
+                console.error("Error accessing camera: ", error);
+            }
+
+            // Open WebSocket connection
+            mobileSocket = new WebSocket("ws://localhost:8000/ws");
+            mobileSocket.onopen = () => {
+                console.log("Mobile WebSocket opened");
+                sendVideoFrames();
+            };
+
+            mobileSocket.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                document.getElementById("responseContainerMobile").innerText = JSON.stringify(message);
+            };
+        });
+
+        // Send All Request
+        document.getElementById("sendAllMobile").addEventListener("click", () => {
+            if (mobileSocket) {
+                const frameData = captureFrameAsBase64();
+                mobileSocket.send(JSON.stringify({
+                    type: "all",
+                    device: "mobile",
+                    u_id: "user_1",
+                    payload: frameData
+                }));
+            }
+        });
+
+        // Capture frame and send as Base64 every second
+        function sendVideoFrames() {
+            if (mobileSocket) {
+                setInterval(() => {
+                    const frameData = captureFrameAsBase64();
+                    mobileSocket.send(JSON.stringify({
+                        type: "video",
+                        device: "mobile",
+                        u_id: "user_1",
+                        payload: frameData
+                    }));
+                }, 1000);  // 1초마다 이미지 전송
+            }
+        }
+
+        // Capture the current video frame and return it as a Base64 encoded string
+        function captureFrameAsBase64() {
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            return canvas.toDataURL('image/jpeg').split(',')[1];  // Base64 문자열 반환
+        }
+    </script>
+</body>
+</html>
