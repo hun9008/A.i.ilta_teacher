@@ -94,7 +94,11 @@ The platform consists of the following components:
 
 3. OCR (Optical Character Recognition):
 
-    <img src="./img/problem_left.png" style="height: 300"><img src="./img/problem_right.png" style="height: 300"> <img src="./img/anti-aliasing.png" style="height: 300">
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <img src="./img/problem_left.png" style="height: 300px;">
+        <img src="./img/problem_right.png" style="height: 300px; margin-right: 10px;">
+        <img src="./img/anti-aliasing.png" style="height: 300px;">
+    </div>
 
     To utilize OCR for math problems, we compared several models and APIs. After our evaluation, we found that building a custom OCR model specifically for math problems + Korean was not feasible due to insufficient data. Therefore, we decided to leverage existing APIs.
 
@@ -145,9 +149,15 @@ The platform consists of the following components:
 
     > The user interface is designed to offer a smooth and interactive learning experience, featuring the following key elements:
 
-    <img src="./img/interface_1.png" style="width:300"> <img src="./img/interface_2.png" style="width:300">
+    <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap;">
+        <img src="./img/interface_1.png" style="width:250px; margin: 10px;">
+        <img src="./img/interface_2.png" style="width:250px; margin: 10px;">
+    </div>
 
-    <img src="./img/interface_3.png" style="width:300"> <img src="./img/interface_4.png" style="width:300">
+    <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap;">
+        <img src="./img/interface_3.png" style="width:250px; margin: 10px;">
+        <img src="./img/interface_4.png" style="width:250px; margin: 10px;">
+    </div>
 
 
 	• Problem Display: The OCR-processed text of the current problem is clearly displayed in a box, allowing the user to easily follow along with the real-time tutor’s guidance.
