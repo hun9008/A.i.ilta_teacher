@@ -170,6 +170,14 @@ The platform consists of the following components:
 	
     • Timer & Study Control: A timer in the bottom left tracks the remaining study and break time. This helps students stay focused and manage their time effectively. There are also buttons to start or pause the session.
 
+7. DB Migration
+
+    From <img src="https://img.shields.io/badge/-MongoDB-13aa52?style=for-the-badge&logo=mongodb&logoColor=white"> To <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"/> !
+
+    Initially, a simple database was sufficient to handle problem-solving tasks, so we started the project using MongoDB Atlas. However, as the need to store more complex data for user study reports grew, the NoSQL object database structure became increasingly complicated. This complexity led to concerns about overhead during data retrieval.
+
+    To optimize performance and ensure efficient data queries, we decided to migrate to MySQL, a relational database management system (RDBMS). By investing time into this migration, we were able to simplify the data structure through normalization. This process allowed us to significantly improve the speed of data retrieval and better handle the increasing volume of user data.
+
 ## 🌍 Social Impact & ESG (Environmental, Social, and Governance)
 
 Our mission is to reduce the educational inequality between urban and rural students by providing personalized AI tutoring for students in underdeveloped regions. Through m.AI Tutor, we aim to:
